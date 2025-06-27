@@ -44,7 +44,7 @@ jobs:
       - uses: KSPModdingLibs/KSPBuildTools/.github/actions/assemble-release@0.0.4
         id: assemble-release
         with:
-          artifacts: Build 
+          artifacts: Build/GameData
           output-file-name: 'LunaFixes'
 
       - name: Publish to Github
