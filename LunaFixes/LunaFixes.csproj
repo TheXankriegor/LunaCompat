@@ -1,0 +1,55 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<Import Project="..\BuildConfigurationBase.targets" />
+
+	<PropertyGroup>
+		<TargetFramework>net4.8</TargetFramework>
+		<AssemblyTitle>LunaFixes</AssemblyTitle>
+		<BinariesOutputRelativePath>Build/GameData/$(SolutionName)</BinariesOutputRelativePath>
+		<XmlSourceDir>$(ProjectDir)XML_COMPAT</XmlSourceDir>
+		<XmlDestinationDir>$(SolutionDir)Build\GameData\LunaMultiplayer\PartSync\LunaFixes</XmlDestinationDir>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<KSPVersionFile Include=".">
+			<Destination>$(SolutionDir)Build\GameData\$(SolutionName)\lunafixes.version</Destination>
+			<URL>https://github.com/TheXankriegor/LunaFixes/raw/master/lunafixes.version</URL>
+			<Download>https://github.com/TheXankriegor/LunaFixes/releases/latest</Download>
+		</KSPVersionFile>
+	</ItemGroup>
+
+	<Target Name="CopyFiles" AfterTargets="GenerateKSPVersionFile">
+		<ItemGroup>
+			<XmlFilesToCopy Include="$([MSBuild]::EnsureTrailingSlash('$(XmlSourceDir)'))**\*.*" />
+		</ItemGroup>
+
+		<MakeDir Directories="$(XmlDestinationDir)" />
+		<Copy SourceFiles="@(XmlFilesToCopy)" DestinationFolder="$([MSBuild]::EnsureTrailingSlash('$(XmlDestinationDir)'))%(RecursiveDir)" />
+	</Target>
+
+	<ItemGroup>
+		<!-- Depends on Modulemanager -->
+		<Reference Include="$(KSPRoot)/Modulemanager*.dll">
+			<Private>False</Private>
+		</Reference>
+		<!-- Depends on Harmony -->
+		<Reference Include="0Harmony, Culture=neutral, PublicKeyToken=null">
+			<HintPath>$(KSPRoot)/GameData/000_Harmony/0Harmony.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<!-- Depends on Luna Multiplayer -->
+		<Reference Include="LmpClient, Culture=neutral, PublicKeyToken=null">
+			<HintPath>$(KSPRoot)/GameData/LunaMultiplayer/Plugins/LmpClient.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+
+		<!-- WIP references -->
+		<Reference Include="KIS, Culture=neutral, PublicKeyToken=null">
+			<HintPath>$(KSPRoot)/GameData/KIS/Plugins/KIS.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="KSPBuildTools" Version="0.0.4" />
+	</ItemGroup>
+</Project>

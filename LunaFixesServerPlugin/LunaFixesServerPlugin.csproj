@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<Import Project="..\BuildConfigurationBase.targets" />
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<AssemblyTitle>LunaFixesServerPlugin</AssemblyTitle>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<OutputPath>$(SolutionDir)\Build</OutputPath>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Reference Include="$(LMPServerRoot)/Server.dll">
+			<Private>False</Private>
+		</Reference>
+	</ItemGroup>
+
+</Project>
