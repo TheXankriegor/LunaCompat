@@ -1,0 +1,59 @@
+name: build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  workflow_call:
+
+env:
+  KSP_ROOT: /tmp/ksp
+  RELEASE_STAGING: /tmp/release
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout Mod Repo
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0 # get full history, not shallow clone
+
+      - name: Get Changelog Information
+        uses: drewcassidy/yaclog@1.5.0
+        id: yaclog-show
+
+      - uses: KSPModdingLibs/KSPBuildTools/.github/actions/setup-ckan@0.0.4
+
+      - uses: KSPModdingLibs/KSPBuildTools/.github/actions/install-dependencies@0.0.4
+        with:
+           dependency-identifiers: Harmony2 LunaMultiplayer 
+
+      - uses: KSPModdingLibs/KSPBuildTools/.github/actions/compile@0.0.4
+        with:
+          ksp-zip-url: https://github.com/KSPModdingLibs/KSPLibs/raw/main/KSP-1.12.5.zip
+
+      - name: Generate KSP Changelog
+        uses: drewcassidy/yaclog-ksp@1.2.0
+        with:
+          mod-name: LunaFixes
+          output-path: Build/GameData/LunaFixes/lunafixes-version.cfg
+
+      - uses: KSPModdingLibs/KSPBuildTools/.github/actions/assemble-release@0.0.4
+        id: assemble-release
+        with:
+          artifacts: Build 
+          output-file-name: 'LunaFixes'
+
+      - name: Publish to Github
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+        run: >
+          gh release create ${{ github.ref_name }}
+          --notes-file "${{ steps.yaclog-show.outputs.body-file }}"
+          --title "${{ steps.yaclog-show.outputs.name }}"
+          ${{ steps.assemble-release.outputs.artifact-path }}.zip
+          Build/GameData/LunaFixes/lunafixes.version
+        # We publish both the mod AND the version file, that way there's always a static latest version file to compare against
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
