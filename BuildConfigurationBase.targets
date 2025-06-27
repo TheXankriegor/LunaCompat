@@ -8,6 +8,7 @@
 		<AssemblyVersion>0.0.1</AssemblyVersion>
 		<FileVersion>$(AssemblyVersion)</FileVersion>
 
+		<NoWarn>IDE0290</NoWarn>
 		<DebugSymbols>true</DebugSymbols>
 		<DebugType>embedded</DebugType>
 		<LangVersion>latest</LangVersion>
