@@ -28,10 +28,11 @@ jobs:
 
       - uses: KSPModdingLibs/KSPBuildTools/.github/actions/install-dependencies@0.0.4
         with:
-           dependency-identifiers: Harmony2 LunaMultiplayer 
+           dependency-identifiers: Harmony2 LunaMultiplayer=0.29.0-Draft
 
       - uses: KSPModdingLibs/KSPBuildTools/.github/actions/compile@0.0.4
         with:
+          dotnet-version: 6.0.x
           ksp-zip-url: https://github.com/KSPModdingLibs/KSPLibs/raw/main/KSP-1.12.5.zip
 
       - name: Generate KSP Changelog

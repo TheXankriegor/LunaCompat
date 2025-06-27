@@ -41,12 +41,6 @@
 			<HintPath>$(KSPRoot)/GameData/LunaMultiplayer/Plugins/LmpClient.dll</HintPath>
 			<Private>False</Private>
 		</Reference>
-
-		<!-- WIP references -->
-		<Reference Include="KIS, Culture=neutral, PublicKeyToken=null">
-			<HintPath>$(KSPRoot)/GameData/KIS/Plugins/KIS.dll</HintPath>
-			<Private>False</Private>
-		</Reference>
 	</ItemGroup>
 
 	<ItemGroup>
