@@ -14,7 +14,7 @@ namespace LunaFixes.Mods.KerbalInventorySystem
 {
     [LunaFixFor(PackageName)]
     [UsedImplicitly]
-    public class KisCompat
+    internal class KisCompat
     {
         #region Constants
 

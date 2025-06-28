@@ -2,13 +2,10 @@
 <ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
 	<Fields>
 		<FieldDefinition>
-			<FieldName>variantIndex</FieldName>
-			<MaxIntervalInMs>250</MaxIntervalInMs>
+			<FieldName>PadName</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>Operational</FieldName>
 		</FieldDefinition>
 	</Fields>
-	<Methods>
-		<MethodDefinition>
-			<MethodName>ActivateEvent</MethodName>
-		</MethodDefinition>
-	</Methods>
 </ModuleDefinition>

@@ -55,6 +55,12 @@
 			<KSPAssemblyName>LmpClient</KSPAssemblyName>
 			<KSPAssemblyVersion>0.29.0.672</KSPAssemblyVersion>
 		</Reference>
+
+		<Reference Include="Launchpad, Culture=neutral, PublicKeyToken=null">
+			<HintPath>$(KSPRoot)/GameData/ExtraplanetaryLaunchpads/Plugins/Launchpad.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+
 	</ItemGroup>
 
 	<ItemGroup>
