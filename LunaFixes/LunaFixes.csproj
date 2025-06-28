@@ -11,7 +11,6 @@
 
 	<PropertyGroup>
 		<GenerateKSPAssemblyAttribute>true</GenerateKSPAssemblyAttribute>
-		<GenerateKSPAssemblyDependencyAttributes>true</GenerateKSPAssemblyDependencyAttributes>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -45,7 +44,6 @@
 			<Private>False</Private>
 			<CKANIdentifier>Harmony2</CKANIdentifier>
 			<KSPAssemblyName>0Harmony</KSPAssemblyName>
-			<KSPAssemblyVersion>2.2.1</KSPAssemblyVersion>
 		</Reference>
 		<!-- Depends on Luna Multiplayer -->
 		<Reference Include="LmpClient, Culture=neutral, PublicKeyToken=null">
@@ -53,14 +51,7 @@
 			<Private>False</Private>
 			<CKANIdentifier>LunaMultiplayer</CKANIdentifier>
 			<KSPAssemblyName>LmpClient</KSPAssemblyName>
-			<KSPAssemblyVersion>0.29.0.672</KSPAssemblyVersion>
 		</Reference>
-
-		<Reference Include="Launchpad, Culture=neutral, PublicKeyToken=null">
-			<HintPath>$(KSPRoot)/GameData/ExtraplanetaryLaunchpads/Plugins/Launchpad.dll</HintPath>
-			<Private>False</Private>
-		</Reference>
-
 	</ItemGroup>
 
 	<ItemGroup>

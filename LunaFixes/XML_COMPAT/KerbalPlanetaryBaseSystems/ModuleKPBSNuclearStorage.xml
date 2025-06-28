@@ -1,0 +1,23 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Methods>
+		<MethodDefinition>
+			<MethodName>initTransferFuel</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>initTransferWaste</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>nextTarget</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>prevTarget</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>startTransfer</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>cancelTransfer</MethodName>
+		</MethodDefinition>
+	</Methods>
+</ModuleDefinition>
