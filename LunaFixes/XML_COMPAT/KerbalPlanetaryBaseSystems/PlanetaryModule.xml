@@ -2,13 +2,21 @@
 <ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
 	<Fields>
 		<FieldDefinition>
-			<FieldName>variantIndex</FieldName>
+			<FieldName>animationTime</FieldName>
+			<MaxIntervalInMs>250</MaxIntervalInMs>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>nextIsReverse</FieldName>
+			<MaxIntervalInMs>250</MaxIntervalInMs>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>hasBeenInitialized</FieldName>
 			<MaxIntervalInMs>250</MaxIntervalInMs>
 		</FieldDefinition>
 	</Fields>
 	<Methods>
 		<MethodDefinition>
-			<MethodName>ActivateEvent</MethodName>
+			<MethodName>toggleAnimation</MethodName>
 		</MethodDefinition>
 	</Methods>
 </ModuleDefinition>

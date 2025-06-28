@@ -4,8 +4,6 @@ using HarmonyLib;
 
 using JetBrains.Annotations;
 
-using KSPBuildTools;
-
 using LmpClient.Events;
 
 using LunaFixes.Attributes;
@@ -32,8 +30,9 @@ namespace LunaFixes.Mods.InfernalRobotics
 
         public InfernalRoboticsCompat(LunaFixForAttribute _)
         {
+            // TODO: I am 99% sure that this does effectively nothing useful. Original LmpIrPlugin has it however?
             _moduleIrServo = AccessTools.TypeByName("InfernalRobotics_v3.Module.ModuleIRServo_v3");
-   
+
             PartModuleEvent.onPartModuleBoolFieldProcessed.Add((x, y, z) => UpdatePartPos(x, y, z));
             PartModuleEvent.onPartModuleIntFieldProcessed.Add((x, y, z) => UpdatePartPos(x, y, z));
             PartModuleEvent.onPartModuleFloatFieldProcessed.Add((x, y, z) => UpdatePartPos(x, y, z));
@@ -52,12 +51,8 @@ namespace LunaFixes.Mods.InfernalRobotics
 
         private void UpdatePartPos(ProtoPartModuleSnapshot module, string fieldName, object value)
         {
-            Log.Message($"Attempting {fieldName}: {value}");
-
             if (module.moduleRef != null && _moduleIrServo.IsAssignableFrom(module.moduleRef.GetType()))
             {
-                Log.Message($"Updating IR servo {value}");
-
                 module.moduleRef.Fields[fieldName].SetValue(value, module.moduleRef);
                 module.moduleRef.OnStart(PartModule.StartState.None);
             }
