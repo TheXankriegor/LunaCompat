@@ -10,7 +10,7 @@ internal class PlanetaryBaseSystemsCompat
 {
     #region Constants
 
-    private const string PackageName = "Launchpad";
+    private const string PackageName = "PlanetarySurfaceStructures";
 
     #endregion
 
