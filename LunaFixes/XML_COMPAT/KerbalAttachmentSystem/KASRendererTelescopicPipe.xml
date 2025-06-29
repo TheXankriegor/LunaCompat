@@ -1,0 +1,11 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Methods>
+		<MethodDefinition>
+			<MethodName>ExtendAtMaxMenuAction</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>RetractToMinMenuAction</MethodName>
+		</MethodDefinition>
+	</Methods>
+</ModuleDefinition>

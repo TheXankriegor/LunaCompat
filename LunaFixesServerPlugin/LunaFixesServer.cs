@@ -5,54 +5,53 @@ using Server.Client;
 using Server.Log;
 using Server.Plugin;
 
-namespace LunaFixesServerPlugin
+namespace LunaFixesServerPlugin;
+
+public class LunaFixesServer : ILmpPlugin
 {
-    public class LunaFixesServer : ILmpPlugin
+    public void OnUpdate()
     {
-        public void OnUpdate()
-        {
             
-        }
+    }
 
-        public void OnServerStart()
+    public void OnServerStart()
+    {
+        LunaLog.Info($"Luna: OnServerStart");
+    }
+
+    public void OnServerStop()
+    {
+        LunaLog.Info($"Luna: OnServerStop");
+    }
+
+    public void OnClientConnect(ClientStructure client)
+    {
+        LunaLog.Info($"Luna: OnClientConnect");
+    }
+
+    public void OnClientAuthenticated(ClientStructure client)
+    {
+        LunaLog.Info($"Luna: OnClientAuthenticated");
+    }
+
+    public void OnClientDisconnect(ClientStructure client)
+    {
+        LunaLog.Info($"Luna: OnClientDisconnect");
+    }
+
+    public void OnMessageReceived(ClientStructure client, IClientMessageBase messageData)
+    {
+        if (messageData.MessageType == ClientMessageType.Vessel)
         {
-            LunaLog.Info($"Luna: OnServerStart");
+
         }
+    }
 
-        public void OnServerStop()
+    public void OnMessageSent(ClientStructure client, IServerMessageBase messageData)
+    {
+        if (messageData.MessageType == ServerMessageType.Vessel)
         {
-            LunaLog.Info($"Luna: OnServerStop");
-        }
 
-        public void OnClientConnect(ClientStructure client)
-        {
-            LunaLog.Info($"Luna: OnClientConnect");
-        }
-
-        public void OnClientAuthenticated(ClientStructure client)
-        {
-            LunaLog.Info($"Luna: OnClientAuthenticated");
-        }
-
-        public void OnClientDisconnect(ClientStructure client)
-        {
-            LunaLog.Info($"Luna: OnClientDisconnect");
-        }
-
-        public void OnMessageReceived(ClientStructure client, IClientMessageBase messageData)
-        {
-            if (messageData.MessageType == ClientMessageType.Vessel)
-            {
-
-            }
-        }
-
-        public void OnMessageSent(ClientStructure client, IServerMessageBase messageData)
-        {
-            if (messageData.MessageType == ServerMessageType.Vessel)
-            {
-
-            }
         }
     }
 }

@@ -2693,4 +2693,5 @@ private static readonly DependencyPropertyKey $propertyName$PropertyKey = &#xD;
     DependencyProperty.RegisterReadOnly(nameof($propertyName$), typeof($propertyType$), typeof($containingType$), new PropertyMetadata(default($propertyType$)));&#xD;
 public static readonly DependencyProperty $propertyName$Property = $propertyName$PropertyKey.DependencyProperty;</s:String>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=Kerbal/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=Kethane/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=Xan_0027s/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>

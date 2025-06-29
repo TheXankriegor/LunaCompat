@@ -2,25 +2,24 @@
 
 using LunaFixes.Attributes;
 
-namespace LunaFixes.Mods.KerbalPlanetaryBaseSystems
+namespace LunaFixes.Mods.KerbalPlanetaryBaseSystems;
+
+[LunaFixFor(PackageName)]
+[UsedImplicitly]
+internal class PlanetaryBaseSystemsCompat
 {
-    [LunaFixFor(PackageName)]
-    [UsedImplicitly]
-    internal class PlanetaryBaseSystemsCompat
+    #region Constants
+
+    private const string PackageName = "PlanetarySurfaceStructures";
+
+    #endregion
+
+    #region Constructors
+
+    public PlanetaryBaseSystemsCompat(LunaFixForAttribute _)
     {
-        #region Constants
-
-        private const string PackageName = "Launchpad";
-
-        #endregion
-
-        #region Constructors
-
-        public PlanetaryBaseSystemsCompat(LunaFixForAttribute _)
-        {
-            // TODO add Kerbal Planetary Base Systems fixes here
-        }
-
-        #endregion
+        // TODO add Kerbal Planetary Base Systems fixes here
     }
+
+    #endregion
 }

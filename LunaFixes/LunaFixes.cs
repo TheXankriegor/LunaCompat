@@ -17,11 +17,11 @@ namespace LunaFixes;
 [KSPAddon(KSPAddon.Startup.AllGameScenes, true)]
 public class LunaFixes : MonoBehaviour
 {
-    #region Public Methods
-
-    public static LunaFixes Singleton { get; set; }
+    private const string ConfigFilePath = $"GameData/{nameof(LunaFixes)}/{nameof(LunaFixes)}.cfg";
 
     public static Harmony HarmonyInstance = new("LunaFixes");
+
+    public static LunaFixes Singleton { get; set; }
 
     public void Awake()
     {
@@ -29,9 +29,20 @@ public class LunaFixes : MonoBehaviour
         DontDestroyOnLoad(this);
 
         if (!MainSystem.Singleton || !MainSystem.Singleton.Enabled)
+        {
+            Log.Error("Luna Multiplayer does not appear to be running.");
             return;
+        }
 
-        // does KSP use AssemblyLoader?
+        var node = ConfigNode.Load(KSPUtil.ApplicationRootPath + ConfigFilePath);
+
+        if (node == null)
+        {
+            Log.Error($"Failed to locate config file '{ConfigFilePath}'.");
+            return;
+        }
+
+        // We could load external fixes here as well - but will that ever be needed?
         var queue = Assembly.GetAssembly(typeof(LunaFixes))
                             .GetTypes()
                             .Where(IsLunaFix)
@@ -61,6 +72,4 @@ public class LunaFixes : MonoBehaviour
         var attributes = type.GetCustomAttributes<LunaFixForAttribute>(false);
         return attributes.Any();
     }
-
-    #endregion
 }
