@@ -1,0 +1,22 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>persistedIsConnectorLocked</FieldName>
+		</FieldDefinition>
+	</Fields>
+	<Methods>
+		<MethodDefinition>
+			<MethodName>InstantLockConnectorEvent</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>GrabConnectorEvent</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>ReturnConnectorEvent</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>DetachConnectorEvent</MethodName>
+		</MethodDefinition>
+	</Methods>
+</ModuleDefinition>
