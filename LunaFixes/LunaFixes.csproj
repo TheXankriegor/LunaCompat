@@ -57,4 +57,10 @@
 	<ItemGroup>
 		<PackageReference Include="KSPBuildTools" Version="0.0.4" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="LunaFixes.cfg">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
 </Project>

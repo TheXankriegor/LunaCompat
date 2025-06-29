@@ -1,26 +1,55 @@
-﻿using JetBrains.Annotations;
+﻿using HarmonyLib;
+
+using JetBrains.Annotations;
+
+using KSPBuildTools;
+
+using LmpClient.Systems.TimeSync;
 
 using LunaFixes.Attributes;
 
-namespace LunaFixes.Mods.Kethane
+namespace LunaFixes.Mods.Kethane;
+
+[LunaFixFor(PackageName)]
+[UsedImplicitly]
+internal class KethaneCompat
 {
-    [LunaFixFor(PackageName)]
-    [UsedImplicitly]
-    internal class KethaneCompat
+    #region Constants
+
+    private const string PackageName = "Kethane";
+
+    #endregion
+
+    #region Constructors
+
+    public KethaneCompat(LunaFixForAttribute _)
     {
-        #region Constants
+        var legacyResourceGenerator = AccessTools.TypeByName("Kethane.Generators.LegacyResourceGenerator");
 
-        private const string PackageName = "Kethane";
-
-        #endregion
-
-        #region Constructors
-
-        public KethaneCompat(LunaFixForAttribute _)
-        {
-            // TODO add Kethane fixes here
-        }
-
-        #endregion
+        LunaFixes.HarmonyInstance.Patch(AccessTools.Method(legacyResourceGenerator, "Load", [
+            typeof(CelestialBody), typeof(ConfigNode)
+        ]), prefix: new HarmonyMethod(typeof(KethaneCompat), nameof(PrefixLoad)));
     }
+
+    #endregion
+
+    #region Non-Public Methods
+
+    /// <summary>
+    /// Patch Kethane.Generators.LegacyResourceGenerator to not use random but instead always generate same values by
+    /// pregenerating a seed node.
+    /// </summary>
+    private static void PrefixLoad(CelestialBody body, ConfigNode node)
+    {
+        if (node != null)
+            return;
+
+        node = new ConfigNode();
+        var seed = (int)(TimeSyncSystem.ServerStartTime % int.MaxValue);
+        node.SetValue("Seed", seed);
+
+        Log.Message($"[FIX {nameof(PackageName)}]: Use server-wide Kethane seed ({seed}).");
+    }
+
+    #endregion
 }
