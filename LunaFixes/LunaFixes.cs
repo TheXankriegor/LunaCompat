@@ -43,22 +43,24 @@ public class LunaFixes : MonoBehaviour
         }
 
         // We could load external fixes here as well - but will that ever be needed?
-        var queue = Assembly.GetAssembly(typeof(LunaFixes))
-                            .GetTypes()
-                            .Where(IsLunaFix)
-                            .SelectMany(t => t.GetCustomAttributes<LunaFixForAttribute>(false), (type, attr) => (type, attr));
+        var queue = Assembly.GetAssembly(typeof(LunaFixes)).GetTypes().Where(IsLunaFix);
 
-        foreach (var (type, attr) in queue)
+        foreach (var type in queue)
         {
             try
             {
-                Activator.CreateInstance(type, attr);
+                var compatInstance = (ModCompat)Activator.CreateInstance(type);
 
-                Log.Message($"Initialized compatibility for {attr.PackageId}");
+                if (!AssemblyLoader.loadedAssemblies.Contains(compatInstance.PackageName))
+                    continue;
+
+                compatInstance.Patch();
+
+                Log.Message($"Initialized compatibility for {compatInstance.PackageName}");
             }
             catch (Exception e)
             {
-                Log.Error($"Exception loading {attr.PackageId}: {e}");
+                Log.Error($"Exception loading {type.Name}: {e}");
             }
         }
 
@@ -69,7 +71,7 @@ public class LunaFixes : MonoBehaviour
 
     private static bool IsLunaFix(Type type)
     {
-        var attributes = type.GetCustomAttributes<LunaFixForAttribute>(false);
+        var attributes = type.GetCustomAttributes<LunaFixAttribute>(false);
         return attributes.Any();
     }
 }

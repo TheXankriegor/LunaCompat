@@ -10,25 +10,25 @@ using LunaFixes.Attributes;
 
 namespace LunaFixes.Mods.InfernalRobotics;
 
-[LunaFixFor(PackageName)]
+[LunaFix]
 [UsedImplicitly]
-internal class InfernalRoboticsCompat
+internal class InfernalRoboticsCompat : ModCompat
 {
-    #region Constants
-
-    private const string PackageName = "InfernalRobotics_v3";
-
-    #endregion
-
     #region Fields
 
-    private readonly Type _moduleIrServo;
+    private Type _moduleIrServo;
 
     #endregion
 
-    #region Constructors
+    #region Properties
 
-    public InfernalRoboticsCompat(LunaFixForAttribute _)
+    public override string PackageName => "InfernalRoboticsNext";
+
+    #endregion
+
+    #region Public Methods
+
+    public override void Patch()
     {
         // TODO: I am 99% sure that this does effectively nothing useful. Original LmpIrPlugin has it however?
         _moduleIrServo = AccessTools.TypeByName("InfernalRobotics_v3.Module.ModuleIRServo_v3");

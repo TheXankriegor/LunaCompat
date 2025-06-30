@@ -10,25 +10,25 @@ using LunaFixes.Attributes;
 
 namespace LunaFixes.Mods.ExtraplanetaryLaunchpads;
 
-[LunaFixFor(PackageName)]
+[LunaFix]
 [UsedImplicitly]
-internal class ExtraplanetaryLaunchpadsCompat
+internal class ExtraplanetaryLaunchpadsCompat : ModCompat
 {
-    #region Constants
-
-    private const string PackageName = "Launchpad";
-
-    #endregion
-
     #region Fields
 
     private static int serverSeed;
 
     #endregion
 
-    #region Constructors
+    #region Properties
 
-    public ExtraplanetaryLaunchpadsCompat(LunaFixForAttribute _)
+    public override string PackageName => "Launchpad";
+
+    #endregion
+
+    #region Public Methods
+
+    public override void Patch()
     {
         // TODO add Extraplanetary Launchpads fixes here
         // building progress and basic launch + decouple works

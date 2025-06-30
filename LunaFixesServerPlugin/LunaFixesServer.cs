@@ -9,41 +9,41 @@ namespace LunaFixesServerPlugin;
 
 public class LunaFixesServer : ILmpPlugin
 {
+    #region Public Methods
+
     public void OnUpdate()
     {
-            
     }
 
     public void OnServerStart()
     {
-        LunaLog.Info($"Luna: OnServerStart");
+        LunaLog.Info("Luna: OnServerStart");
     }
 
     public void OnServerStop()
     {
-        LunaLog.Info($"Luna: OnServerStop");
+        LunaLog.Info("Luna: OnServerStop");
     }
 
     public void OnClientConnect(ClientStructure client)
     {
-        LunaLog.Info($"Luna: OnClientConnect");
+        LunaLog.Info("Luna: OnClientConnect");
     }
 
     public void OnClientAuthenticated(ClientStructure client)
     {
-        LunaLog.Info($"Luna: OnClientAuthenticated");
+        LunaLog.Info("Luna: OnClientAuthenticated");
     }
 
     public void OnClientDisconnect(ClientStructure client)
     {
-        LunaLog.Info($"Luna: OnClientDisconnect");
+        LunaLog.Info("Luna: OnClientDisconnect");
     }
 
     public void OnMessageReceived(ClientStructure client, IClientMessageBase messageData)
     {
         if (messageData.MessageType == ClientMessageType.Vessel)
         {
-
         }
     }
 
@@ -51,7 +51,8 @@ public class LunaFixesServer : ILmpPlugin
     {
         if (messageData.MessageType == ServerMessageType.Vessel)
         {
-
         }
     }
+
+    #endregion
 }
