@@ -11,7 +11,7 @@ All notable changes to this project will be documented in this file
 - patch Kethane to use server-wide seed
 - patch ExtraplanetaryLaunchpad recylcer to use a server-wide random
 - add far future technologies compat
-
+- add IR connection system compat
 
 ## 0.0.1 - 2025-06-27
 

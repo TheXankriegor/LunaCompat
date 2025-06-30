@@ -1,0 +1,34 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>crossfeed</FieldName>
+		</FieldDefinition>
+	</Fields>
+	<Methods>
+		<MethodDefinition>
+			<MethodName>TogglePort</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>ToggleMode</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>Latch</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>Release</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>Dock</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>Undock</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>EnableXFeed</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>DisableXFeed</MethodName>
+		</MethodDefinition>
+	</Methods>
+</ModuleDefinition>
