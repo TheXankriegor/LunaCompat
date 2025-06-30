@@ -4,19 +4,19 @@ using LunaFixes.Attributes;
 
 namespace LunaFixes.Mods.BreakingGrounds;
 
-[LunaFixFor(PackageName)]
+[LunaFix]
 [UsedImplicitly]
-internal class BreakingGroundsCompat
+internal class BreakingGroundsCompat : ModCompat
 {
-    #region Constants
+    #region Properties
 
-    private const string PackageName = "Breaking Grounds";
+    public override string PackageName => "Breaking Grounds";
 
     #endregion
 
-    #region Constructors
+    #region Public Methods
 
-    public BreakingGroundsCompat(LunaFixForAttribute _)
+    public override void Patch()
     {
         // TODO this will require hooking into the creation event via harmony and fire an actual event the server can see
         // Currently LMP is missing a handler for all ground science GameEvents (GameEvents.onGroundSciencePartDeployed etc.)

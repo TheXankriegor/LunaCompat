@@ -12,19 +12,19 @@ using UnityEngine;
 
 namespace LunaFixes.Mods.KerbalInventorySystem;
 
-[LunaFixFor(PackageName)]
+[LunaFix]
 [UsedImplicitly]
-internal class KisCompat
+internal class KisCompat : ModCompat
 {
-    #region Constants
+    #region Properties
 
-    private const string PackageName = "KIS_Shared";
+    public override string PackageName => "KIS";
 
     #endregion
 
-    #region Constructors
+    #region Public Methods
 
-    public KisCompat(LunaFixForAttribute _)
+    public override void Patch()
     {
         var kisShared = AccessTools.TypeByName("KIS.KIS_Shared");
         var onPartReady = kisShared.GetNestedType("OnPartReady");

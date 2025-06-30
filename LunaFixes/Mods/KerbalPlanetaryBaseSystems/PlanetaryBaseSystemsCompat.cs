@@ -4,19 +4,19 @@ using LunaFixes.Attributes;
 
 namespace LunaFixes.Mods.KerbalPlanetaryBaseSystems;
 
-[LunaFixFor(PackageName)]
+[LunaFix]
 [UsedImplicitly]
-internal class PlanetaryBaseSystemsCompat
+internal class PlanetaryBaseSystemsCompat : ModCompat
 {
-    #region Constants
+    #region Properties
 
-    private const string PackageName = "PlanetarySurfaceStructures";
+    public override string PackageName => "PlanetarySurfaceStructures";
 
     #endregion
 
-    #region Constructors
+    #region Public Methods
 
-    public PlanetaryBaseSystemsCompat(LunaFixForAttribute _)
+    public override void Patch()
     {
         // TODO add Kerbal Planetary Base Systems fixes here
     }

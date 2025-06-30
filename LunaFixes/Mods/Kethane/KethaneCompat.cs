@@ -10,25 +10,25 @@ using LunaFixes.Attributes;
 
 namespace LunaFixes.Mods.Kethane;
 
-[LunaFixFor(PackageName)]
+[LunaFix]
 [UsedImplicitly]
-internal class KethaneCompat
+internal class KethaneCompat : ModCompat
 {
-    #region Constants
+    #region Properties
 
-    private const string PackageName = "Kethane";
+    public override string PackageName => "Kethane";
 
     #endregion
 
-    #region Constructors
+    #region Public Methods
 
-    public KethaneCompat(LunaFixForAttribute _)
+    public override void Patch()
     {
         var legacyResourceGenerator = AccessTools.TypeByName("Kethane.Generators.LegacyResourceGenerator");
 
         LunaFixes.HarmonyInstance.Patch(AccessTools.Method(legacyResourceGenerator, "Load", [
             typeof(CelestialBody), typeof(ConfigNode)
-        ]), prefix: new HarmonyMethod(typeof(KethaneCompat), nameof(PrefixLoad)));
+        ]), new HarmonyMethod(typeof(KethaneCompat), nameof(PrefixLoad)));
     }
 
     #endregion

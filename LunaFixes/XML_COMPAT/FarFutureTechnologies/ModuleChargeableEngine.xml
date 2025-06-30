@@ -1,0 +1,34 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>Charged</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>Charging</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>CurrentCharge</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>ChargeRate</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>ShutdownEngineOnLowThrottle</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>MinimumThrottleFraction</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>CurrentPowerConsumption</FieldName>
+		</FieldDefinition>
+	</Fields>
+	<Methods>
+		<MethodDefinition>
+			<MethodName>EnableCharging</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>DisableCharging</MethodName>
+		</MethodDefinition>
+	</Methods>
+</ModuleDefinition>
