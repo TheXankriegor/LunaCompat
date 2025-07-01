@@ -1,0 +1,19 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>selectedTexture</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>selectedMapURL</FieldName>
+		</FieldDefinition>
+	</Fields>
+	<Methods>
+		<MethodDefinition>
+			<MethodName>nextTextureEvent</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>previousTextureEvent</MethodName>
+		</MethodDefinition>
+	</Methods>
+</ModuleDefinition>

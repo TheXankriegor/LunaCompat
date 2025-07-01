@@ -1,0 +1,37 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>selectedTankSetup</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>configuredAmounts</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>configuredFlowStates</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>storedFactorMultiplier</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>storedSurfaceMultiplier</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>storedVolumeMultiplier</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>baseMassMultiplier</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>initialMassMultiplier</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>dryMass</FieldName>
+		</FieldDefinition>
+	</Fields>
+	<Methods>
+		<MethodDefinition>
+			<MethodName>ContextMenuDetach</MethodName>
+		</MethodDefinition>
+	</Methods>
+</ModuleDefinition>
