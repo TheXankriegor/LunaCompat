@@ -1,0 +1,22 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>nameStr</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>IsEnabled</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>IsPowered</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>science_to_add</FieldName>
+		</FieldDefinition>
+	</Fields>
+	<Methods>
+		<MethodDefinition>
+			<MethodName>RetrofitCore</MethodName>
+		</MethodDefinition>
+	</Methods>
+</ModuleDefinition>

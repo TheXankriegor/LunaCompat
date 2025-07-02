@@ -1,0 +1,23 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>selectedFuel</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>IsEnabled</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>Launched</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>hideEmpty</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>selectedTank</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>selectedTankName</FieldName>
+		</FieldDefinition>
+	</Fields>
+</ModuleDefinition>

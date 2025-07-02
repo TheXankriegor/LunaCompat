@@ -1,0 +1,23 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Methods>
+		<MethodDefinition>
+			<MethodName>DumpActinides</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>SwapFuelMode</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>SwitchMode</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>ManualRestart</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>ManualShutdown</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>Refuel</MethodName>
+		</MethodDefinition>
+	</Methods>
+</ModuleDefinition>
