@@ -1,0 +1,37 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>storedAbsoluteFactor</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>isupgraded</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>propellantName</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>propellantGUIName</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>propellantIsSaved</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>fuel_mode</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>vacplasmaadded</FieldName>
+		</FieldDefinition>
+	</Fields>
+	<Methods>
+		<MethodDefinition>
+			<MethodName>ToggleNextPropellantEvent</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>TogglePreviousPropellantEvent</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>RetrofitEngine</MethodName>
+		</MethodDefinition>
+	</Methods>
+</ModuleDefinition>

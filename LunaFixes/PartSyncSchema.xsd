@@ -9,7 +9,13 @@
 							<xs:element maxOccurs="unbounded" name="FieldDefinition">
 								<xs:complexType>
 									<xs:sequence>
-										<xs:element name="FieldName" type="xs:string" />
+										<xs:element name="FieldName" >
+											<xs:simpleType>
+												<xs:restriction base="xs:string">
+													<xs:pattern value="^(?!\s*$).+" />
+												</xs:restriction>
+											</xs:simpleType>
+										</xs:element>
 										<xs:element minOccurs="0" name="MaxIntervalInMs" type="xs:string" />
 									</xs:sequence>
 								</xs:complexType>
@@ -27,7 +33,13 @@
 							<xs:element maxOccurs="unbounded" name="MethodDefinition">
 								<xs:complexType>
 									<xs:sequence>
-										<xs:element name="MethodName" type="xs:string" />
+										<xs:element name="MethodName" >
+											<xs:simpleType>
+												<xs:restriction base="xs:string">
+													<xs:pattern value="^(?!\s*$).+" />
+												</xs:restriction>
+											</xs:simpleType>
+										</xs:element>
 										<xs:element minOccurs="0" name="MaxIntervalInMs" type="xs:string" />
 									</xs:sequence>
 								</xs:complexType>

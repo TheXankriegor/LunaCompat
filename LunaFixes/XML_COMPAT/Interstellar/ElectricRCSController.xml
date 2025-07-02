@@ -1,0 +1,31 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>fuel_mode</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>fuel_mode_name</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>storedPower</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>maxStoredPower</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>hasSufficientPower</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>powerEnabled</FieldName>
+		</FieldDefinition>
+	</Fields>
+	<Methods>
+		<MethodDefinition>
+			<MethodName>ToggleNextPropellantEvent</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>TogglePreviousPropellantEvent</MethodName>
+		</MethodDefinition>
+	</Methods>
+</ModuleDefinition>
