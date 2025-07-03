@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file
 
 - add interstellar fuel switch compat
 - add interstellar photon sailor compat
+- add interstellar compat
 
 
 ## 0.0.2 - 2025-06-30
