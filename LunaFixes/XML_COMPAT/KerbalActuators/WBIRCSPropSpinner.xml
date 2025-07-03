@@ -2,13 +2,10 @@
 <ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
 	<Fields>
 		<FieldDefinition>
-			<FieldName>persistentAutopilotMode</FieldName>
+			<FieldName>isBlurred</FieldName>
 		</FieldDefinition>
 		<FieldDefinition>
-			<FieldName>ratioHeadingVersusRequest</FieldName>
-		</FieldDefinition>
-		<FieldDefinition>
-			<FieldName>IsEnabled</FieldName>
+			<FieldName>mirrorRotation</FieldName>
 		</FieldDefinition>
 	</Fields>
 </ModuleDefinition>

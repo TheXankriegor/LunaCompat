@@ -1,0 +1,28 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>previousSituation</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>isParked</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>parkedAltitude</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>isOnRails</FieldName>
+		</FieldDefinition>
+	</Fields>
+	<Methods>
+		<MethodDefinition>
+			<MethodName>SetLanded</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>SetFlying</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>TogglePark</MethodName>
+		</MethodDefinition>
+	</Methods>
+</ModuleDefinition>

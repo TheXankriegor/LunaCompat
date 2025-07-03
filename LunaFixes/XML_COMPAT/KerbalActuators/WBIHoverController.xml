@@ -1,0 +1,38 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>hoverActive</FieldName>
+		</FieldDefinition>
+	</Fields>
+	<Methods>
+		<MethodDefinition>
+			<MethodName>ToggleHoverMode</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>StartEngine</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>StopEngine</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>IncreaseVerticalSpeed</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>DecreaseVerticalSpeed</MethodName>
+		</MethodDefinition>
+		<!-- This typo overload is in the mod. -->
+		<MethodDefinition>
+			<MethodName>killVerticalSpeed</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>KillVerticalSpeed</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>ActivateHover</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>DeactivateHover</MethodName>
+		</MethodDefinition>
+	</Methods>
+</ModuleDefinition>
