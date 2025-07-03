@@ -1,0 +1,32 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>selectedBeamConfiguration</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>isInitialized</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>maximumPower</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>wavelength</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>wavelengthText</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>atmosphericAbsorptionPercentage</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>waterAbsorptionPercentage</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>efficiencyPercentage</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>storedMassMultiplier</FieldName>
+		</FieldDefinition>
+	</Fields>
+</ModuleDefinition>

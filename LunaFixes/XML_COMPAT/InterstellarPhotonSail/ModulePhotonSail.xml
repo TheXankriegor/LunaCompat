@@ -1,0 +1,37 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>IsEnabled</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>previousPeA</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>previousAeA</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>previousFixedDeltaTime</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>storedMassMultiplier</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>kcsBeamedPowerThrottle</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>beamedPowerThrottle</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>beamedPowerForwardDirection</FieldName>
+		</FieldDefinition>
+	</Fields>
+	<Methods>
+		<MethodDefinition>
+			<MethodName>DeploySail</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>RetractSail</MethodName>
+		</MethodDefinition>
+	</Methods>
+</ModuleDefinition>

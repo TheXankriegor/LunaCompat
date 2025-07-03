@@ -1,0 +1,34 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>Deployed</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>transmit_value</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>recovery_value</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>data_size</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>xmit_scalar</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>ref_value</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>data_gend</FieldName>
+		</FieldDefinition>
+	</Fields>
+	<Methods>
+		<MethodDefinition>
+			<MethodName>DeployExperiment</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>ResetExperiment</MethodName>
+		</MethodDefinition>
+	</Methods>
+</ModuleDefinition>

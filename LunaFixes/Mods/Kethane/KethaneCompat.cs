@@ -39,6 +39,7 @@ internal class KethaneCompat : ModCompat
     /// Patch Kethane.Generators.LegacyResourceGenerator to not use random but instead always generate same values by
     /// pregenerating a seed node.
     /// </summary>
+    // ReSharper disable once UnusedParameter.Local
     private static void PrefixLoad(CelestialBody body, ConfigNode node)
     {
         if (node != null)
