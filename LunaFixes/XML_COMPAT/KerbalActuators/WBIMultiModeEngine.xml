@@ -2,13 +2,21 @@
 <ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
 	<Fields>
 		<FieldDefinition>
-			<FieldName>persistentAutopilotMode</FieldName>
+			<FieldName>currentEngineID</FieldName>
 		</FieldDefinition>
 		<FieldDefinition>
-			<FieldName>ratioHeadingVersusRequest</FieldName>
+			<FieldName>currentEngineIndex</FieldName>
 		</FieldDefinition>
 		<FieldDefinition>
-			<FieldName>IsEnabled</FieldName>
+			<FieldName>autoSwitch</FieldName>
 		</FieldDefinition>
 	</Fields>
+	<Methods>
+		<MethodDefinition>
+			<MethodName>NextEngine</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>PreviousEngine</MethodName>
+		</MethodDefinition>
+	</Methods>
 </ModuleDefinition>

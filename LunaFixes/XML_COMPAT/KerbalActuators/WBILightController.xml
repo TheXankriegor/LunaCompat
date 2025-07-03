@@ -2,22 +2,27 @@
 <ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
 	<Fields>
 		<FieldDefinition>
-			<FieldName>powerGeneratorPowerInput</FieldName>
+			<FieldName>ecRequired</FieldName>
 		</FieldDefinition>
 		<FieldDefinition>
-			<FieldName>powerGeneratorPowerOutput</FieldName>
+			<FieldName>red</FieldName>
 		</FieldDefinition>
 		<FieldDefinition>
-			<FieldName>last_active_time</FieldName>
+			<FieldName>green</FieldName>
 		</FieldDefinition>
 		<FieldDefinition>
-			<FieldName>initialMaxBufferSize</FieldName>
+			<FieldName>blue</FieldName>
 		</FieldDefinition>
 		<FieldDefinition>
-			<FieldName>initialInputAmount</FieldName>
+			<FieldName>intensity</FieldName>
 		</FieldDefinition>
 		<FieldDefinition>
-			<FieldName>initialOutputAmount</FieldName>
+			<FieldName>lightsOn</FieldName>
 		</FieldDefinition>
 	</Fields>
+	<Methods>
+		<MethodDefinition>
+			<MethodName>ToggleLights</MethodName>
+		</MethodDefinition>
+	</Methods>
 </ModuleDefinition>
