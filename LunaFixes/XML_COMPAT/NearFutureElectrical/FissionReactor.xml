@@ -1,0 +1,37 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>UIIcon</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>UIName</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>CurrentSafetyOverride</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>CurrentPowerPercent</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>AvailablePower</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>TimewarpShutdown</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>TimewarpShutdownFactor</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>CoreIntegrity</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>FirstLoad</FieldName>
+		</FieldDefinition>
+	</Fields>
+	<Methods>
+		<MethodDefinition>
+			<MethodName>RepairReactor</MethodName>
+		</MethodDefinition>
+	</Methods>
+</ModuleDefinition>
