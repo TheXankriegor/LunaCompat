@@ -65,8 +65,6 @@ public class LunaFixes : MonoBehaviour
         }
 
         Log.Message("Xan's Luna Fixes Plugin started.");
-
-        HarmonyInstance.PatchAll();
     }
 
     private static bool IsLunaFix(Type type)

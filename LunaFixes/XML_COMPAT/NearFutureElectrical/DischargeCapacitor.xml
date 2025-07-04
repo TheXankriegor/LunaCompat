@@ -1,0 +1,37 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>CapacitorGroups</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>Enabled</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>Discharging</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>ModuleID</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>FirstLoad</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>lastUpdateTime</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>dischargeActual</FieldName>
+		</FieldDefinition>
+	</Fields>
+	<Methods>
+		<MethodDefinition>
+			<MethodName>Discharge</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>Enable</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>Disable</MethodName>
+		</MethodDefinition>
+	</Methods>
+</ModuleDefinition>
