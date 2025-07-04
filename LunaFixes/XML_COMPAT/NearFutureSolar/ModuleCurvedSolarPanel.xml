@@ -1,0 +1,19 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>SavedState</FieldName>
+		</FieldDefinition>
+	</Fields>
+	<Methods>
+		<MethodDefinition>
+			<MethodName>DeployPanels</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>RetractPanels</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>TogglePanels</MethodName>
+		</MethodDefinition>
+	</Methods>
+</ModuleDefinition>

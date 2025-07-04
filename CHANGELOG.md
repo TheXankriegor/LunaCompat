@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file
 - add kerbal actuators compat
 - add near future electrical compat
 - add near future propulsion compat
+- add near future solar compat
 
 
 ## 0.0.2 - 2025-06-30
