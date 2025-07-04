@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file
 
+## Unreleased
+
+- add sandcastle compat
+
+
 ## 0.0.3 - 2025-07-04
 
 - add interstellar fuel switch compat
