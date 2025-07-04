@@ -1,0 +1,19 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>CurPowerSetting</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>LinkAllEngines</FieldName>
+		</FieldDefinition>
+	</Fields>
+	<Methods>
+		<MethodDefinition>
+			<MethodName>LinkEngines</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>UnlinkEngines</MethodName>
+		</MethodDefinition>
+	</Methods>
+</ModuleDefinition>
