@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file
 
-## Unreleased
+## 0.0.3 - 2025-07-04
 
 - add interstellar fuel switch compat
 - add interstellar photon sailor compat
@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file
 - add near future propulsion compat
 - add near future solar compat
 - add near future spacecraft compat
+- add procedural parts compat
 
 
 ## 0.0.2 - 2025-06-30

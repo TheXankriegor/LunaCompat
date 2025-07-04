@@ -1,0 +1,34 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>density</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>forceLegacyTextures</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>textureSet</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>capTextureIndex</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>shapeName</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>moduleCost</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>moduleMass</FieldName>
+		</FieldDefinition>
+	</Fields>
+	<Methods>
+		<MethodDefinition>
+			<MethodName>OnChangeTextureScale</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>OnPartColliderChanged</MethodName>
+		</MethodDefinition>
+	</Methods>
+</ModuleDefinition>

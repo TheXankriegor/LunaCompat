@@ -1,0 +1,29 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>topDiameter</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>bottomDiameter</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>length</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>rodDiameter</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>nbRods</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>tiltAngle</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>offsetAngle</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>symmetryRods</FieldName>
+		</FieldDefinition>
+	</Fields>
+</ModuleDefinition>
