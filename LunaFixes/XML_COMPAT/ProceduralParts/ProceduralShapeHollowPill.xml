@@ -1,0 +1,17 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>innerDiameter</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>outerDiameter</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>length</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>fillet</FieldName>
+		</FieldDefinition>
+	</Fields>
+</ModuleDefinition>
