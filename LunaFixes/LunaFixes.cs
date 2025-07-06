@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
@@ -9,21 +10,25 @@ using KSPBuildTools;
 using LmpClient;
 
 using LunaFixes.Attributes;
+using LunaFixes.Utils;
 
 using UnityEngine;
 
 namespace LunaFixes;
 
-[KSPAddon(KSPAddon.Startup.AllGameScenes, true)]
+[KSPAddon(KSPAddon.Startup.MainMenu, true)]
 public class LunaFixes : MonoBehaviour
 {
     private const string ConfigFilePath = $"GameData/{nameof(LunaFixes)}/{nameof(LunaFixes)}.cfg";
 
     public static Harmony HarmonyInstance = new("LunaFixes");
 
+    private readonly HashSet<ModCompat> _activePatches = [];
+    private ModMessageHandler _modMessageHandler;
+
     public static LunaFixes Singleton { get; set; }
 
-    public void Awake()
+    private void Awake()
     {
         Singleton = this;
         DontDestroyOnLoad(this);
@@ -42,6 +47,8 @@ public class LunaFixes : MonoBehaviour
             return;
         }
 
+        _modMessageHandler = new ModMessageHandler();
+
         // We could load external fixes here as well - but will that ever be needed?
         var queue = Assembly.GetAssembly(typeof(LunaFixes)).GetTypes().Where(IsLunaFix);
 
@@ -54,7 +61,9 @@ public class LunaFixes : MonoBehaviour
                 if (!AssemblyLoader.loadedAssemblies.Contains(compatInstance.PackageName))
                     continue;
 
-                compatInstance.Patch();
+                _activePatches.Add(compatInstance);
+
+                compatInstance.Patch(_modMessageHandler);
 
                 Log.Message($"Initialized compatibility for {compatInstance.PackageName}");
             }
@@ -65,6 +74,14 @@ public class LunaFixes : MonoBehaviour
         }
 
         Log.Message("Xan's Luna Fixes Plugin started.");
+    }
+
+    private void OnDestroy()
+    {
+        foreach (var patch in _activePatches)
+            patch.Destroy();
+
+        _modMessageHandler.Destroy();
     }
 
     private static bool IsLunaFix(Type type)

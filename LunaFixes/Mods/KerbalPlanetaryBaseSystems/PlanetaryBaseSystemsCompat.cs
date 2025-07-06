@@ -1,6 +1,7 @@
 ﻿using JetBrains.Annotations;
 
 using LunaFixes.Attributes;
+using LunaFixes.Utils;
 
 namespace LunaFixes.Mods.KerbalPlanetaryBaseSystems;
 
@@ -16,7 +17,7 @@ internal class PlanetaryBaseSystemsCompat : ModCompat
 
     #region Public Methods
 
-    public override void Patch()
+    public override void Patch(ModMessageHandler modMessageHandler)
     {
         // TODO add Kerbal Planetary Base Systems fixes here
     }

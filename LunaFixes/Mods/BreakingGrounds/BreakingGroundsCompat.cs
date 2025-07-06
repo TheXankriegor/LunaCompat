@@ -1,6 +1,7 @@
 ﻿using JetBrains.Annotations;
 
 using LunaFixes.Attributes;
+using LunaFixes.Utils;
 
 namespace LunaFixes.Mods.BreakingGrounds;
 
@@ -16,7 +17,7 @@ internal class BreakingGroundsCompat : ModCompat
 
     #region Public Methods
 
-    public override void Patch()
+    public override void Patch(ModMessageHandler modMessageHandler)
     {
         // TODO this will require hooking into the creation event via harmony and fire an actual event the server can see
         // Currently LMP is missing a handler for all ground science GameEvents (GameEvents.onGroundSciencePartDeployed etc.)

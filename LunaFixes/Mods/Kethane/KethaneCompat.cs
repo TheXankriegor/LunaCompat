@@ -7,6 +7,7 @@ using KSPBuildTools;
 using LmpClient.Systems.TimeSync;
 
 using LunaFixes.Attributes;
+using LunaFixes.Utils;
 
 namespace LunaFixes.Mods.Kethane;
 
@@ -22,9 +23,9 @@ internal class KethaneCompat : ModCompat
 
     #region Public Methods
 
-    public override void Patch()
+    public override void Patch(ModMessageHandler modMessageHandler)
     {
-        var legacyResourceGenerator = AccessTools.TypeByName("Kethane.Generators.LegacyResourceGenerator");
+            var legacyResourceGenerator = AccessTools.TypeByName("Kethane.Generators.LegacyResourceGenerator");
 
         LunaFixes.HarmonyInstance.Patch(AccessTools.Method(legacyResourceGenerator, "Load", [
             typeof(CelestialBody), typeof(ConfigNode)

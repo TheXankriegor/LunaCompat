@@ -1,4 +1,6 @@
-﻿namespace LunaFixes;
+﻿using LunaFixes.Utils;
+
+namespace LunaFixes;
 
 internal abstract class ModCompat
 {
@@ -10,7 +12,12 @@ internal abstract class ModCompat
 
     #region Public Methods
 
-    public abstract void Patch();
+    public abstract void Patch(ModMessageHandler modMessageHandler);
+
+    public virtual void Destroy()
+    {
+        // nothing to do usually
+    }
 
     #endregion
 }
