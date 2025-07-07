@@ -25,7 +25,7 @@ internal class KisCompat : ModCompat
 
     #region Public Methods
 
-    public override void Patch(ModMessageHandler modMessageHandler)
+    public override void Patch(ModMessageHandler modMessageHandler, ConfigNode node)
     {
         var kisShared = AccessTools.TypeByName("KIS.KIS_Shared");
         var onPartReady = kisShared.GetNestedType("OnPartReady");

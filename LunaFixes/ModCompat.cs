@@ -12,7 +12,7 @@ internal abstract class ModCompat
 
     #region Public Methods
 
-    public abstract void Patch(ModMessageHandler modMessageHandler);
+    public abstract void Patch(ModMessageHandler modMessageHandler, ConfigNode node);
 
     public virtual void Destroy()
     {

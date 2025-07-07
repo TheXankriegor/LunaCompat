@@ -29,7 +29,7 @@ internal class InfernalRoboticsCompat : ModCompat
 
     #region Public Methods
 
-    public override void Patch(ModMessageHandler modMessageHandler)
+    public override void Patch(ModMessageHandler modMessageHandler, ConfigNode node)
     {
         // TODO: I am 99% sure that this does effectively nothing useful. Original LmpIrPlugin has it however?
         _moduleIrServo = AccessTools.TypeByName("InfernalRobotics_v3.Module.ModuleIRServo_v3");

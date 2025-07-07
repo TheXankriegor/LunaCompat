@@ -24,9 +24,19 @@ namespace LunaFixes.Mods.SCANsat;
 [UsedImplicitly]
 internal class ScanSatCompat : ModCompat
 {
+    #region Constants
+
+    private const string SyncMessageId = "SCANsatSync";
+    private const string ChangeMessageId = "SCANsatChange";
+
+    #endregion
+
     #region Fields
 
     private static MethodInfo finishRegistrationMethod;
+    private static Type scanSatType;
+    private static Type scanVesselType;
+    private static Type scanTypeType;
 
     private bool _keepAlive;
     private ModMessageHandler _modMessageHandler;
@@ -36,6 +46,13 @@ internal class ScanSatCompat : ModCompat
     private PropertyInfo _coverageProp;
     private PropertyInfo _bodyProp;
     private MethodInfo _deserializeMethod;
+    private int _syncInterval;
+    private MethodInfo registerSensorTempMethod;
+    private MethodInfo unregisterSensorMethod;
+    private FieldInfo tempIdsField;
+    private FieldInfo knownVesselsField;
+    private FieldInfo vesselField;
+    private MethodInfo tryGetValueField;
 
     #endregion
 
@@ -47,19 +64,12 @@ internal class ScanSatCompat : ModCompat
 
     #region Public Methods
 
-    public override void Patch(ModMessageHandler modMessageHandler)
+    public override void Patch(ModMessageHandler modMessageHandler, ConfigNode node)
     {
         _modMessageHandler = modMessageHandler;
-        var scanControllerType = AccessTools.TypeByName("SCANsat.SCANcontroller");
-        finishRegistrationMethod = scanControllerType.GetMethod("finishRegistration", BindingFlags.NonPublic | BindingFlags.Instance);
-        _getDataMethod = scanControllerType.GetMethod("getData", [typeof(string)]);
-        _getAllDataMethod = scanControllerType.GetProperty("GetAllData");
 
-        var scanDataType = AccessTools.TypeByName("SCANsat.SCAN_Data.SCANdata");
-        _serializeMethod = scanDataType.GetMethod("shortSerialize", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-        _coverageProp = scanDataType.GetProperty("Coverage");
-        _bodyProp = scanDataType.GetProperty("Body");
-        _deserializeMethod = scanDataType.GetMethod("shortDeserialize", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+        var scanControllerType = AccessTools.TypeByName("SCANsat.SCANcontroller");
+        ReflectScanSatTypes(scanControllerType);
 
         LunaFixes.HarmonyInstance.Patch(AccessTools.Method(scanControllerType, "scanFromAllVessels"),
                                         new HarmonyMethod(typeof(ScanSatCompat), nameof(PrefixScan)));
@@ -69,11 +79,21 @@ internal class ScanSatCompat : ModCompat
                                         postfix: new HarmonyMethod(typeof(ScanSatCompat), nameof(PostfixUpdate)));
         LunaFixes.HarmonyInstance.Patch(AccessTools.Method(scanControllerType, "finishRegistration", [typeof(Guid)]),
                                         new HarmonyMethod(typeof(ScanSatCompat), nameof(PrefixFinishRegistration)));
+        LunaFixes.HarmonyInstance.Patch(AccessTools.Method(scanSatType, "startScan"),
+                                        postfix: new HarmonyMethod(typeof(ScanSatCompat), nameof(PostfixStartScan)));
+        LunaFixes.HarmonyInstance.Patch(AccessTools.Method(scanSatType, "stopScan"),
+                                        postfix: new HarmonyMethod(typeof(ScanSatCompat), nameof(PostfixStopScan)));
 
         // add a custom scenario handler for map progress
+        var intervalString = node.GetValue("SCANsatSyncInterval");
+
+        if (!int.TryParse(intervalString, out _syncInterval))
+            _syncInterval = 5;
+
         _keepAlive = true;
         LunaFixes.Singleton.StartCoroutine(ScanSatSync());
-        modMessageHandler.RegisterModMessageListener(PackageName, OnModMessageReceived);
+        modMessageHandler.RegisterModMessageListener<ScanSatSyncMessage>(SyncMessageId, OnSyncMessageReceived);
+        modMessageHandler.RegisterModMessageListener<ScanSatScannerChangeMessage>(ChangeMessageId, OnChangeMessageReceived);
     }
 
     public override void Destroy()
@@ -87,9 +107,47 @@ internal class ScanSatCompat : ModCompat
 
     #region Non-Public Methods
 
+    private static void PostfixStartScan(ref object __instance)
+    {
+        if (IsPrimaryPlayer())
+            return;
+
+        var message = CreateFromScanSatModule(ref __instance);
+        message.Loaded = true;
+
+        ModMessageHandler.Instance.SendReliableMessage(ChangeMessageId, message);
+    }
+
+    private static void PostfixStopScan(ref object __instance)
+    {
+        if (IsPrimaryPlayer())
+            return;
+
+        var message = CreateFromScanSatModule(ref __instance);
+        message.Loaded = false;
+
+        ModMessageHandler.Instance.SendReliableMessage(ChangeMessageId, message);
+    }
+
+    private static ScanSatScannerChangeMessage CreateFromScanSatModule(ref object __instance)
+    {
+        var partModule = __instance as PartModule;
+
+        return new ScanSatScannerChangeMessage
+        {
+            Vessel = partModule?.vessel.id ?? Guid.Empty,
+            Sensor = (int)scanSatType.GetField("sensorType").GetValue(__instance),
+            Fov = (float)scanSatType.GetField("fov").GetValue(__instance),
+            MinAlt = (float)scanSatType.GetField("min_alt").GetValue(__instance),
+            MaxAlt = (float)scanSatType.GetField("max_alt").GetValue(__instance),
+            BestAlt = (float)scanSatType.GetField("best_alt").GetValue(__instance),
+            RequireLight = (bool)scanSatType.GetField("requireLight").GetValue(__instance)
+        };
+    }
+
     private static void PostfixUpdate(object __instance, List<Guid> ___tempIDs)
     {
-        // all vessels loaded
+        // not all vessels loaded
         if (!VesselProtoSystem.Singleton.VesselProtos.All(x => x.Value.IsEmpty))
             return;
 
@@ -139,25 +197,50 @@ internal class ScanSatCompat : ModCompat
         return players.Length <= 1 || players[0] == StatusSystem.Singleton.MyPlayerStatus.PlayerName;
     }
 
+    private void ReflectScanSatTypes(Type scanControllerType)
+    {
+        finishRegistrationMethod = scanControllerType.GetMethod("finishRegistration", BindingFlags.NonPublic | BindingFlags.Instance);
+        _getDataMethod = scanControllerType.GetMethod("getData", [typeof(string)]);
+        _getAllDataMethod = scanControllerType.GetProperty("GetAllData");
+
+        scanSatType = AccessTools.TypeByName("SCANsat.SCAN_PartModules.SCANsat");
+        scanVesselType = AccessTools.TypeByName("SCANvessel");
+        scanTypeType = AccessTools.TypeByName("SCANtype");
+        registerSensorTempMethod = scanControllerType.GetMethod("registerSensorTemp", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+        unregisterSensorMethod = scanControllerType.GetMethod("unregisterSensor", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+        tempIdsField = scanControllerType.GetField("tempIDs", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+        knownVesselsField = scanControllerType.GetField("knownVessels", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+        vesselField = scanVesselType.GetField("vessel");
+
+        var dicType = typeof(DictionaryValueList<,>).MakeGenericType(typeof(Guid), scanVesselType);
+        tryGetValueField = dicType.GetMethod("TryGetValue", BindingFlags.Instance | BindingFlags.Public);
+
+        var scanDataType = AccessTools.TypeByName("SCANsat.SCAN_Data.SCANdata");
+        _serializeMethod = scanDataType.GetMethod("shortSerialize", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+        _coverageProp = scanDataType.GetProperty("Coverage");
+        _bodyProp = scanDataType.GetProperty("Body");
+        _deserializeMethod = scanDataType.GetMethod("shortDeserialize", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+    }
+
     private IEnumerator ScanSatSync()
     {
         var previousValues = new Dictionary<string, string>();
 
         while (_keepAlive)
         {
-            yield return new WaitForSeconds(5);
+            yield return new WaitForSeconds(_syncInterval);
 
             try
             {
                 var scanController = ScenarioRunner.GetLoadedModules()?.Find(x => x.ClassName == "SCANcontroller");
 
-                if (scanController == null || !IsPrimaryPlayer())
+                if (!scanController || !IsPrimaryPlayer())
+                    continue;
+
+                if (_getAllDataMethod.GetValue(scanController) is not IEnumerable scanDataList)
                     continue;
 
                 // For the server, the scenario data is updated as should be. However, without an additional system other clients won't know about the scan updates
-
-                var scanDataList = _getAllDataMethod.GetValue(scanController) as IEnumerable;
-
                 foreach (var scanData in scanDataList)
                 {
                     var coverage = _coverageProp.GetValue(scanData) as short[,];
@@ -168,7 +251,6 @@ internal class ScanSatCompat : ModCompat
 
                     var serializedData = _serializeMethod.Invoke(scanData, []) as string;
 
-                    // no change
                     if (previousValues.TryGetValue(body.bodyName, out var previousValue) && previousValue.Equals(serializedData))
                         continue;
 
@@ -180,24 +262,7 @@ internal class ScanSatCompat : ModCompat
                         Map = serializedData
                     };
 
-                    _modMessageHandler.SendReliableMessage(PackageName, messageToSend);
-
-                    //var messageToBeSend = BinaryUtils.Serialize(messageToSend);
-
-                    //var msgData = NetworkMain.CliMsgFactory.CreateNewMessageData<ModMsgData>();
-                    //if (msgData.Data.Length < messageToBeSend.Length)
-                    //    msgData.Data = new byte[messageToBeSend.Length];
-
-                    //Array.Copy(messageToBeSend, msgData.Data, messageToBeSend.Length);
-
-                    //msgData.NumBytes = messageToBeSend.Length;
-                    //msgData.Relay = true;
-                    //msgData.ModName = PackageName;
-                    //// set message to reliable so that it gets split
-                    //msgData.Reliable = true;
-
-                    //var msg = ModApiSystem.MessageFactory.CreateNew<ModCliMsg>(msgData);
-                    //ModApiMessageSender.TaskFactory.StartNew(() => NetworkSender.QueueOutgoingMessage(msg));
+                    _modMessageHandler.SendReliableMessage(SyncMessageId, messageToSend);
                 }
             }
             catch (Exception e)
@@ -207,7 +272,42 @@ internal class ScanSatCompat : ModCompat
         }
     }
 
-    private void ProcessReceivedMessage(ScanSatSyncMessage message)
+    private void OnChangeMessageReceived(ScanSatScannerChangeMessage message)
+    {
+        // Refresh scan controller every time to account for scene changes
+        var scanController = ScenarioRunner.GetLoadedModules()?.Find(x => x.ClassName == "SCANcontroller");
+
+        if (scanController == null || !IsPrimaryPlayer())
+            return;
+
+        var sensorShort = Enum.ToObject(scanTypeType, message.Sensor);
+
+        if (message.Loaded && tempIdsField.GetValue(scanController) is IList tempIds)
+        {
+            registerSensorTempMethod?.Invoke(scanController, [
+                message.Vessel, sensorShort, message.Fov, message.MinAlt, message.MaxAlt, message.BestAlt,
+                message.RequireLight
+            ]);
+            tempIds.Add(message.Vessel);
+        }
+        else
+        {
+            var args = new[]
+            {
+                message.Vessel, Activator.CreateInstance(scanVesselType)
+            };
+            var knownVessels = knownVesselsField.GetValue(scanController);
+            tryGetValueField?.Invoke(knownVessels, args);
+            var vesselObj = vesselField.GetValue(args[1]);
+
+            unregisterSensorMethod?.Invoke(scanController, [
+                vesselObj, sensorShort, message.Fov, message.MinAlt, message.MaxAlt, message.BestAlt,
+                message.RequireLight
+            ]);
+        }
+    }
+
+    private void OnSyncMessageReceived(ScanSatSyncMessage message)
     {
         // Refresh scan controller every time to account for scene changes
         var scanController = ScenarioRunner.GetLoadedModules()?.Find(x => x.ClassName == "SCANcontroller");
@@ -217,15 +317,6 @@ internal class ScanSatCompat : ModCompat
 
         var scanData = _getDataMethod.Invoke(scanController, [message.Body]);
         _deserializeMethod.Invoke(scanData, [message.Map]);
-    }
-
-    private void OnModMessageReceived(byte[] data)
-    {
-        if (data.Length <= 0)
-            return;
-
-        var syncMessage = BinaryUtils.Deserialize<ScanSatSyncMessage>(data);
-        ProcessReceivedMessage(syncMessage);
     }
 
     #endregion
@@ -238,6 +329,26 @@ internal class ScanSatCompat : ModCompat
         public string Body { get; set; }
 
         public string Map { get; set; }
+    }
+
+    [Serializable]
+    public class ScanSatScannerChangeMessage
+    {
+        public bool Loaded { get; set; }
+
+        public Guid Vessel { get; set; }
+
+        public int Sensor { get; set; }
+
+        public float Fov { get; set; }
+
+        public float MinAlt { get; set; }
+
+        public float MaxAlt { get; set; }
+
+        public float BestAlt { get; set; }
+
+        public bool RequireLight { get; set; }
     }
 
     #endregion

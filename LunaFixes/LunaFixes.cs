@@ -63,7 +63,7 @@ public class LunaFixes : MonoBehaviour
 
                 _activePatches.Add(compatInstance);
 
-                compatInstance.Patch(_modMessageHandler);
+                compatInstance.Patch(_modMessageHandler, node);
 
                 Log.Message($"Initialized compatibility for {compatInstance.PackageName}");
             }

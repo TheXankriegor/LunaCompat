@@ -14,8 +14,10 @@ internal class ModMessageHandler
 {
     #region Fields
 
+    public static ModMessageHandler Instance;
+
     private readonly EventData<string, byte[]> _onModMessageReceivedEvent;
-    private readonly Dictionary<string, Action<byte[]>> _modMessageListeners;
+    private readonly Dictionary<string, IMessageListener> _modMessageListeners;
 
     #endregion
 
@@ -23,6 +25,7 @@ internal class ModMessageHandler
 
     public ModMessageHandler()
     {
+        Instance = this;
         _modMessageListeners = [];
         _onModMessageReceivedEvent = GameEvents.FindEvent<EventData<string, byte[]>>("onModMessageReceived");
         _onModMessageReceivedEvent?.Add(HandleModMessage);
@@ -32,9 +35,9 @@ internal class ModMessageHandler
 
     #region Public Methods
 
-    public void RegisterModMessageListener(string id, Action<byte[]> messageHandler)
+    public void RegisterModMessageListener<TMessageType>(string id, Action<TMessageType> messageHandler)
     {
-        _modMessageListeners.TryAdd(id, messageHandler);
+        _modMessageListeners.TryAdd(id, new MessageListener<TMessageType>(messageHandler));
     }
 
     public void Destroy()
@@ -75,8 +78,50 @@ internal class ModMessageHandler
 
     private void HandleModMessage(string id, byte[] data)
     {
-        if (_modMessageListeners.TryGetValue(id, out var mod))
-            mod.Invoke(data);
+        if (!_modMessageListeners.TryGetValue(id, out var mod))
+            return;
+
+        mod.Execute(data);
+    }
+
+    #endregion
+
+    #region Nested Types
+
+    private interface IMessageListener
+    {
+        void Execute(byte[] data);
+    }
+
+    private class MessageListener<T> : IMessageListener
+    {
+        #region Fields
+
+        private readonly Action<T> _messageHandler;
+
+        #endregion
+
+        #region Constructors
+
+        public MessageListener(Action<T> messageHandler)
+        {
+            _messageHandler = messageHandler;
+        }
+
+        #endregion
+
+        #region Public Methods
+
+        public void Execute(byte[] data)
+        {
+            if (data.Length <= 0)
+                return;
+
+            var syncMessage = BinaryUtils.Deserialize<T>(data);
+            _messageHandler.Invoke(syncMessage);
+        }
+
+        #endregion
     }
 
     #endregion

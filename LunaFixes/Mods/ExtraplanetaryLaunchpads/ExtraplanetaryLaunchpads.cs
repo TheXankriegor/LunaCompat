@@ -29,7 +29,7 @@ internal class ExtraplanetaryLaunchpadsCompat : ModCompat
 
     #region Public Methods
 
-    public override void Patch(ModMessageHandler modMessageHandler)
+    public override void Patch(ModMessageHandler modMessageHandler, ConfigNode node)
     {
         // TODO add Extraplanetary Launchpads fixes here
         // building progress and basic launch + decouple works

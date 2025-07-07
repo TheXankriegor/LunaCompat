@@ -17,7 +17,7 @@ internal class BreakingGroundsCompat : ModCompat
 
     #region Public Methods
 
-    public override void Patch(ModMessageHandler modMessageHandler)
+    public override void Patch(ModMessageHandler modMessageHandler, ConfigNode node)
     {
         // TODO this will require hooking into the creation event via harmony and fire an actual event the server can see
         // Currently LMP is missing a handler for all ground science GameEvents (GameEvents.onGroundSciencePartDeployed etc.)
