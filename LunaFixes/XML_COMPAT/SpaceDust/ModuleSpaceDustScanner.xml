@@ -1,0 +1,22 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>Enabled</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>PowerCost</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>CurrentPowerConsumption</FieldName>
+		</FieldDefinition>
+	</Fields>
+	<Methods>
+		<MethodDefinition>
+			<MethodName>EnableScanner</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>DisableScanner</MethodName>
+		</MethodDefinition>
+	</Methods>
+</ModuleDefinition>

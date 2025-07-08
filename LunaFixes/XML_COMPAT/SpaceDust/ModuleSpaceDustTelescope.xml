@@ -1,0 +1,28 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>Enabled</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>PowerCost</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>Target</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>CurrentPowerConsumption</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>Slots</FieldName>
+		</FieldDefinition>
+	</Fields>
+	<Methods>
+		<MethodDefinition>
+			<MethodName>EnableTelescope</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>DisableTelescope</MethodName>
+		</MethodDefinition>
+	</Methods>
+</ModuleDefinition>
