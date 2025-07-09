@@ -1,0 +1,31 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>LevelingTransformName</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>MaxLegDistance</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>MinimumAutoLevelFraction</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>LinkedExtension</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>previousOffset</FieldName>
+		</FieldDefinition>
+	</Fields>
+	<Methods>
+		<MethodDefinition>
+			<MethodName>AutoLevel</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>Retract</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>Deploy</MethodName>
+		</MethodDefinition>
+	</Methods>
+</ModuleDefinition>

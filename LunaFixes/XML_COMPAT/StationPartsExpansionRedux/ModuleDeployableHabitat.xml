@@ -1,0 +1,19 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>Retractable</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>Deployed</FieldName>
+		</FieldDefinition>
+	</Fields>
+	<Methods>
+		<MethodDefinition>
+			<MethodName>Deploy</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>Retract</MethodName>
+		</MethodDefinition>
+	</Methods>
+</ModuleDefinition>

@@ -243,10 +243,9 @@ internal class ScanSatCompat : ModCompat
                 // For the server, the scenario data is updated as should be. However, without an additional system other clients won't know about the scan updates
                 foreach (var scanData in scanDataList)
                 {
-                    var coverage = _coverageProp.GetValue(scanData) as short[,];
                     var body = _bodyProp.GetValue(scanData) as CelestialBody;
 
-                    if (!body || coverage == null)
+                    if (!body || _coverageProp.GetValue(scanData) is short[,] coverage)
                         continue;
 
                     var serializedData = _serializeMethod.Invoke(scanData, []) as string;
