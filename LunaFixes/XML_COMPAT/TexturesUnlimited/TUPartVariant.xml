@@ -1,0 +1,17 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>textureSet</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>modelShaderSet</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>variantName</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>persistentData</FieldName>
+		</FieldDefinition>
+	</Fields>
+</ModuleDefinition>
