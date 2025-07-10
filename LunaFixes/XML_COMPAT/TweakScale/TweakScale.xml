@@ -1,0 +1,17 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>currentScaleFactor</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>defaultTransformScale</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>extraCost</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>extraMass</FieldName>
+		</FieldDefinition>
+	</Fields>
+</ModuleDefinition>

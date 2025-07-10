@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file
 - add station parts expansion redux compat
 - add system heat compat
 - add textures unlimited compat
+- add tweakscale compat
 
 
 ## 0.0.3 - 2025-07-04
