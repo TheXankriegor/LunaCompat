@@ -1,0 +1,25 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>storageEnabled</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>heatStored</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>storageTemperature</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>heatStorageDumpRate</FieldName>
+		</FieldDefinition>
+	</Fields>
+	<Methods>
+		<MethodDefinition>
+			<MethodName>EnableStorage</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>DisableStorage</MethodName>
+		</MethodDefinition>
+	</Methods>
+</ModuleDefinition>

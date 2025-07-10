@@ -28,6 +28,7 @@ internal class ScanSatCompat : ModCompat
 
     private const string SyncMessageId = "SCANsatSync";
     private const string ChangeMessageId = "SCANsatChange";
+    private const string ScanControllerTypeName = "SCANcontroller";
 
     #endregion
 
@@ -47,12 +48,12 @@ internal class ScanSatCompat : ModCompat
     private PropertyInfo _bodyProp;
     private MethodInfo _deserializeMethod;
     private int _syncInterval;
-    private MethodInfo registerSensorTempMethod;
-    private MethodInfo unregisterSensorMethod;
-    private FieldInfo tempIdsField;
-    private FieldInfo knownVesselsField;
-    private FieldInfo vesselField;
-    private MethodInfo tryGetValueField;
+    private MethodInfo _registerSensorTempMethod;
+    private MethodInfo _unregisterSensorMethod;
+    private FieldInfo _tempIdsField;
+    private FieldInfo _knownVesselsField;
+    private FieldInfo _vesselField;
+    private MethodInfo _tryGetValueField;
 
     #endregion
 
@@ -64,6 +65,14 @@ internal class ScanSatCompat : ModCompat
 
     #region Public Methods
 
+    /// <summary>
+    /// SCANsat compatibility covers multiple parts:
+    /// - Only allow background scanning for one client, see <see cref="PrefixScan" />
+    /// - Block saving and vessel registration while LMP is still loading, see <see cref="PrefixOnSave" />
+    /// - Sync scan data regularly from the primary client to all others, see <see cref="ScanSatSync" />
+    /// - Sync changes in loaded vessels of other players to the primary client, see <see cref="PostfixStartScan" /> and
+    /// <see cref="PostfixStopScan" />
+    /// </summary>
     public override void Patch(ModMessageHandler modMessageHandler, ConfigNode node)
     {
         _modMessageHandler = modMessageHandler;
@@ -206,14 +215,14 @@ internal class ScanSatCompat : ModCompat
         scanSatType = AccessTools.TypeByName("SCANsat.SCAN_PartModules.SCANsat");
         scanVesselType = AccessTools.TypeByName("SCANvessel");
         scanTypeType = AccessTools.TypeByName("SCANtype");
-        registerSensorTempMethod = scanControllerType.GetMethod("registerSensorTemp", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-        unregisterSensorMethod = scanControllerType.GetMethod("unregisterSensor", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-        tempIdsField = scanControllerType.GetField("tempIDs", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-        knownVesselsField = scanControllerType.GetField("knownVessels", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-        vesselField = scanVesselType.GetField("vessel");
+        _registerSensorTempMethod = scanControllerType.GetMethod("registerSensorTemp", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+        _unregisterSensorMethod = scanControllerType.GetMethod("unregisterSensor", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+        _tempIdsField = scanControllerType.GetField("tempIDs", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+        _knownVesselsField = scanControllerType.GetField("knownVessels", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+        _vesselField = scanVesselType.GetField("vessel");
 
         var dicType = typeof(DictionaryValueList<,>).MakeGenericType(typeof(Guid), scanVesselType);
-        tryGetValueField = dicType.GetMethod("TryGetValue", BindingFlags.Instance | BindingFlags.Public);
+        _tryGetValueField = dicType.GetMethod("TryGetValue", BindingFlags.Instance | BindingFlags.Public);
 
         var scanDataType = AccessTools.TypeByName("SCANsat.SCAN_Data.SCANdata");
         _serializeMethod = scanDataType.GetMethod("shortSerialize", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
@@ -232,7 +241,7 @@ internal class ScanSatCompat : ModCompat
 
             try
             {
-                var scanController = ScenarioRunner.GetLoadedModules()?.Find(x => x.ClassName == "SCANcontroller");
+                var scanController = ScenarioRunner.GetLoadedModules()?.Find(x => x.ClassName == ScanControllerTypeName);
 
                 if (!scanController || !IsPrimaryPlayer())
                     continue;
@@ -273,17 +282,20 @@ internal class ScanSatCompat : ModCompat
 
     private void OnChangeMessageReceived(ScanSatScannerChangeMessage message)
     {
-        // Refresh scan controller every time to account for scene changes
-        var scanController = ScenarioRunner.GetLoadedModules()?.Find(x => x.ClassName == "SCANcontroller");
+        if (!IsPrimaryPlayer() || FlightGlobals.VesselsLoaded.Any(x => x.id == message.Vessel))
+            return;
 
-        if (scanController == null || !IsPrimaryPlayer())
+        // Refresh scan controller every time to account for scene changes
+        var scanController = ScenarioRunner.GetLoadedModules()?.Find(x => x.ClassName == ScanControllerTypeName);
+
+        if (scanController == null)
             return;
 
         var sensorShort = Enum.ToObject(scanTypeType, message.Sensor);
 
-        if (message.Loaded && tempIdsField.GetValue(scanController) is IList tempIds)
+        if (message.Loaded && _tempIdsField.GetValue(scanController) is IList tempIds)
         {
-            registerSensorTempMethod?.Invoke(scanController, [
+            _registerSensorTempMethod?.Invoke(scanController, [
                 message.Vessel, sensorShort, message.Fov, message.MinAlt, message.MaxAlt, message.BestAlt,
                 message.RequireLight
             ]);
@@ -295,11 +307,11 @@ internal class ScanSatCompat : ModCompat
             {
                 message.Vessel, Activator.CreateInstance(scanVesselType)
             };
-            var knownVessels = knownVesselsField.GetValue(scanController);
-            tryGetValueField?.Invoke(knownVessels, args);
-            var vesselObj = vesselField.GetValue(args[1]);
+            var knownVessels = _knownVesselsField.GetValue(scanController);
+            _tryGetValueField?.Invoke(knownVessels, args);
+            var vesselObj = _vesselField.GetValue(args[1]);
 
-            unregisterSensorMethod?.Invoke(scanController, [
+            _unregisterSensorMethod?.Invoke(scanController, [
                 vesselObj, sensorShort, message.Fov, message.MinAlt, message.MaxAlt, message.BestAlt,
                 message.RequireLight
             ]);
@@ -309,7 +321,7 @@ internal class ScanSatCompat : ModCompat
     private void OnSyncMessageReceived(ScanSatSyncMessage message)
     {
         // Refresh scan controller every time to account for scene changes
-        var scanController = ScenarioRunner.GetLoadedModules()?.Find(x => x.ClassName == "SCANcontroller");
+        var scanController = ScenarioRunner.GetLoadedModules()?.Find(x => x.ClassName == ScanControllerTypeName);
 
         if (scanController == null || IsPrimaryPlayer())
             return;
