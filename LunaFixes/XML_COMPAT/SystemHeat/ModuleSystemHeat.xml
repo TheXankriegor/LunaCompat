@@ -1,0 +1,23 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>totalSystemTemperature</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>totalSystemFlux</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>currentLoopID</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>currentLoopTemperature</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>nominalLoopTemperature</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>currentLoopFlux</FieldName>
+		</FieldDefinition>
+	</Fields>
+</ModuleDefinition>
