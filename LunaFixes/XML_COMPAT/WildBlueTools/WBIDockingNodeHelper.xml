@@ -1,0 +1,19 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>watchForDocking</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>angleSnapOn</FieldName>
+		</FieldDefinition>
+	</Fields>
+	<Methods>
+		<MethodDefinition>
+			<MethodName>WeldPorts</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>ToggleAngleSnap</MethodName>
+		</MethodDefinition>
+	</Methods>
+</ModuleDefinition>

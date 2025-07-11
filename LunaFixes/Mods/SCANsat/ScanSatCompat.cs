@@ -118,24 +118,38 @@ internal class ScanSatCompat : ModCompat
 
     private static void PostfixStartScan(ref object __instance)
     {
-        if (IsPrimaryPlayer())
-            return;
+        try
+        {
+            if (IsPrimaryPlayer())
+                return;
 
-        var message = CreateFromScanSatModule(ref __instance);
-        message.Loaded = true;
+            var message = CreateFromScanSatModule(ref __instance);
+            message.Loaded = true;
 
-        ModMessageHandler.Instance.SendReliableMessage(ChangeMessageId, message);
+            ModMessageHandler.Instance.SendReliableMessage(ChangeMessageId, message);
+        }
+        catch (Exception ex)
+        {
+            Log.Exception(ex);
+        }
     }
 
     private static void PostfixStopScan(ref object __instance)
     {
-        if (IsPrimaryPlayer())
-            return;
+        try
+        {
+            if (IsPrimaryPlayer())
+                return;
 
-        var message = CreateFromScanSatModule(ref __instance);
-        message.Loaded = false;
+            var message = CreateFromScanSatModule(ref __instance);
+            message.Loaded = false;
 
-        ModMessageHandler.Instance.SendReliableMessage(ChangeMessageId, message);
+            ModMessageHandler.Instance.SendReliableMessage(ChangeMessageId, message);
+        }
+        catch (Exception ex)
+        {
+            Log.Exception(ex);
+        }
     }
 
     private static ScanSatScannerChangeMessage CreateFromScanSatModule(ref object __instance)
@@ -156,46 +170,77 @@ internal class ScanSatCompat : ModCompat
 
     private static void PostfixUpdate(object __instance, List<Guid> ___tempIDs)
     {
-        // not all vessels loaded
-        if (!VesselProtoSystem.Singleton.VesselProtos.All(x => x.Value.IsEmpty))
-            return;
-
-        var toRem = new List<Guid>();
-
-        for (var i = ___tempIDs.Count - 1; i >= 0; i--)
+        try
         {
-            if (FlightGlobals.Vessels.Any(a => a.id == ___tempIDs[i]))
-            {
-                finishRegistrationMethod.Invoke(__instance, [___tempIDs[i]]);
-                toRem.Add(___tempIDs[i]);
-            }
-        }
+            // not all vessels loaded
+            if (!VesselProtoSystem.Singleton.VesselProtos.All(x => x.Value.IsEmpty))
+                return;
 
-        foreach (var id in toRem)
-            ___tempIDs.Remove(id);
+            var toRem = new List<Guid>();
+
+            for (var i = ___tempIDs.Count - 1; i >= 0; i--)
+            {
+                if (FlightGlobals.Vessels.Any(a => a.id == ___tempIDs[i]))
+                {
+                    finishRegistrationMethod.Invoke(__instance, [___tempIDs[i]]);
+                    toRem.Add(___tempIDs[i]);
+                }
+            }
+
+            foreach (var id in toRem)
+                ___tempIDs.Remove(id);
+        }
+        catch (Exception ex)
+        {
+            Log.Exception(ex);
+        }
     }
 
     private static bool PrefixOnSave(ConfigNode __0)
     {
-        if (!__0.HasData)
+        try
+        {
+            if (!__0.HasData)
+                return false;
+
+            if (VesselProtoSystem.Singleton.VesselProtos.All(x => x.Value.IsEmpty))
+                return true;
+
+            Log.Message(
+                $"Blocking SCANsat save - vessels are still loading ({VesselProtoSystem.Singleton.VesselProtos.Values.Count}, {VesselProtoSystem.Singleton.VesselProtos.Count(x => !x.Value.IsEmpty)}).");
             return false;
-
-        if (VesselProtoSystem.Singleton.VesselProtos.All(x => x.Value.IsEmpty))
+        }
+        catch (Exception ex)
+        {
+            Log.Exception(ex);
             return true;
-
-        Log.Message(
-            $"Blocking SCANsat save - vessels are still loading ({VesselProtoSystem.Singleton.VesselProtos.Values.Count}, {VesselProtoSystem.Singleton.VesselProtos.Count(x => !x.Value.IsEmpty)}).");
-        return false;
+        }
     }
 
     private static bool PrefixFinishRegistration(Guid __0)
     {
-        return FlightGlobals.Vessels.Any(a => a.id == __0);
+        try
+        {
+            return FlightGlobals.Vessels.Any(a => a.id == __0);
+        }
+        catch (Exception ex)
+        {
+            Log.Exception(ex);
+            return true;
+        }
     }
 
     private static bool PrefixScan()
     {
-        return IsPrimaryPlayer();
+        try
+        {
+            return IsPrimaryPlayer();
+        }
+        catch (Exception ex)
+        {
+            Log.Exception(ex);
+            return true;
+        }
     }
 
     private static bool IsPrimaryPlayer()
@@ -282,52 +327,66 @@ internal class ScanSatCompat : ModCompat
 
     private void OnChangeMessageReceived(ScanSatScannerChangeMessage message)
     {
-        if (!IsPrimaryPlayer() || FlightGlobals.VesselsLoaded.Any(x => x.id == message.Vessel))
-            return;
-
-        // Refresh scan controller every time to account for scene changes
-        var scanController = ScenarioRunner.GetLoadedModules()?.Find(x => x.ClassName == ScanControllerTypeName);
-
-        if (scanController == null)
-            return;
-
-        var sensorShort = Enum.ToObject(scanTypeType, message.Sensor);
-
-        if (message.Loaded && _tempIdsField.GetValue(scanController) is IList tempIds)
+        try
         {
-            _registerSensorTempMethod?.Invoke(scanController, [
-                message.Vessel, sensorShort, message.Fov, message.MinAlt, message.MaxAlt, message.BestAlt,
-                message.RequireLight
-            ]);
-            tempIds.Add(message.Vessel);
-        }
-        else
-        {
-            var args = new[]
+            if (!IsPrimaryPlayer() || FlightGlobals.VesselsLoaded.Any(x => x.id == message.Vessel))
+                return;
+
+            // Refresh scan controller every time to account for scene changes
+            var scanController = ScenarioRunner.GetLoadedModules()?.Find(x => x.ClassName == ScanControllerTypeName);
+
+            if (scanController == null)
+                return;
+
+            var sensorShort = Enum.ToObject(scanTypeType, message.Sensor);
+
+            if (message.Loaded && _tempIdsField.GetValue(scanController) is IList tempIds)
             {
-                message.Vessel, Activator.CreateInstance(scanVesselType)
-            };
-            var knownVessels = _knownVesselsField.GetValue(scanController);
-            _tryGetValueField?.Invoke(knownVessels, args);
-            var vesselObj = _vesselField.GetValue(args[1]);
+                _registerSensorTempMethod?.Invoke(scanController, [
+                    message.Vessel, sensorShort, message.Fov, message.MinAlt, message.MaxAlt, message.BestAlt,
+                    message.RequireLight
+                ]);
+                tempIds.Add(message.Vessel);
+            }
+            else
+            {
+                var args = new[]
+                {
+                    message.Vessel, Activator.CreateInstance(scanVesselType)
+                };
+                var knownVessels = _knownVesselsField.GetValue(scanController);
+                _tryGetValueField?.Invoke(knownVessels, args);
+                var vesselObj = _vesselField.GetValue(args[1]);
 
-            _unregisterSensorMethod?.Invoke(scanController, [
-                vesselObj, sensorShort, message.Fov, message.MinAlt, message.MaxAlt, message.BestAlt,
-                message.RequireLight
-            ]);
+                _unregisterSensorMethod?.Invoke(scanController, [
+                    vesselObj, sensorShort, message.Fov, message.MinAlt, message.MaxAlt, message.BestAlt,
+                    message.RequireLight
+                ]);
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Exception(ex);
         }
     }
 
     private void OnSyncMessageReceived(ScanSatSyncMessage message)
     {
-        // Refresh scan controller every time to account for scene changes
-        var scanController = ScenarioRunner.GetLoadedModules()?.Find(x => x.ClassName == ScanControllerTypeName);
+        try
+        {
+            // Refresh scan controller every time to account for scene changes
+            var scanController = ScenarioRunner.GetLoadedModules()?.Find(x => x.ClassName == ScanControllerTypeName);
 
-        if (scanController == null || IsPrimaryPlayer())
-            return;
+            if (scanController == null || IsPrimaryPlayer())
+                return;
 
-        var scanData = _getDataMethod.Invoke(scanController, [message.Body]);
-        _deserializeMethod.Invoke(scanData, [message.Map]);
+            var scanData = _getDataMethod.Invoke(scanController, [message.Body]);
+            _deserializeMethod.Invoke(scanData, [message.Map]);
+        }
+        catch (Exception ex)
+        {
+            Log.Exception(ex);
+        }
     }
 
     #endregion

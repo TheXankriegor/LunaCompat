@@ -1,0 +1,14 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>cycleStartTime</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>progress</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>lastAttempt</FieldName>
+		</FieldDefinition>
+	</Fields>
+</ModuleDefinition>

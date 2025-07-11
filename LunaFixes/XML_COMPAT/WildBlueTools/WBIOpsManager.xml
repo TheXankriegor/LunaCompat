@@ -1,0 +1,14 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>activeConverters</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>isBroken</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>isMothballed</FieldName>
+		</FieldDefinition>
+	</Fields>
+</ModuleDefinition>

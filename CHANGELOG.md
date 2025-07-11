@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file
 - add system heat compat
 - add textures unlimited compat
 - add tweakscale compat
+- add basic wildblue tools compat
 
 
 ## 0.0.3 - 2025-07-04

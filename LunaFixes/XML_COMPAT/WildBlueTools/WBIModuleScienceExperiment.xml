@@ -1,0 +1,37 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>overrideExperimentID</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>accumulatedResources</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>status</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>isCompleted</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>experimentFailed</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>finalTransfer</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>isRunning</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>autoRestartExperiment</FieldName>
+		</FieldDefinition>
+	</Fields>
+	<Methods>
+		<MethodDefinition>
+			<MethodName>StartExperiment</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>StopExperiment</MethodName>
+		</MethodDefinition>
+	</Methods>
+</ModuleDefinition>

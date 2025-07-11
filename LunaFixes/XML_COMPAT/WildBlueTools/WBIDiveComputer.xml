@@ -1,0 +1,25 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>enableAutoTrim</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>maintainDepth</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>ventState</FieldName>
+		</FieldDefinition>
+	</Fields>
+	<Methods>
+		<MethodDefinition>
+			<MethodName>ToggleDive</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>ToggleSurface</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>EmergencySurface</MethodName>
+		</MethodDefinition>
+	</Methods>
+</ModuleDefinition>
