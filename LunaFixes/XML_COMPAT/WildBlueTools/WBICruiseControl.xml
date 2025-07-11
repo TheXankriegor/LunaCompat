@@ -1,0 +1,20 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>cruiseControlIsActive</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>cruiseThrottle</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>fuelReservePercent</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>originalBreakableJoints</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>cheatOptionSet</FieldName>
+		</FieldDefinition>
+	</Fields>
+</ModuleDefinition>

@@ -1,0 +1,16 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>nameTagURL</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>isVisible</FieldName>
+		</FieldDefinition>
+	</Fields>
+	<Methods>
+		<MethodDefinition>
+			<MethodName>ToggleNameTag</MethodName>
+		</MethodDefinition>
+	</Methods>
+</ModuleDefinition>

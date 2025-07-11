@@ -1,0 +1,28 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>tankType</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>ventState</FieldName>
+		</FieldDefinition>
+	</Fields>
+	<Methods>
+		<MethodDefinition>
+			<MethodName>ToggleTankType</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>FloodBallast</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>VentBallast</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>EmergencySurface</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>CloseVents</MethodName>
+		</MethodDefinition>
+	</Methods>
+</ModuleDefinition>

@@ -1,0 +1,31 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>currentVolume</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>decalsVisible</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>capacityFactor</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>omniStorageResources</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>partMass</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>templateName</FieldName>
+		</FieldDefinition>
+	</Fields>
+	<Methods>
+		<MethodDefinition>
+			<MethodName>DumpResources</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>ToggleDecals</MethodName>
+		</MethodDefinition>
+	</Methods>
+</ModuleDefinition>

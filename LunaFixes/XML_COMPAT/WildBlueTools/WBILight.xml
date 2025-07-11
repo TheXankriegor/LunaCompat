@@ -1,0 +1,20 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>ecRequired</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>red</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>green</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>blue</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>level</FieldName>
+		</FieldDefinition>
+	</Fields>
+</ModuleDefinition>
