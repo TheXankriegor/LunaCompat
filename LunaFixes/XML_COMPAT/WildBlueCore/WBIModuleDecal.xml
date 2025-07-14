@@ -1,0 +1,22 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>decalURL</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>isVisible</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>isReversed</FieldName>
+		</FieldDefinition>
+	</Fields>
+	<Methods>
+		<MethodDefinition>
+			<MethodName>ToggleDecal</MethodName>
+		</MethodDefinition>
+		<MethodDefinition>
+			<MethodName>ReverseDecal</MethodName>
+		</MethodDefinition>
+	</Methods>
+</ModuleDefinition>
