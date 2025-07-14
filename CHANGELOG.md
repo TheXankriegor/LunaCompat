@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file
 
-## Unreleased
+## 0.0.4 - 2025-07-14
 
 - add sandcastle compat
 - add SCANsat compat
@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file
 - add textures unlimited compat
 - add tweakscale compat
 - add basic wildblue tools compat
+- add basic wildblue core compat
 
 
 ## 0.0.3 - 2025-07-04

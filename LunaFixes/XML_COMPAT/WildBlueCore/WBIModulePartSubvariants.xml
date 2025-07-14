@@ -1,0 +1,17 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>variantIndex</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>updateSymmetry</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>variantApplied</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>currentMeshSet</FieldName>
+		</FieldDefinition>
+	</Fields>
+</ModuleDefinition>
