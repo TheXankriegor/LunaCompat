@@ -1,6 +1,6 @@
 # Luna Compat
 
-Miscellaneous compatibility patches for KSP's Luna Multiplayer Mod.
+Miscellaneous compatibility patches for KSP's [Luna Multiplayer Mod](https://github.com/LunaMultiplayer/LunaMultiplayer).
 
 ## Overview
 
@@ -45,3 +45,13 @@ Part modules from the following mods are synced:
 - [TweakScale](https://github.com/JonnyOThan/TweakScale)
 - [WildBlueCore](https://github.com/Angel-125/WildBlueCore)
 - [WildBlueTools](https://github.com/Angel-125/WildBlueTools)
+
+## Creating a release
+
+When creating a new release follow these steps
+
+1. Update `AssemblyVersion` in [BuildConfigurationBase.targets](./BuildConfigurationBase.targets)
+2. Update version in [lunacompat.version](./lunacompat.version)
+3. Create release changenotes (e.g. `yaclog release <release-version>`)
+4. Add changes to main branch
+5. Create version tag to trigger release pipeline
