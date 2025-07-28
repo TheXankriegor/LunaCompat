@@ -2,7 +2,7 @@
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<PropertyGroup>
 		<OutputType>Library</OutputType>
-		<Product>LunaFixes</Product>
+		<Product>LunaCompat</Product>
 		<Copyright>Copyright © 2025</Copyright>
 		<GenerateAssemblyInfo>true</GenerateAssemblyInfo>
 		<AssemblyVersion>0.0.2</AssemblyVersion>
