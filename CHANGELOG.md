@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file
 
+## 0.0.5 - 2025-07-28
+
+- change mod name to Luna Compat
+
+
 ## 0.0.4 - 2025-07-14
 
 - add sandcastle compat
