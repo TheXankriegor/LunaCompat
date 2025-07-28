@@ -1,4 +1,5 @@
 ﻿using JetBrains.Annotations;
+
 using LunaCompat.Attributes;
 using LunaCompat.Utils;
 
