@@ -16,7 +16,7 @@
 	<ItemGroup>
 		<KSPVersionFile Include=".">
 			<Destination>$(SolutionDir)Build\GameData\$(SolutionName)\lunacompat.version</Destination>
-			<URL>https://github.com/TheXankriegor/LunaCompat/raw/master/lunacompat.version</URL>
+			<URL>https://github.com/TheXankriegor/LunaCompat/raw/main/lunacompat.version</URL>
 			<Download>https://github.com/TheXankriegor/LunaCompat/releases/latest</Download>
 		</KSPVersionFile>
 	</ItemGroup>
