@@ -81,17 +81,17 @@ internal class ScanSatCompat : ModCompat
         ReflectScanSatTypes(scanControllerType);
 
         LunaCompat.HarmonyInstance.Patch(AccessTools.Method(scanControllerType, "scanFromAllVessels"),
-                                        new HarmonyMethod(typeof(ScanSatCompat), nameof(PrefixScan)));
+                                         new HarmonyMethod(typeof(ScanSatCompat), nameof(PrefixScan)));
         LunaCompat.HarmonyInstance.Patch(AccessTools.Method(scanControllerType, "OnSave", [typeof(ConfigNode)]),
-                                        new HarmonyMethod(typeof(ScanSatCompat), nameof(PrefixOnSave)));
+                                         new HarmonyMethod(typeof(ScanSatCompat), nameof(PrefixOnSave)));
         LunaCompat.HarmonyInstance.Patch(AccessTools.Method(scanControllerType, "Update"),
-                                        postfix: new HarmonyMethod(typeof(ScanSatCompat), nameof(PostfixUpdate)));
+                                         postfix: new HarmonyMethod(typeof(ScanSatCompat), nameof(PostfixUpdate)));
         LunaCompat.HarmonyInstance.Patch(AccessTools.Method(scanControllerType, "finishRegistration", [typeof(Guid)]),
-                                        new HarmonyMethod(typeof(ScanSatCompat), nameof(PrefixFinishRegistration)));
+                                         new HarmonyMethod(typeof(ScanSatCompat), nameof(PrefixFinishRegistration)));
         LunaCompat.HarmonyInstance.Patch(AccessTools.Method(scanSatType, "startScan"),
-                                        postfix: new HarmonyMethod(typeof(ScanSatCompat), nameof(PostfixStartScan)));
+                                         postfix: new HarmonyMethod(typeof(ScanSatCompat), nameof(PostfixStartScan)));
         LunaCompat.HarmonyInstance.Patch(AccessTools.Method(scanSatType, "stopScan"),
-                                        postfix: new HarmonyMethod(typeof(ScanSatCompat), nameof(PostfixStopScan)));
+                                         postfix: new HarmonyMethod(typeof(ScanSatCompat), nameof(PostfixStopScan)));
 
         // add a custom scenario handler for map progress
         var intervalString = node.GetValue("SCANsatSyncInterval");
@@ -299,7 +299,7 @@ internal class ScanSatCompat : ModCompat
                 {
                     var body = _bodyProp.GetValue(scanData) as CelestialBody;
 
-                    if (!body || _coverageProp.GetValue(scanData) is short[,] coverage)
+                    if (!body || _coverageProp.GetValue(scanData) is not short[,])
                         continue;
 
                     var serializedData = _serializeMethod.Invoke(scanData, []) as string;
