@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file
 
+## Unreleased
+
+- add TUFX compat
+
+
 ## 0.0.5 - 2025-07-28
 
 - change mod name to Luna Compat

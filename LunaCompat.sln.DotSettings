@@ -2573,11 +2573,11 @@ public static readonly DependencyProperty $propertyName$Property = DependencyPro
 	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6DF9AB81A63BE746B24C964AF8868AA4/Categories/=Imported_00204_002F14_002F2014/@EntryIndexedValue">Imported 4/14/2014</s:String>
 	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6DF9AB81A63BE746B24C964AF8868AA4/Description/@EntryValue">ViewModel Property Templae</s:String>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6DF9AB81A63BE746B24C964AF8868AA4/Field/=name/@KeyIndexDefined">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6DF9AB81A63BE746B24C964AF8868AA4/Field/=NAME/@KeyIndexDefined">True</s:Boolean>
 	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6DF9AB81A63BE746B24C964AF8868AA4/Field/=name/Expression/@EntryValue">decapitalize(NAME)</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6DF9AB81A63BE746B24C964AF8868AA4/Field/=NAME/Expression/@EntryValue">suggestVariableName()</s:String>
 	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6DF9AB81A63BE746B24C964AF8868AA4/Field/=name/InitialRange/@EntryValue">-1</s:Int64>
 	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6DF9AB81A63BE746B24C964AF8868AA4/Field/=name/Order/@EntryValue">2</s:Int64>
-	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6DF9AB81A63BE746B24C964AF8868AA4/Field/=NAME/@KeyIndexDefined">True</s:Boolean>
-	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6DF9AB81A63BE746B24C964AF8868AA4/Field/=NAME/Expression/@EntryValue">suggestVariableName()</s:String>
 	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6DF9AB81A63BE746B24C964AF8868AA4/Field/=NAME/Order/@EntryValue">1</s:Int64>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6DF9AB81A63BE746B24C964AF8868AA4/Field/=TYPE/@KeyIndexDefined">True</s:Boolean>
 	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6DF9AB81A63BE746B24C964AF8868AA4/Field/=TYPE/Order/@EntryValue">0</s:Int64>
@@ -2699,4 +2699,5 @@ public static readonly DependencyProperty $propertyName$Property = $propertyName
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=Nsat/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=Ntype/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=Nvessel/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=TUFX/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=Xan_0027s/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>
