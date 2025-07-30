@@ -11,6 +11,8 @@ Miscellaneous compatibility patches for KSP's [Luna Multiplayer Mod](https://git
 - [KIS](https://github.com/ihsoft/KIS): Old LMP fixes ([https://github.com/LunaMultiplayer/LmpKisPlugin](https://github.com/LunaMultiplayer/LmpKisPlugin))
 - [Kethane](https://github.com/taniwha/Kethane): Use a static random seed for recourse distribution
 - [SCANsat](https://github.com/KSPModStewards/SCANsat): Sync active scanners, background scanning and progress
+- [TUFX](https://github.com/KSPModStewards/TUFX): Keep settings between disconnects
+- [ClickThroughBlocker](https://github.com/linuxgurugamer/ClickThroughBlocker): Keep settings between disconnects
 
 ### Part Syncs
 

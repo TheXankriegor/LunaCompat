@@ -37,7 +37,12 @@ internal class TufxCompat : ModCompat
         var texturesUnlimitedFXLoader = AccessTools.TypeByName("TUFX.TexturesUnlimitedFXLoader");
         var tufxScene = AccessTools.TypeByName("TUFX.TUFXScene");
         tufxGameSettings = AccessTools.TypeByName("TUFX.TUFXGameSettings");
-        tufxSettingsFilePath = Path.Combine(KSPUtil.ApplicationRootPath, "saves", HighLogic.SaveFolder, "TUFXSettings.cfg");
+
+        var saveGamePath = Path.Combine(KSPUtil.ApplicationRootPath, "saves", HighLogic.SaveFolder);
+        if (!Directory.Exists(saveGamePath))
+            Directory.CreateDirectory(saveGamePath);
+
+        tufxSettingsFilePath = Path.Combine(saveGamePath, "TUFXSettings.cfg");
 
         LunaCompat.HarmonyInstance.Patch(AccessTools.Method(texturesUnlimitedFXLoader, "GetProfileNameForScene", [
             tufxScene
