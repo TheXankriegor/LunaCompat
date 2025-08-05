@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file
 
 - add TUFX compat
 - add ClickThroughBlocker compat
+- update netkan config
 
 
 ## 0.0.5 - 2025-07-28

@@ -1,8 +1,13 @@
 # Luna Compat
 
-Miscellaneous compatibility patches for KSP's [Luna Multiplayer Mod](https://github.com/LunaMultiplayer/LunaMultiplayer).
+Compatibility patches to make KSP's [Luna Multiplayer Mod](https://github.com/LunaMultiplayer/LunaMultiplayer) support other mods.
 
 ## Overview
+
+Complex mods are incompatible with Luna Multiplayer. 
+LunaCompat adds compatibility patches for various mods via LMP part module configurations and Harmony patches. 
+Patches are only applied to mods added to the modlist.
+Check the repository to see the full list of supported mods.
 
 ### Harmony patches
 
