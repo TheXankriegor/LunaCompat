@@ -11,13 +11,14 @@ Check the repository to see the full list of supported mods.
 
 ### Harmony patches
 
-- [Extraplanetary-Launchpads](https://github.com/taniwha/Extraplanetary-Launchpads): Use a static random seed for recylcing
+- [Extraplanetary-Launchpads](https://github.com/taniwha/Extraplanetary-Launchpads): Use a static random seed for recycling
 - [InfernalRobotics](https://github.com/meirumeiru/InfernalRobotics): Old LMP fixes ([https://github.com/LunaMultiplayer/LmpIrPlugin](https://github.com/LunaMultiplayer/LmpIrPlugin))
 - [KIS](https://github.com/ihsoft/KIS): Old LMP fixes ([https://github.com/LunaMultiplayer/LmpKisPlugin](https://github.com/LunaMultiplayer/LmpKisPlugin))
-- [Kethane](https://github.com/taniwha/Kethane): Use a static random seed for recourse distribution
+- [Kethane](https://github.com/taniwha/Kethane): Use a static random seed for resource distribution
 - [SCANsat](https://github.com/KSPModStewards/SCANsat): Sync active scanners, background scanning and progress
 - [TUFX](https://github.com/KSPModStewards/TUFX): Keep settings between disconnects
 - [ClickThroughBlocker](https://github.com/linuxgurugamer/ClickThroughBlocker): Keep settings between disconnects
+- [PhysicsRangeExtender](https://github.com/jrodrigv/PhysicsRangeExtender): Force disable PRE at all times
 
 ### Part Syncs
 
