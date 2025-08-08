@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file
 
-## Unreleased
+## 0.0.6-pre - 2025-08-08
 
 - add TUFX compat
 - add ClickThroughBlocker compat

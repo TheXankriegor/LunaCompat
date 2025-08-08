@@ -5,7 +5,7 @@
 		<Product>LunaCompat</Product>
 		<Copyright>Copyright © 2025</Copyright>
 		<GenerateAssemblyInfo>true</GenerateAssemblyInfo>
-		<AssemblyVersion>0.0.5</AssemblyVersion>
+		<AssemblyVersion>0.0.6</AssemblyVersion>
 		<FileVersion>$(AssemblyVersion)</FileVersion>
 
 		<NoWarn>IDE0290</NoWarn>

@@ -2,6 +2,16 @@
 
 Compatibility patches to make KSP's [Luna Multiplayer Mod](https://github.com/LunaMultiplayer/LunaMultiplayer) support other mods.
 
+- [Luna Compat](#luna-compat)
+  - [Overview](#overview)
+    - [Harmony patches](#harmony-patches)
+    - [Part Syncs](#part-syncs)
+  - [Installation](#installation)
+    - [CKAN](#ckan)
+    - [Manual installation](#manual-installation)
+    - [Dependencies](#dependencies)
+  - [Creating a release](#creating-a-release)
+
 ## Overview
 
 Complex mods are incompatible with Luna Multiplayer. 
@@ -53,6 +63,24 @@ Part modules from the following mods are synced:
 - [TweakScale](https://github.com/JonnyOThan/TweakScale)
 - [WildBlueCore](https://github.com/Angel-125/WildBlueCore)
 - [WildBlueTools](https://github.com/Angel-125/WildBlueTools)
+
+## Installation
+
+### CKAN
+
+The mod is available on CKAN - just search for 'Luna Compat'!
+
+### Manual installation
+
+- Download the latest `LunaCompat.zip` from the [Releases](https://github.com/TheXankriegor/LunaCompat/releases)
+- Unpack into your Kerbal Space Program folder
+  - The ZIP file contents in `GameData/LunaMultiplayer/` should be merged with your existing LMP mod folder
+
+### Dependencies
+
+- [Luna Multiplayer Client](https://github.com/LunaMultiplayer/LunaMultiplayer)
+- [Harmony 2](https://github.com/KSPModdingLibs/HarmonyKSP)
+- [Module Manager](https://github.com/sarbian/ModuleManager)
 
 ## Creating a release
 
