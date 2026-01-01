@@ -2,12 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 
 using HarmonyLib;
 
 using KSPBuildTools;
 
 using LmpClient;
+using LmpClient.Events;
+
+using LmpCommon.Enums;
 
 using LunaCompat.Attributes;
 using LunaCompat.Utils;
@@ -25,6 +29,7 @@ public class LunaCompat : MonoBehaviour
 
     private readonly HashSet<ModCompat> _activePatches = [];
     private ModMessageHandler _modMessageHandler;
+    private ConfigNode _node;
 
     public static LunaCompat Singleton { get; set; }
 
@@ -39,39 +44,23 @@ public class LunaCompat : MonoBehaviour
             return;
         }
 
-        var node = ConfigNode.Load(KSPUtil.ApplicationRootPath + ConfigFilePath);
+        _modMessageHandler = new ModMessageHandler();
 
-        if (node == null)
+        NetworkEvent.onNetworkStatusChanged.Add(OnLmpNetworkStatusChanged);
+
+        _node = ConfigNode.Load(KSPUtil.ApplicationRootPath + ConfigFilePath);
+
+        if (_node == null)
         {
             Log.Error($"Failed to locate config file '{ConfigFilePath}'.");
             return;
         }
 
-        _modMessageHandler = new ModMessageHandler();
-
         // We could load external fixes here as well - but will that ever be needed?
         var queue = Assembly.GetAssembly(typeof(LunaCompat)).GetTypes().Where(IsLunaFix);
 
         foreach (var type in queue)
-        {
-            try
-            {
-                var compatInstance = (ModCompat)Activator.CreateInstance(type);
-
-                if (!AssemblyLoader.loadedAssemblies.Contains(compatInstance.PackageName))
-                    continue;
-
-                _activePatches.Add(compatInstance);
-
-                compatInstance.Patch(_modMessageHandler, node);
-
-                Log.Message($"Initialized compatibility for {compatInstance.PackageName}");
-            }
-            catch (Exception e)
-            {
-                Log.Error($"Exception loading {type.Name}: {e}");
-            }
-        }
+            SetupModCompat(type, _node);
 
         Log.Message("Xan's Luna Compat Plugin started.");
     }
@@ -82,6 +71,67 @@ public class LunaCompat : MonoBehaviour
             patch.Destroy();
 
         _modMessageHandler.Destroy();
+        NetworkEvent.onNetworkStatusChanged?.Remove(OnLmpNetworkStatusChanged);
+    }
+
+    private void SetupModCompat(Type type, ConfigNode node)
+    {
+        try
+        {
+            var compatInstance = (ModCompat)Activator.CreateInstance(type);
+
+            if (!AssemblyLoader.loadedAssemblies.Contains(compatInstance.PackageName))
+                return;
+
+            _activePatches.Add(compatInstance);
+
+            compatInstance.Patch(_modMessageHandler, node);
+
+            Log.Message($"Initialized compatibility for {compatInstance.PackageName}");
+        }
+        catch (Exception e)
+        {
+            Log.Error($"Exception loading {type.Name}: {e}");
+        }
+    }
+
+    private void OnLmpNetworkStatusChanged(ClientState data)
+    {
+        // Test for Compat plugin
+        if (data == ClientState.Running)
+        {
+            const string PACKAGE_NAME = "Init";
+
+            var serverModConfirmed = false;
+            Log.Message("Testing for Luna Compat Server Plugin...");
+
+            _modMessageHandler.RegisterModMessageListener<LunaCompatInit>(PACKAGE_NAME, message =>
+            {
+                Log.Message($"Received Luna Compat Server Plugin: {message.Version}");
+                serverModConfirmed = true;
+                _node.SetValue("HasServerCompatPlugin", serverModConfirmed, true);
+            });
+
+            var version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            _modMessageHandler.SendReliableMessage(PACKAGE_NAME, new LunaCompatInit
+            {
+                Version = version
+            }, false);
+
+            // If no reply within 5 seconds
+            Task.Run(async () =>
+            {
+                await Task.Delay(5000);
+
+                if (!serverModConfirmed)
+                {
+                    Log.Message("Luna Compat server mod missing");
+                    _node.SetValue("HasServerCompatPlugin", serverModConfirmed, true);
+                }
+
+                _modMessageHandler.UnregisterModMessageListener(PACKAGE_NAME);
+            });
+        }
     }
 
     private static bool IsLunaFix(Type type)
@@ -89,4 +139,14 @@ public class LunaCompat : MonoBehaviour
         var attributes = type.GetCustomAttributes<LunaFixAttribute>(false);
         return attributes.Any();
     }
+}
+
+[Serializable]
+internal class LunaCompatInit : IModMessage
+{
+    #region Properties
+
+    public string Version { get; set; }
+
+    #endregion
 }

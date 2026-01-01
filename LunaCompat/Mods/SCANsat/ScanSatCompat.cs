@@ -394,7 +394,7 @@ internal class ScanSatCompat : ModCompat
     #region Nested Types
 
     [Serializable]
-    public class ScanSatSyncMessage
+    public class ScanSatSyncMessage : IModMessage
     {
         public string Body { get; set; }
 
@@ -402,7 +402,7 @@ internal class ScanSatCompat : ModCompat
     }
 
     [Serializable]
-    public class ScanSatScannerChangeMessage
+    public class ScanSatScannerChangeMessage : IModMessage
     {
         public bool Loaded { get; set; }
 

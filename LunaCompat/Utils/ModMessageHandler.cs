@@ -10,6 +10,8 @@ using LmpCommon.Message.Data;
 
 namespace LunaCompat.Utils;
 
+internal interface IModMessage;
+
 internal class ModMessageHandler
 {
     #region Fields
@@ -36,8 +38,14 @@ internal class ModMessageHandler
     #region Public Methods
 
     public void RegisterModMessageListener<TMessageType>(string id, Action<TMessageType> messageHandler)
+        where TMessageType : IModMessage
     {
-        _modMessageListeners.TryAdd(id, new MessageListener<TMessageType>(messageHandler));
+        _modMessageListeners.TryAdd(CreatePrefixedModMessageId(id), new MessageListener<TMessageType>(messageHandler));
+    }
+
+    public void UnregisterModMessageListener(string id)
+    {
+        _modMessageListeners.Remove(CreatePrefixedModMessageId(id));
     }
 
     public void Destroy()
@@ -45,13 +53,13 @@ internal class ModMessageHandler
         _onModMessageReceivedEvent?.Remove(HandleModMessage);
     }
 
-    public void SendUnreliableMessage(string packageName, object messageToSend, bool relay = true)
+    public void SendUnreliableMessage(string packageName, IModMessage messageToSend, bool relay = true)
     {
         var messageToBeSend = BinaryUtils.Serialize(messageToSend);
-        ModApiSystem.Singleton.SendModMessage(packageName, messageToBeSend, messageToBeSend.Length, relay);
+        ModApiSystem.Singleton.SendModMessage(CreatePrefixedModMessageId(packageName), messageToBeSend, messageToBeSend.Length, relay);
     }
 
-    public void SendReliableMessage(string packageName, object messageToSend, bool relay = true)
+    public void SendReliableMessage(string packageName, IModMessage messageToSend, bool relay = true)
     {
         var messageToBeSend = BinaryUtils.Serialize(messageToSend);
 
@@ -63,7 +71,7 @@ internal class ModMessageHandler
 
         msgData.NumBytes = messageToBeSend.Length;
         msgData.Relay = relay;
-        msgData.ModName = packageName;
+        msgData.ModName = CreatePrefixedModMessageId(packageName);
 
         // set message to reliable so that it gets split
         msgData.Reliable = true;
@@ -75,6 +83,11 @@ internal class ModMessageHandler
     #endregion
 
     #region Non-Public Methods
+
+    private string CreatePrefixedModMessageId(string packageName)
+    {
+        return $"LMPC_{packageName}";
+    }
 
     private void HandleModMessage(string id, byte[] data)
     {
@@ -94,6 +107,7 @@ internal class ModMessageHandler
     }
 
     private class MessageListener<T> : IMessageListener
+        where T : IModMessage
     {
         #region Fields
 

@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<Import Project="..\BuildConfigurationBase.targets" />
+
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.0</TargetFrameworks>
+		<AssemblyTitle>LunaCompatShared</AssemblyTitle>
+		<BinariesOutputRelativePath>Build/GameData/$(SolutionName)</BinariesOutputRelativePath>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<GenerateKSPAssemblyAttribute>true</GenerateKSPAssemblyAttribute>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <Folder Include="Messages\" />
+	</ItemGroup>
+
+</Project>
