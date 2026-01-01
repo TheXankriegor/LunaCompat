@@ -8,9 +8,10 @@ using LmpClient.Systems.ModApi;
 using LmpCommon.Message.Client;
 using LmpCommon.Message.Data;
 
-namespace LunaCompat.Utils;
+using LunaCompatCommon.Messages;
+using LunaCompatCommon.Utils;
 
-internal interface IModMessage;
+namespace LunaCompat.Utils;
 
 internal class ModMessageHandler
 {
@@ -38,7 +39,7 @@ internal class ModMessageHandler
     #region Public Methods
 
     public void RegisterModMessageListener<TMessageType>(string id, Action<TMessageType> messageHandler)
-        where TMessageType : IModMessage
+        where TMessageType : class, IModMessage, new()
     {
         _modMessageListeners.TryAdd(CreatePrefixedModMessageId(id), new MessageListener<TMessageType>(messageHandler));
     }
@@ -53,15 +54,17 @@ internal class ModMessageHandler
         _onModMessageReceivedEvent?.Remove(HandleModMessage);
     }
 
-    public void SendUnreliableMessage(string packageName, IModMessage messageToSend, bool relay = true)
+    public void SendUnreliableMessage<T>(string packageName, T messageToSend, bool relay = true)
+        where T : class, IModMessage, new()
     {
-        var messageToBeSend = BinaryUtils.Serialize(messageToSend);
+        var messageToBeSend = SerializationUtil.Serialize(messageToSend);
         ModApiSystem.Singleton.SendModMessage(CreatePrefixedModMessageId(packageName), messageToBeSend, messageToBeSend.Length, relay);
     }
 
-    public void SendReliableMessage(string packageName, IModMessage messageToSend, bool relay = true)
+    public void SendReliableMessage<T>(string packageName, T messageToSend, bool relay = true)
+        where T : class, IModMessage, new()
     {
-        var messageToBeSend = BinaryUtils.Serialize(messageToSend);
+        var messageToBeSend = SerializationUtil.Serialize(messageToSend);
 
         var msgData = NetworkMain.CliMsgFactory.CreateNewMessageData<ModMsgData>();
         if (msgData.Data.Length < messageToBeSend.Length)
@@ -107,7 +110,7 @@ internal class ModMessageHandler
     }
 
     private class MessageListener<T> : IMessageListener
-        where T : IModMessage
+        where T : class, IModMessage, new()
     {
         #region Fields
 
@@ -131,7 +134,7 @@ internal class ModMessageHandler
             if (data.Length <= 0)
                 return;
 
-            var syncMessage = BinaryUtils.Deserialize<T>(data);
+            var syncMessage = SerializationUtil.Deserialize<T>(data);
             _messageHandler.Invoke(syncMessage);
         }
 

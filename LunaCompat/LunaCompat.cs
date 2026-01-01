@@ -16,6 +16,8 @@ using LmpCommon.Enums;
 using LunaCompat.Attributes;
 using LunaCompat.Utils;
 
+using LunaCompatCommon.Messages;
+
 using UnityEngine;
 
 namespace LunaCompat;
@@ -105,7 +107,7 @@ public class LunaCompat : MonoBehaviour
             var serverModConfirmed = false;
             Log.Message("Testing for Luna Compat Server Plugin...");
 
-            _modMessageHandler.RegisterModMessageListener<LunaCompatInit>(PACKAGE_NAME, message =>
+            _modMessageHandler.RegisterModMessageListener<InitializeMessage>(PACKAGE_NAME, message =>
             {
                 Log.Message($"Received Luna Compat Server Plugin: {message.Version}");
                 serverModConfirmed = true;
@@ -113,7 +115,7 @@ public class LunaCompat : MonoBehaviour
             });
 
             var version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            _modMessageHandler.SendReliableMessage(PACKAGE_NAME, new LunaCompatInit
+            _modMessageHandler.SendReliableMessage(PACKAGE_NAME, new InitializeMessage
             {
                 Version = version
             }, false);
@@ -139,14 +141,4 @@ public class LunaCompat : MonoBehaviour
         var attributes = type.GetCustomAttributes<LunaFixAttribute>(false);
         return attributes.Any();
     }
-}
-
-[Serializable]
-internal class LunaCompatInit : IModMessage
-{
-    #region Properties
-
-    public string Version { get; set; }
-
-    #endregion
 }

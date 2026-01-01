@@ -31,6 +31,7 @@ public class LunaCompatServer : LmpPlugin
         _modSettingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Config", "ModSettingsStructure.xml");
         _modIntegrations = new Dictionary<string, ServersideModIntegration>();
         _modMessageHandler = new ServerModMessageHandler();
+        _settingsStructure = new ModSettingsStructure();
     }
 
     #endregion

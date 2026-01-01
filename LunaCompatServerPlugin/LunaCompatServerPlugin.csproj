@@ -5,13 +5,10 @@
 		<TargetFramework>net6.0</TargetFramework>
 		<AssemblyTitle>LunaCompatServerPlugin</AssemblyTitle>
 		<ImplicitUsings>enable</ImplicitUsings>
+		<PlatformTarget>x64</PlatformTarget>
 		<Nullable>enable</Nullable>
 		<OutputPath>$(SolutionDir)\Build</OutputPath>
 	</PropertyGroup>
-
-	<ItemGroup>
-	  <ProjectReference Include="..\LunaCompatShared\LunaCompatShared.csproj" />
-	</ItemGroup>
 
 	<ItemGroup>
 		<Reference Include="$(LMPServerRoot)/Server.dll">

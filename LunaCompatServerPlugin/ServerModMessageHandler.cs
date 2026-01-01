@@ -6,7 +6,8 @@ using LmpCommon.Message.Data;
 using LmpCommon.Message.Interface;
 using LmpCommon.Message.Server;
 
-using LunaCompatShared.Utils;
+using LunaCompatCommon.Messages;
+using LunaCompatCommon.Utils;
 
 using Server.Client;
 using Server.Log;
@@ -62,12 +63,22 @@ internal class ServerModMessageHandler
             // Initialization check
             if (msgData.ModName.Equals("LMPC_Init"))
             {
-                
-
                 LunaLog.Info($"Initializing LMP compatibility for player {client.PlayerName}. ({Environment.Version})");
+
+                var initMessage = SerializationUtil.Deserialize<InitializeMessage>(msgData.Data);
+
+                var serverPluginVersion = Assembly.GetExecutingAssembly().GetName().Version!.ToString();
+
+                if (initMessage.Version != serverPluginVersion)
+                    LunaLog.Info(
+                        $"Client {client.PlayerName} is using a different version of LunaCompat ({initMessage.Version}, should be {serverPluginVersion}).");
+
                 var msg = _messageFactory.CreateNewMessageData<ModMsgData>();
                 msg.ModName = msgData.ModName;
-                msg.Data = BinaryUtils.Serialize(Assembly.GetExecutingAssembly().GetName().Version?.ToString());
+                msg.Data = SerializationUtil.Serialize(new InitializeMessage
+                {
+                    Version = serverPluginVersion
+                });
                 msg.NumBytes = msg.Data.Length;
 
                 SendCompatMessage(client, msg);
@@ -91,22 +102,6 @@ internal class ServerModMessageHandler
     public void ClientAuthenticated(ClientStructure client)
     {
         OnClientAuthenticated?.Invoke(this, client);
-    }
-
-    #endregion
-
-    #region Nested Types
-
-    internal interface IModMessage;
-
-    [Serializable]
-    internal class LunaCompatInit : IModMessage
-    {
-        #region Properties
-
-        public string Version { get; set; }
-
-        #endregion
     }
 
     #endregion
