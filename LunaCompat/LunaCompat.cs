@@ -100,40 +100,46 @@ public class LunaCompat : MonoBehaviour
     private void OnLmpNetworkStatusChanged(ClientState data)
     {
         // Test for Compat plugin
-        if (data == ClientState.Running)
+        if (data != ClientState.Running)
+            return;
+
+        var serverModConfirmed = false;
+        Log.Message("Testing for Luna Compat Server Plugin...");
+
+        var version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+
+        _modMessageHandler.RegisterModMessageListener<InitializeMessage>(message =>
         {
-            const string PACKAGE_NAME = "Init";
+            Log.Message($"Received Luna Compat Server Plugin: {message.Version}");
 
-            var serverModConfirmed = false;
-            Log.Message("Testing for Luna Compat Server Plugin...");
-
-            _modMessageHandler.RegisterModMessageListener<InitializeMessage>(PACKAGE_NAME, message =>
+            if (message.Version != version)
             {
-                Log.Message($"Received Luna Compat Server Plugin: {message.Version}");
-                serverModConfirmed = true;
+                Log.Warning(
+                    $"The Luna Compat Server Plugin does not match the installed version: Client: {version}, Server: {message.Version} - Contact the server owner for assistance.");
+            }
+
+            serverModConfirmed = true;
+            _node.SetValue("HasServerCompatPlugin", serverModConfirmed, true);
+        });
+
+        _modMessageHandler.SendReliableMessage(new InitializeMessage
+        {
+            Version = version
+        }, false);
+
+        // If no reply within 5 seconds
+        Task.Run(async () =>
+        {
+            await Task.Delay(5000);
+
+            if (!serverModConfirmed)
+            {
+                Log.Warning("Luna Compat Server Plugin is missing. Contact the server owner for assistance.");
                 _node.SetValue("HasServerCompatPlugin", serverModConfirmed, true);
-            });
+            }
 
-            var version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            _modMessageHandler.SendReliableMessage(PACKAGE_NAME, new InitializeMessage
-            {
-                Version = version
-            }, false);
-
-            // If no reply within 5 seconds
-            Task.Run(async () =>
-            {
-                await Task.Delay(5000);
-
-                if (!serverModConfirmed)
-                {
-                    Log.Message("Luna Compat server mod missing");
-                    _node.SetValue("HasServerCompatPlugin", serverModConfirmed, true);
-                }
-
-                _modMessageHandler.UnregisterModMessageListener(PACKAGE_NAME);
-            });
-        }
+            _modMessageHandler.UnregisterModMessageListener<InitializeMessage>();
+        });
     }
 
     private static bool IsLunaFix(Type type)

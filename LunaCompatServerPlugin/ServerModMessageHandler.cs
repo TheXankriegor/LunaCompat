@@ -58,35 +58,39 @@ internal class ServerModMessageHandler
 
     public void CompatMessageReceived(ClientStructure client, ModCliMsg clientMessage)
     {
-        if (clientMessage.Data is ModMsgData msgData && msgData.ModName.StartsWith("LMPC_"))
+        LunaLog.Info($"Received {clientMessage}: {((ModMsgData)clientMessage.Data).ModName}");
+
+        if (clientMessage.Data is not ModMsgData msgData || !msgData.ModName.StartsWith(Constants.Prefix))
+            return;
+
+        // Initialization check
+        if (msgData.ModName.Equals($"{Constants.Prefix}{nameof(InitializeMessage)}"))
         {
-            // Initialization check
-            if (msgData.ModName.Equals("LMPC_Init"))
+            LunaLog.Info($"Initializing LMP compatibility for player {client.PlayerName}.");
+
+            var initMessage = SerializationUtil.Deserialize<InitializeMessage>(msgData.Data);
+
+            var serverPluginVersion = Assembly.GetExecutingAssembly().GetName().Version!.ToString();
+
+            if (initMessage.Version != serverPluginVersion)
             {
-                LunaLog.Info($"Initializing LMP compatibility for player {client.PlayerName}. ({Environment.Version})");
-
-                var initMessage = SerializationUtil.Deserialize<InitializeMessage>(msgData.Data);
-
-                var serverPluginVersion = Assembly.GetExecutingAssembly().GetName().Version!.ToString();
-
-                if (initMessage.Version != serverPluginVersion)
-                    LunaLog.Info(
-                        $"Client {client.PlayerName} is using a different version of LunaCompat ({initMessage.Version}, should be {serverPluginVersion}).");
-
-                var msg = _messageFactory.CreateNewMessageData<ModMsgData>();
-                msg.ModName = msgData.ModName;
-                msg.Data = SerializationUtil.Serialize(new InitializeMessage
-                {
-                    Version = serverPluginVersion
-                });
-                msg.NumBytes = msg.Data.Length;
-
-                SendCompatMessage(client, msg);
-                return;
+                LunaLog.Warning(
+                    $"Client {client.PlayerName} is using a different version of LunaCompat ({initMessage.Version}, should be {serverPluginVersion}).");
             }
 
-            OnCompatMessageReceived?.Invoke(this, (client, clientMessage));
+            var msg = _messageFactory.CreateNewMessageData<ModMsgData>();
+            msg.ModName = msgData.ModName;
+            msg.Data = SerializationUtil.Serialize(new InitializeMessage
+            {
+                Version = serverPluginVersion
+            });
+            msg.NumBytes = msg.Data.Length;
+
+            SendCompatMessage(client, msg);
+            return;
         }
+
+        OnCompatMessageReceived?.Invoke(this, (client, clientMessage));
     }
 
     public void CompatMessageSent(ClientStructure client, IServerMessageBase messageData)

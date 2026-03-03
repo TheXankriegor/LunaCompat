@@ -38,15 +38,15 @@ internal class ModMessageHandler
 
     #region Public Methods
 
-    public void RegisterModMessageListener<TMessageType>(string id, Action<TMessageType> messageHandler)
+    public void RegisterModMessageListener<TMessageType>(Action<TMessageType> messageHandler)
         where TMessageType : class, IModMessage, new()
     {
-        _modMessageListeners.TryAdd(CreatePrefixedModMessageId(id), new MessageListener<TMessageType>(messageHandler));
+        _modMessageListeners.TryAdd(CreatePrefixedModMessageId<TMessageType>(), new MessageListener<TMessageType>(messageHandler));
     }
 
-    public void UnregisterModMessageListener(string id)
+    public void UnregisterModMessageListener<TMessageType>()
     {
-        _modMessageListeners.Remove(CreatePrefixedModMessageId(id));
+        _modMessageListeners.Remove(CreatePrefixedModMessageId<TMessageType>());
     }
 
     public void Destroy()
@@ -54,14 +54,14 @@ internal class ModMessageHandler
         _onModMessageReceivedEvent?.Remove(HandleModMessage);
     }
 
-    public void SendUnreliableMessage<T>(string packageName, T messageToSend, bool relay = true)
+    public void SendUnreliableMessage<T>(T messageToSend, bool relay = true)
         where T : class, IModMessage, new()
     {
         var messageToBeSend = SerializationUtil.Serialize(messageToSend);
-        ModApiSystem.Singleton.SendModMessage(CreatePrefixedModMessageId(packageName), messageToBeSend, messageToBeSend.Length, relay);
+        ModApiSystem.Singleton.SendModMessage(CreatePrefixedModMessageId<T>(), messageToBeSend, messageToBeSend.Length, relay);
     }
 
-    public void SendReliableMessage<T>(string packageName, T messageToSend, bool relay = true)
+    public void SendReliableMessage<T>(T messageToSend, bool relay = true)
         where T : class, IModMessage, new()
     {
         var messageToBeSend = SerializationUtil.Serialize(messageToSend);
@@ -74,7 +74,7 @@ internal class ModMessageHandler
 
         msgData.NumBytes = messageToBeSend.Length;
         msgData.Relay = relay;
-        msgData.ModName = CreatePrefixedModMessageId(packageName);
+        msgData.ModName = CreatePrefixedModMessageId<T>();
 
         // set message to reliable so that it gets split
         msgData.Reliable = true;
@@ -87,9 +87,9 @@ internal class ModMessageHandler
 
     #region Non-Public Methods
 
-    private string CreatePrefixedModMessageId(string packageName)
+    private string CreatePrefixedModMessageId<T>()
     {
-        return $"LMPC_{packageName}";
+        return $"{Constants.Prefix}{typeof(T).Name}";
     }
 
     private void HandleModMessage(string id, byte[] data)

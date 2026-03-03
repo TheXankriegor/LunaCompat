@@ -103,8 +103,8 @@ internal class ScanSatCompat : ModCompat
 
         _keepAlive = true;
         LunaCompat.Singleton.StartCoroutine(ScanSatSync());
-        modMessageHandler.RegisterModMessageListener<ScanSatSyncMessage>(SyncMessageId, OnSyncMessageReceived);
-        modMessageHandler.RegisterModMessageListener<ScanSatScannerChangeMessage>(ChangeMessageId, OnChangeMessageReceived);
+        modMessageHandler.RegisterModMessageListener<ScanSatSyncMessage>(OnSyncMessageReceived);
+        modMessageHandler.RegisterModMessageListener<ScanSatScannerChangeMessage>(OnChangeMessageReceived);
     }
 
     public override void Destroy()
@@ -128,7 +128,7 @@ internal class ScanSatCompat : ModCompat
             var message = CreateFromScanSatModule(ref __instance);
             message.Loaded = true;
 
-            ModMessageHandler.Instance.SendReliableMessage(ChangeMessageId, message);
+            ModMessageHandler.Instance.SendReliableMessage(message);
         }
         catch (Exception ex)
         {
@@ -146,7 +146,7 @@ internal class ScanSatCompat : ModCompat
             var message = CreateFromScanSatModule(ref __instance);
             message.Loaded = false;
 
-            ModMessageHandler.Instance.SendReliableMessage(ChangeMessageId, message);
+            ModMessageHandler.Instance.SendReliableMessage(message);
         }
         catch (Exception ex)
         {
@@ -317,7 +317,7 @@ internal class ScanSatCompat : ModCompat
                         Map = serializedData
                     };
 
-                    _modMessageHandler.SendReliableMessage(SyncMessageId, messageToSend);
+                    _modMessageHandler.SendReliableMessage( messageToSend);
                 }
             }
             catch (Exception e)
