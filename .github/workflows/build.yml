@@ -9,6 +9,7 @@ on:
 env:
   KSP_ROOT: /tmp/ksp
   RELEASE_STAGING: /tmp/release
+  LMP_VERSION: 0.29.0-Draft
 
 jobs:
   build:
@@ -28,7 +29,7 @@ jobs:
 
       - uses: KSPModdingLibs/KSPBuildTools/.github/actions/install-dependencies@0.0.4
         with:
-           dependency-identifiers: Harmony2 LunaMultiplayer=0.29.0-Draft
+           dependency-identifiers: Harmony2 LunaMultiplayer=${{ env.LMP_VERSION }}
 
       - uses: KSPModdingLibs/KSPBuildTools/.github/actions/compile@0.0.4
         with:
@@ -47,14 +48,34 @@ jobs:
           artifacts: Build/GameData
           output-file-name: 'LunaCompat'
 
+      - name: Download LMP Server
+        id: download-lmp-server
+        run: |
+          URL="https://github.com/LunaMultiplayer/LunaMultiplayer/releases/download/${{ env.LMP_VERSION }}/LunaMultiplayer-Server-linux-x64-Release.zip"
+          curl -L -o lmp-server.zip "$URL"
+          unzip lmp-server.zip -d lmp-server
+          echo "path=$(pwd)/lmp-server/LMPServer" >> $GITHUB_OUTPUT
+
+      - name: Build LunaCompatServerPlugin
+        run: dotnet build LunaCompatServerPlugin/LunaCompatServerPlugin.csproj -c Release -p:LMPServerRoot=${{ steps.download-lmp-server.outputs.path }} -p:SolutionDir=${{ github.workspace }}
+
+      - name: Upload Server Plugin Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: LunaCompatServerPlugin
+          path: Build/**/LunaCompatServerPlugin.dll
+
       - name: Publish to Github
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
-        run: >
-          gh release create ${{ github.ref_name }}
-          --notes-file "${{ steps.yaclog-show.outputs.body-file }}"
-          --title "${{ steps.yaclog-show.outputs.name }}"
-          ${{ steps.assemble-release.outputs.artifact-path }}.zip
-          Build/GameData/LunaCompat/lunacompat.version
+        run: |
+          zip -j LunaCompatServerPlugin.zip $(find Build -name "LunaCompatServerPlugin.dll" | head -n 1)
+          gh release create ${{ github.ref_name }} \
+            --notes-file "${{ steps.yaclog-show.outputs.body-file }}" \
+            --title "${{ steps.yaclog-show.outputs.name }}" \
+            ${{ steps.assemble-release.outputs.artifact-path }}.zip \
+            LunaCompatServerPlugin.zip \
+            Build/GameData/LunaCompat/lunacompat.version
         # We publish both the mod AND the version file, that way there's always a static latest version file to compare against
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
