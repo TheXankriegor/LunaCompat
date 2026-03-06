@@ -9,7 +9,8 @@
     <Import_RootNamespace>LunaCompatCommon</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)Messages\Constants.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\KerbalKonstructMessages.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utils\Constants.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Messages\IModMessage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Messages\InitializeMessage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Messages\ScanSatMessages.cs" />

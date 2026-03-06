@@ -119,7 +119,7 @@ public class LunaCompat : MonoBehaviour
             }
 
             serverModConfirmed = true;
-            _node.SetValue("HasServerCompatPlugin", serverModConfirmed, true);
+            _modMessageHandler.SetServerIntegrationDetermined(true);
         });
 
         _modMessageHandler.SendReliableMessage(new InitializeMessage
@@ -127,15 +127,15 @@ public class LunaCompat : MonoBehaviour
             Version = version
         }, false);
 
-        // If no reply within 5 seconds
+        // If no reply within 15 seconds - due to this happening on load the communication can be VERY delayed
         Task.Run(async () =>
         {
-            await Task.Delay(5000);
+            await Task.Delay(15000);
 
             if (!serverModConfirmed)
             {
                 Log.Warning("Luna Compat Server Plugin is missing. Contact the server owner for assistance.");
-                _node.SetValue("HasServerCompatPlugin", serverModConfirmed, true);
+                _modMessageHandler.SetServerIntegrationDetermined(false);
             }
 
             _modMessageHandler.UnregisterModMessageListener<InitializeMessage>();

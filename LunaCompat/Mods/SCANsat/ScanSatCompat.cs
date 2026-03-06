@@ -210,6 +210,7 @@ internal class ScanSatCompat : ModCompat
 
             Log.Message(
                 $"Blocking SCANsat save - vessels are still loading ({VesselProtoSystem.Singleton.VesselProtos.Values.Count}, {VesselProtoSystem.Singleton.VesselProtos.Count(x => !x.Value.IsEmpty)}).");
+
             return false;
         }
         catch (Exception ex)
@@ -317,7 +318,7 @@ internal class ScanSatCompat : ModCompat
                         Map = serializedData
                     };
 
-                    _modMessageHandler.SendReliableMessage( messageToSend);
+                    _modMessageHandler.SendReliableMessage(messageToSend);
                 }
             }
             catch (Exception e)

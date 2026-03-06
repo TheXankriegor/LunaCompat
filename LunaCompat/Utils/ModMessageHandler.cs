@@ -36,17 +36,35 @@ internal class ModMessageHandler
 
     #endregion
 
+    #region Events
+
+    public event EventHandler<bool> HasServerIntegrationChanged;
+
+    #endregion
+
+    #region Properties
+
+    public bool HasServerIntegration { get; private set; }
+
+    #endregion
+
     #region Public Methods
+
+    public void SetServerIntegrationDetermined(bool hasServerIntegration)
+    {
+        HasServerIntegration = hasServerIntegration;
+        HasServerIntegrationChanged?.Invoke(this, hasServerIntegration);
+    }
 
     public void RegisterModMessageListener<TMessageType>(Action<TMessageType> messageHandler)
         where TMessageType : class, IModMessage, new()
     {
-        _modMessageListeners.TryAdd(CreatePrefixedModMessageId<TMessageType>(), new MessageListener<TMessageType>(messageHandler));
+        _modMessageListeners.TryAdd(SerializationUtil.CreatePrefixedModMessageId<TMessageType>(), new MessageListener<TMessageType>(messageHandler));
     }
 
     public void UnregisterModMessageListener<TMessageType>()
     {
-        _modMessageListeners.Remove(CreatePrefixedModMessageId<TMessageType>());
+        _modMessageListeners.Remove(SerializationUtil.CreatePrefixedModMessageId<TMessageType>());
     }
 
     public void Destroy()
@@ -58,7 +76,7 @@ internal class ModMessageHandler
         where T : class, IModMessage, new()
     {
         var messageToBeSend = SerializationUtil.Serialize(messageToSend);
-        ModApiSystem.Singleton.SendModMessage(CreatePrefixedModMessageId<T>(), messageToBeSend, messageToBeSend.Length, relay);
+        ModApiSystem.Singleton.SendModMessage(SerializationUtil.CreatePrefixedModMessageId<T>(), messageToBeSend, messageToBeSend.Length, relay);
     }
 
     public void SendReliableMessage<T>(T messageToSend, bool relay = true)
@@ -74,7 +92,7 @@ internal class ModMessageHandler
 
         msgData.NumBytes = messageToBeSend.Length;
         msgData.Relay = relay;
-        msgData.ModName = CreatePrefixedModMessageId<T>();
+        msgData.ModName = SerializationUtil.CreatePrefixedModMessageId<T>();
 
         // set message to reliable so that it gets split
         msgData.Reliable = true;
@@ -86,11 +104,6 @@ internal class ModMessageHandler
     #endregion
 
     #region Non-Public Methods
-
-    private string CreatePrefixedModMessageId<T>()
-    {
-        return $"{Constants.Prefix}{typeof(T).Name}";
-    }
 
     private void HandleModMessage(string id, byte[] data)
     {

@@ -10,6 +10,7 @@ using LunaCompatServerPlugin.ModSettings;
 using Server.Client;
 using Server.Log;
 using Server.Plugin;
+using Server.System;
 
 namespace LunaCompatServerPlugin;
 
@@ -19,8 +20,8 @@ public class LunaCompatServer : LmpPlugin
 
     private readonly string _modSettingsPath;
     private readonly Dictionary<string, ServersideModIntegration> _modIntegrations;
-    private ModSettingsStructure _settingsStructure;
     private readonly ServerModMessageHandler _modMessageHandler;
+    private ModSettingsStructure _settingsStructure;
 
     #endregion
 
@@ -28,7 +29,7 @@ public class LunaCompatServer : LmpPlugin
 
     public LunaCompatServer()
     {
-        _modSettingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Config", "ModSettingsStructure.xml");
+        _modSettingsPath = Path.Combine(GetLunaCompatBaseDirectory(), "ModSettingsStructure.xml");
         _modIntegrations = new Dictionary<string, ServersideModIntegration>();
         _modMessageHandler = new ServerModMessageHandler();
         _settingsStructure = new ModSettingsStructure();
@@ -38,19 +39,30 @@ public class LunaCompatServer : LmpPlugin
 
     #region Public Methods
 
+    public static string GetLunaCompatBaseDirectory()
+    {
+        return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "LunaCompat");
+    }
+
     public override void OnServerStart()
     {
         LunaLog.Info("Luna Compat: Loading mod settings storage");
 
-        if (!File.Exists(_modSettingsPath))
+        if (!FileHandler.FileExists(_modSettingsPath))
+        {
+            FileHandler.FolderCreate(GetLunaCompatBaseDirectory());
             LunaXmlSerializer.WriteToXmlFile(new ModSettingsStructure(), _modSettingsPath);
+        }
 
         _settingsStructure = LunaXmlSerializer.ReadXmlFromPath<ModSettingsStructure>(_modSettingsPath);
 
         // We could load external fixes here as well - but will that ever be needed?
-        var modIntegrations = Assembly.GetExecutingAssembly()?.GetTypes().Where(x => x.IsAssignableTo(typeof(ServersideModIntegration)) && !x.IsAbstract);
+        var modIntegrations = Assembly.GetExecutingAssembly()
+                                      .GetTypes()
+                                      .Where(x => x.IsAssignableTo(typeof(ServersideModIntegration)) && !x.IsAbstract)
+                                      .ToList();
 
-        if (modIntegrations == null)
+        if (!modIntegrations.Any())
         {
             LunaLog.Error("No Luna Compat integrations found.");
             return;
@@ -61,7 +73,7 @@ public class LunaCompatServer : LmpPlugin
             try
             {
                 var instance = (ServersideModIntegration)Activator.CreateInstance(integration)!;
-                instance.Setup(this);
+                instance.Setup(_modMessageHandler);
                 _modIntegrations.Add(integration.Name, instance);
                 LunaLog.Info($"Setup mod integration '{integration.Name}' ({instance.ModPrefix})");
             }
@@ -74,15 +86,11 @@ public class LunaCompatServer : LmpPlugin
 
     public override void OnClientConnect(ClientStructure client)
     {
-        LunaLog.Info("Luna: OnClientConnect");
-
         _modMessageHandler.ClientConnected(client);
     }
 
     public override void OnClientAuthenticated(ClientStructure client)
     {
-        LunaLog.Info("Luna: OnClientAuthenticated");
-
         _modMessageHandler.ClientAuthenticated(client);
     }
 
@@ -96,11 +104,17 @@ public class LunaCompatServer : LmpPlugin
 
     public override void OnMessageSent(ClientStructure client, IServerMessageBase messageData)
     {
-        if (messageData.MessageType == ServerMessageType.Vessel)
-        {
-        }
-
         _modMessageHandler.CompatMessageSent(client, messageData);
+    }
+
+    public override void OnServerStop()
+    {
+        base.OnServerStop();
+
+        foreach (var integration in _modIntegrations)
+            integration.Value.Destroy();
+
+        _modIntegrations.Clear();
     }
 
     #endregion

@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<OutputType>Library</OutputType>
 		<Product>LunaCompat</Product>
-		<Copyright>Copyright © 2025</Copyright>
+		<Copyright>Copyright © 2026</Copyright>
 		<GenerateAssemblyInfo>true</GenerateAssemblyInfo>
 		<AssemblyVersion>0.0.6</AssemblyVersion>
 		<FileVersion>$(AssemblyVersion)</FileVersion>

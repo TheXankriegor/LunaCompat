@@ -34,13 +34,13 @@ internal class ServerModMessageHandler
 
     #region Events
 
-    public event EventHandler<(ClientStructure, ModCliMsg)>? OnCompatMessageReceived;
+    public event EventHandler<(ClientStructure Client, ModMsgData Data)> OnCompatMessageReceived;
 
-    public event EventHandler<(ClientStructure, IServerMessageBase)>? OnCompatMessageSent;
+    public event EventHandler<(ClientStructure Client, IServerMessageBase Message)> OnCompatMessageSent;
 
-    public event EventHandler<ClientStructure>? OnClientConnected;
+    public event EventHandler<ClientStructure> OnClientConnected;
 
-    public event EventHandler<ClientStructure>? OnClientAuthenticated;
+    public event EventHandler<ClientStructure> OnClientAuthenticated;
 
     #endregion
 
@@ -64,7 +64,7 @@ internal class ServerModMessageHandler
             return;
 
         // Initialization check
-        if (msgData.ModName.Equals($"{Constants.Prefix}{nameof(InitializeMessage)}"))
+        if (SerializationUtil.IsMessageOfType<InitializeMessage>(msgData.ModName))
         {
             LunaLog.Info($"Initializing LMP compatibility for player {client.PlayerName}.");
 
@@ -78,19 +78,26 @@ internal class ServerModMessageHandler
                     $"Client {client.PlayerName} is using a different version of LunaCompat ({initMessage.Version}, should be {serverPluginVersion}).");
             }
 
-            var msg = _messageFactory.CreateNewMessageData<ModMsgData>();
-            msg.ModName = msgData.ModName;
-            msg.Data = SerializationUtil.Serialize(new InitializeMessage
+            var msg = CreateModMsgData(new InitializeMessage
             {
                 Version = serverPluginVersion
             });
-            msg.NumBytes = msg.Data.Length;
 
             SendCompatMessage(client, msg);
             return;
         }
 
-        OnCompatMessageReceived?.Invoke(this, (client, clientMessage));
+        OnCompatMessageReceived?.Invoke(this, (client, msgData));
+    }
+
+    public ModMsgData CreateModMsgData<T>(T message)
+        where T : class, new()
+    {
+        var msg = _messageFactory.CreateNewMessageData<ModMsgData>();
+        msg.ModName = SerializationUtil.CreatePrefixedModMessageId<T>();
+        msg.Data = SerializationUtil.Serialize(message);
+        msg.NumBytes = msg.Data.Length;
+        return msg;
     }
 
     public void CompatMessageSent(ClientStructure client, IServerMessageBase messageData)

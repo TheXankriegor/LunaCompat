@@ -10,7 +10,7 @@ namespace LunaCompatCommon.Utils
     /// - NuGet packages introduce additional DLLs (ignoring ILMerge)
     /// With patience, this could be reworked into manual serialization for each message type
     /// </summary>
-    public static class SerializationUtil
+    internal static class SerializationUtil
     {
         #region Public Methods
 
@@ -26,6 +26,16 @@ namespace LunaCompatCommon.Utils
         {
             var str = Encoding.UTF8.GetString(param);
             return LunaXmlSerializer.ReadXmlFromString<T>(str);
+        }
+
+        public static string CreatePrefixedModMessageId<T>()
+        {
+            return $"{Constants.Prefix}{typeof(T).Name}";
+        }
+
+        public static bool IsMessageOfType<T>(string messageName)
+        {
+            return messageName.Equals($"{Constants.Prefix}{typeof(T).Name}");
         }
 
         #endregion

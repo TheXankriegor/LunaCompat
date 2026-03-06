@@ -6,12 +6,14 @@
 		<AssemblyTitle>LunaCompatServerPlugin</AssemblyTitle>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<PlatformTarget>x64</PlatformTarget>
-		<Nullable>enable</Nullable>
 		<OutputPath>$(SolutionDir)\Build</OutputPath>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<Reference Include="$(LMPServerRoot)/Server.dll">
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="$(LMPServerRoot)/LunaConfigNode.dll">
 			<Private>False</Private>
 		</Reference>
 	</ItemGroup>

@@ -2,7 +2,5 @@
 {
     public interface IModMessage
     {
-
-       
     }
 }

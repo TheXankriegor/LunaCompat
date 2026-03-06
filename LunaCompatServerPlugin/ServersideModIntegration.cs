@@ -11,7 +11,12 @@ internal abstract class ServersideModIntegration
     #region Public Methods
 
     // replace server with some interface
-    public abstract void Setup(LunaCompatServer messageHandler);
+    public abstract void Setup(ServerModMessageHandler messageHandler);
+
+    public virtual void Destroy()
+    {
+        // nothing to do usually
+    }
 
     #endregion
 }

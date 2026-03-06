@@ -32,7 +32,8 @@
 
 	<ItemGroup>
 		<!-- Depends on Modulemanager -->
-		<Reference Include="$(KSPRoot)/Modulemanager*.dll">
+		<Reference Include="ModuleManager.4.2.3, Culture=neutral, PublicKeyToken=nul">
+			<HintPath>$(KSPRoot)/GameData/ModuleManager.4.2.3.dll</HintPath>
 			<Private>False</Private>
 			<CKANIdentifier>ModuleManager</CKANIdentifier>
 			<KSPAssemblyName>ModuleManager.4.2.3</KSPAssemblyName>

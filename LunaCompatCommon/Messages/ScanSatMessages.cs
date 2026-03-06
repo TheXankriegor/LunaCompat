@@ -1,18 +1,23 @@
-﻿using System;
+﻿// ReSharper disable once RedundantUsingDirective
+using System;
 
 namespace LunaCompatCommon.Messages
 {
-    [Serializable]
     public class ScanSatSyncMessage : IModMessage
     {
+        #region Properties
+
         public string Body { get; set; }
 
         public string Map { get; set; }
+
+        #endregion
     }
 
-    [Serializable]
     public class ScanSatScannerChangeMessage : IModMessage
     {
+        #region Properties
+
         public bool Loaded { get; set; }
 
         public Guid Vessel { get; set; }
@@ -28,5 +33,7 @@ namespace LunaCompatCommon.Messages
         public float BestAlt { get; set; }
 
         public bool RequireLight { get; set; }
+
+        #endregion
     }
 }
