@@ -10,10 +10,15 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Messages\KerbalKonstructMessages.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serializer\SerializationReader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serializer\SerializationUtil.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serializer\SerializationWriter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serializer\TypeCache.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serializer\VarInt.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utils\Constants.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Messages\IModMessage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Messages\InitializeMessage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Messages\ScanSatMessages.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Utils\SerializationUtil.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\SegmentedMessage.cs" />
   </ItemGroup>
 </Project>

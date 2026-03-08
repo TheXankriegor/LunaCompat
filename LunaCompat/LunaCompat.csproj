@@ -7,6 +7,7 @@
 		<BinariesOutputRelativePath>Build/GameData/$(SolutionName)</BinariesOutputRelativePath>
 		<XmlSourceDir>$(ProjectDir)XML_COMPAT</XmlSourceDir>
 		<XmlDestinationDir>$(SolutionDir)Build\GameData\LunaMultiplayer\PartSync\LunaCompat</XmlDestinationDir>
+		<LangVersion>latest</LangVersion>
 	</PropertyGroup>
 
 	<PropertyGroup>

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using KSPBuildTools;
+
 using LmpClient.Base;
 using LmpClient.Network;
 using LmpClient.Systems.ModApi;
@@ -9,9 +11,14 @@ using LmpCommon.Message.Client;
 using LmpCommon.Message.Data;
 
 using LunaCompatCommon.Messages;
-using LunaCompatCommon.Utils;
+using LunaCompatCommon.Serializer;
 
 namespace LunaCompat.Utils;
+
+internal interface IMessageListener
+{
+    void Execute(byte[] data);
+}
 
 internal class ModMessageHandler
 {
@@ -21,6 +28,7 @@ internal class ModMessageHandler
 
     private readonly EventData<string, byte[]> _onModMessageReceivedEvent;
     private readonly Dictionary<string, IMessageListener> _modMessageListeners;
+    private readonly SegmentedMessageHandler _segmentedMessageHandler;
 
     #endregion
 
@@ -30,6 +38,7 @@ internal class ModMessageHandler
     {
         Instance = this;
         _modMessageListeners = [];
+        _segmentedMessageHandler = new SegmentedMessageHandler(_modMessageListeners);
         _onModMessageReceivedEvent = GameEvents.FindEvent<EventData<string, byte[]>>("onModMessageReceived");
         _onModMessageReceivedEvent?.Add(HandleModMessage);
     }
@@ -107,6 +116,9 @@ internal class ModMessageHandler
 
     private void HandleModMessage(string id, byte[] data)
     {
+        if (id == SerializationUtil.CreatePrefixedModMessageId<SegmentedMessage>())
+            _segmentedMessageHandler.HandleSegment(data);
+
         if (!_modMessageListeners.TryGetValue(id, out var mod))
             return;
 
@@ -116,11 +128,6 @@ internal class ModMessageHandler
     #endregion
 
     #region Nested Types
-
-    private interface IMessageListener
-    {
-        void Execute(byte[] data);
-    }
 
     private class MessageListener<T> : IMessageListener
         where T : class, IModMessage, new()
@@ -147,8 +154,16 @@ internal class ModMessageHandler
             if (data.Length <= 0)
                 return;
 
-            var syncMessage = SerializationUtil.Deserialize<T>(data);
-            _messageHandler.Invoke(syncMessage);
+            try
+            {
+                var syncMessage = SerializationUtil.Deserialize<T>(data);
+                _messageHandler.Invoke(syncMessage);
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Failed to deserialize message: {data.Length} size");
+                Log.Exception(ex);
+            }
         }
 
         #endregion

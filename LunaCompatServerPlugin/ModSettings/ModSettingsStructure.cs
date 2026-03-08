@@ -6,7 +6,7 @@ public class ModSettingsStructure
 
     public ModSettingsStructure()
     {
-        Mods = [];
+        Mods = new List<ModSettingsEntry>();
     }
 
     #endregion
@@ -24,7 +24,7 @@ public class ModSettingsEntry
 
     public ModSettingsEntry()
     {
-        Settings = [];
+        Settings = new List<ModSetting>();
     }
 
     #endregion

@@ -6,9 +6,9 @@ using LmpCommon.Message.Interface;
 using LmpCommon.Xml;
 
 using LunaCompatServerPlugin.ModSettings;
+using LunaCompatServerPlugin.Utils;
 
 using Server.Client;
-using Server.Log;
 using Server.Plugin;
 using Server.System;
 
@@ -46,7 +46,7 @@ public class LunaCompatServer : LmpPlugin
 
     public override void OnServerStart()
     {
-        LunaLog.Info("Luna Compat: Loading mod settings storage");
+        Log.Info("Luna Compat: Loading mod settings storage");
 
         if (!FileHandler.FileExists(_modSettingsPath))
         {
@@ -64,7 +64,7 @@ public class LunaCompatServer : LmpPlugin
 
         if (!modIntegrations.Any())
         {
-            LunaLog.Error("No Luna Compat integrations found.");
+            Log.Error("No Luna Compat integrations found.");
             return;
         }
 
@@ -75,23 +75,13 @@ public class LunaCompatServer : LmpPlugin
                 var instance = (ServersideModIntegration)Activator.CreateInstance(integration)!;
                 instance.Setup(_modMessageHandler);
                 _modIntegrations.Add(integration.Name, instance);
-                LunaLog.Info($"Setup mod integration '{integration.Name}' ({instance.ModPrefix})");
+                Log.Info($"Setup mod integration '{integration.Name}' ({instance.ModPrefix})");
             }
             catch (Exception e)
             {
-                LunaLog.Error($"Exception loading {integration.Name}: {e}");
+                Log.Error($"Exception loading {integration.Name}: {e}");
             }
         }
-    }
-
-    public override void OnClientConnect(ClientStructure client)
-    {
-        _modMessageHandler.ClientConnected(client);
-    }
-
-    public override void OnClientAuthenticated(ClientStructure client)
-    {
-        _modMessageHandler.ClientAuthenticated(client);
     }
 
     public override void OnMessageReceived(ClientStructure client, IClientMessageBase messageData)
@@ -100,11 +90,6 @@ public class LunaCompatServer : LmpPlugin
             return;
 
         _modMessageHandler.CompatMessageReceived(client, clientMessage);
-    }
-
-    public override void OnMessageSent(ClientStructure client, IServerMessageBase messageData)
-    {
-        _modMessageHandler.CompatMessageSent(client, messageData);
     }
 
     public override void OnServerStop()

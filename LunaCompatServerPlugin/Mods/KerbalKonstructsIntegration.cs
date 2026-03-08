@@ -1,80 +1,170 @@
 ﻿using LmpCommon.Message.Data;
 
 using LunaCompatCommon.Messages;
-using LunaCompatCommon.Utils;
+using LunaCompatCommon.Serializer;
+
+using LunaCompatServerPlugin.Utils;
+
+using LunaConfigNode.CfgNode;
 
 using Server.Client;
 using Server.System;
 
-namespace LunaCompatServerPlugin.Mods
+namespace LunaCompatServerPlugin.Mods;
+
+internal class KerbalKonstructsIntegration : ServersideModIntegration
 {
-    internal class KerbalKonstructsIntegration : ServersideModIntegration
+    #region Fields
+
+    private ServerModMessageHandler _messageHandler;
+    private string _baseInstancePath;
+
+    #endregion
+
+    #region Properties
+
+    public override string ModPrefix => "KerbalKonstructs";
+
+    #endregion
+
+    #region Public Methods
+
+    public override void Setup(ServerModMessageHandler messageHandler)
     {
-        #region Fields
+        _messageHandler = messageHandler;
 
-        private ServerModMessageHandler _messageHandler;
+        _messageHandler.OnCompatMessageReceived += OnCompatMessageReceived;
 
-        #endregion
+        _baseInstancePath = Path.Combine(LunaCompatServer.GetLunaCompatBaseDirectory(), "KerbalKonstructs", "NewInstances");
+        if (!FileHandler.FolderExists(_baseInstancePath))
+            FileHandler.FolderCreate(_baseInstancePath);
+    }
 
-        #region Properties
+    #endregion
 
-        public override string ModPrefix => "KerbalKonstructs";
+    #region Non-Public Methods
 
-        #endregion
+    private void OnCompatMessageReceived(object sender, (ClientStructure Client, ModMsgData Data) e)
+    {
+        if (SerializationUtil.IsMessageOfType<KerbalKonstructRequestInstancesMessage>(e.Data.ModName))
+            Task.Run(() => SendAllInstances(e));
 
-        #region Public Methods
+        if (SerializationUtil.IsMessageOfType<KerbalKonstructDeleteStaticInstanceMessage>(e.Data.ModName))
+            Task.Run(() => DeleteStaticInstance(e));
 
-        public override void Setup(ServerModMessageHandler messageHandler)
+        if (SerializationUtil.IsMessageOfType<KerbalKonstructChangeStaticInstanceMessage>(e.Data.ModName))
+            Task.Run(() => UpdateStaticInstance(e));
+    }
+
+    private void UpdateStaticInstance((ClientStructure Client, ModMsgData Data) data)
+    {
+        try
         {
-            _messageHandler = messageHandler;
+            var message = SerializationUtil.Deserialize<KerbalKonstructChangeStaticInstanceMessage>(data.Data.Data);
 
-            _messageHandler.OnCompatMessageReceived += OnCompatMessageReceived;
-        }
+            Log.Debug($"Received static instance update for {message.ModelName}", ModPrefix);
 
-        #endregion
+            var instancePath = Path.Combine(_baseInstancePath, $"{message.ModelName}.cfg");
 
-        #region Non-Public Methods
-
-        private void OnCompatMessageReceived(object sender, (ClientStructure Client, ModMsgData Data) e)
-        {
-            if (SerializationUtil.IsMessageOfType<KerbalKonstructRequestInstancesMessage>(e.Data.ModName))
+            if (File.Exists(instancePath))
             {
-                // send all instances
+                var existing = new ConfigNode(FileHandler.ReadFileText(instancePath));
 
-                var basePath = Path.Combine(LunaCompatServer.GetLunaCompatBaseDirectory(), "KerbalKonstructs", "NewInstances");
+                var existingInstances = existing.GetNode("root").Value.GetNode("STATIC").Value;
+                var eN = existingInstances.GetNodes("Instances");
+                var update = new ConfigNode(message.Content);
+                var uN = update.GetNode("root").Value.GetNode("STATIC").Value.GetNodes("Instances");
 
-                if (FileHandler.FolderExists(basePath))
+                foreach (var newInstance in uN)
                 {
-                    var files = Directory.GetFiles(basePath);
+                    var match = eN.FirstOrDefault(x => x.Value.GetValue("UUID") == newInstance.Value.GetValue("UUID"));
 
-                    if (files.Any())
-                    {
-                        foreach (var i in files)
-                        {
-                            var instanceMsg = _messageHandler.CreateModMsgData(new KerbalKonstructChangeStaticInstanceMessage
-                            {
-                                PathName = Path.GetFileName(i),
-                                Content = FileHandler.ReadFileText(i)
-                            });
-                            _messageHandler.SendCompatMessage(e.Client, instanceMsg);
-                        }
-                    }
+                    if (match != null)
+                        existingInstances.ReplaceNode(match.Value, newInstance.Value);
+                    else
+                        existingInstances.AddNode(newInstance.Value);
+                }
+
+                FileHandler.WriteToFile(instancePath, existing.ToString());
+            }
+            else
+                FileHandler.WriteToFile(instancePath, message.Content);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex.ToString(), ModPrefix);
+        }
+    }
+
+    private void DeleteStaticInstance((ClientStructure Client, ModMsgData Data) data)
+    {
+        try
+        {
+            var message = SerializationUtil.Deserialize<KerbalKonstructDeleteStaticInstanceMessage>(data.Data.Data);
+
+            Log.Debug($"Received static instance delete for {message.ModelName} ({message.Uuid})", ModPrefix);
+
+            var instancePath = Path.Combine(_baseInstancePath, $"{message.ModelName}.cfg");
+
+            if (!File.Exists(instancePath))
+            {
+                Log.Warning($"Trying to delete static instance which does not exist on the server ({message.ModelName}).", ModPrefix);
+                return;
+            }
+
+            var existing = new ConfigNode(FileHandler.ReadFileText(instancePath));
+            var statics = existing.GetNode("root").Value.GetNode("STATIC").Value;
+            var instances = statics.GetNodes("Instances");
+
+            foreach (var instance in instances)
+            {
+                if (instance.Value.GetValue("UUID").Value == message.Uuid)
+                {
+                    instances.Remove(instance);
+                    break;
                 }
             }
 
-            if (SerializationUtil.IsMessageOfType<KerbalKonstructChangeStaticInstanceMessage>(e.Data.ModName))
-            {
-                var message = SerializationUtil.Deserialize<KerbalKonstructChangeStaticInstanceMessage>(e.Data.Data);
-                var basePath = Path.Combine(LunaCompatServer.GetLunaCompatBaseDirectory(), "KerbalKonstructs", "NewInstances");
-                if (!FileHandler.FolderExists(basePath))
-                    FileHandler.FolderCreate(basePath);
-                var fileName = Path.GetFileName(message.PathName);
-                var instancePath = Path.Combine(basePath, fileName);
-
-                FileHandler.WriteToFile(instancePath, message.Content);
-            }
+            FileHandler.WriteToFile(instancePath, existing.ToString());
         }
-
-        #endregion
+        catch (Exception ex)
+        {
+            Log.Error(ex.ToString(), ModPrefix);
+        }
     }
+
+    private void SendAllInstances((ClientStructure Client, ModMsgData Data) data)
+    {
+        try
+        {
+            Log.Debug($"Sending all static instances to {data.Client.PlayerName}", ModPrefix);
+
+            var files = Directory.GetFiles(_baseInstancePath);
+
+            foreach (var file in files)
+            {
+                try
+                {
+                    var baseMessage = new KerbalKonstructChangeStaticInstanceMessage
+                    {
+                        ModelName = Path.GetFileNameWithoutExtension(file),
+                        Content = FileHandler.ReadFileText(file)
+                    };
+                    _messageHandler.SendCompatMessage(data.Client, baseMessage);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error($"Failed to send {file}: {ex}", ModPrefix);
+                }
+            }
+
+            _messageHandler.SendCompatMessage(data.Client, new KerbalKonstructRequestInstancesMessage());
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex.ToString(), ModPrefix);
+        }
+    }
+
+    #endregion
 }

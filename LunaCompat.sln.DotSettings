@@ -2694,6 +2694,7 @@ private static readonly DependencyPropertyKey $propertyName$PropertyKey = &#xD;
 public static readonly DependencyProperty $propertyName$Property = $propertyName$PropertyKey.DependencyProperty;</s:String>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=Kerbal/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=Kethane/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=Konstructs/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=Ncontroller/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=Ndata/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=Nsat/@EntryIndexedValue">True</s:Boolean>
