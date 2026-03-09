@@ -26,6 +26,8 @@ internal class KerbalKonstructsCompat : ModCompat
     #region Fields
 
     private ModMessageHandler _modMessageHandler;
+    private static FieldInfo selectedInstanceField;
+    private static Type editorGuiType;
     private static MethodInfo deactivateMethod;
     private static FieldInfo configUrlField;
     private static FieldInfo configPathField;
@@ -40,7 +42,7 @@ internal class KerbalKonstructsCompat : ModCompat
     private static FieldInfo modelField;
     private static FieldInfo uuidField;
     private static Type staticInstanceType;
-    private static MethodInfo allStaticInstancesMethod;
+    private static MethodInfo getModelByNameMethod;
     private static MethodInfo onLevelWasLoadMethod;
     private static FieldInfo kkInstanceField;
     private static MethodInfo loadInstancesMethod;
@@ -72,8 +74,8 @@ internal class KerbalKonstructsCompat : ModCompat
         LunaCompat.HarmonyInstance.Patch(AccessTools.Method(kkCustomParametersType, "Interactible"),
                                          postfix: new HarmonyMethod(typeof(KerbalKonstructsCompat), nameof(PostfixKKCustomParameter1Interactible)));
 
-        LunaCompat.HarmonyInstance.Patch(AccessTools.Method(staticInstanceType, "Destroy"),
-                                         postfix: new HarmonyMethod(typeof(KerbalKonstructsCompat), nameof(PostfixStaticInstanceDestroy)));
+        var deleteInstanceMethod = AccessTools.Method(editorGuiType, "DeleteInstance");
+        LunaCompat.HarmonyInstance.Patch(deleteInstanceMethod, new HarmonyMethod(typeof(KerbalKonstructsCompat), nameof(PrefixStaticInstanceDelete)));
 
         _modMessageHandler.HasServerIntegrationChanged += OnServerIntegrationDetermined;
         _modMessageHandler.RegisterModMessageListener<KerbalKonstructChangeStaticInstanceMessage>(OnChangeStaticInstanceMessageReceived);
@@ -99,7 +101,7 @@ internal class KerbalKonstructsCompat : ModCompat
         onLevelWasLoadMethod = AccessTools.Method(kerbalKonstructsType, "OnLevelWasLoad");
 
         var staticDatabaseType = AccessTools.TypeByName("KerbalKonstructs.Core.StaticDatabase");
-        allStaticInstancesMethod = AccessTools.Method(staticDatabaseType, "GetModelByName");
+        getModelByNameMethod = AccessTools.Method(staticDatabaseType, "GetModelByName");
         allStaticInstancesField = AccessTools.Field(staticDatabaseType, "allStaticInstances");
 
         staticInstanceType = AccessTools.TypeByName("KerbalKonstructs.Core.StaticInstance");
@@ -122,17 +124,21 @@ internal class KerbalKonstructsCompat : ModCompat
         isOpenMethod = AccessTools.Method(staticsEditorGuiType, "IsOpen");
         toggleEditorMethod = AccessTools.Method(staticsEditorGuiType, "ToggleEditor");
         guiInstanceField = AccessTools.Field(staticsEditorGuiType, "_instance");
+
+        editorGuiType = AccessTools.TypeByName("KerbalKonstructs.UI.EditorGUI");
+        selectedInstanceField = AccessTools.Field(editorGuiType, "selectedInstance");
     }
 
-    private static void PostfixStaticInstanceDestroy(ref object __instance)
+    private static void PrefixStaticInstanceDelete()
     {
         if (!initialized || isDeleting || !ModMessageHandler.Instance.HasServerIntegration)
             return;
 
-        // send UUID to delete
+        // prefix so that we can access selectedInstance
+        var selected = selectedInstanceField.GetValue(null);
 
-        var uuid = uuidField.GetValue(__instance) as string;
-        var model = modelField.GetValue(__instance);
+        var uuid = uuidField.GetValue(selected) as string;
+        var model = modelField.GetValue(selected);
         var name = nameField.GetValue(model) as string;
 
         Log.Message($"KerbalKonstructs delete: {name} ({uuid})");
@@ -161,7 +167,7 @@ internal class KerbalKonstructsCompat : ModCompat
             var node = ConfigNode.Load(nodePath);
             var name = node.GetNode("STATIC")?.GetValue("pointername");
 
-            Log.Message($"KerbalKonstructs saved: {node} ({nodePath})");
+            Log.Message($"KerbalKonstructs saved: ({nodePath})");
 
             ModMessageHandler.Instance.SendReliableMessage(new KerbalKonstructChangeStaticInstanceMessage
             {
@@ -283,10 +289,13 @@ internal class KerbalKonstructsCompat : ModCompat
         GameDatabase.Instance.root.children.First().files.Add(collectionFile);
 
         var modelName = staticNode.GetValue("pointername");
-        var model = allStaticInstancesMethod.Invoke(null, [modelName]);
+        var model = getModelByNameMethod.Invoke(null, [modelName]);
 
         if (model != null)
             loadInstancesMethod.Invoke(kkInstanceField.GetValue(null), [config, model]);
+
+        var allStaticInstances = (Array)allStaticInstancesField.GetValue(null);
+        Log.Message($"Loaded: {allStaticInstances.Length} instances");
 
         if (!initialized)
             return;
@@ -320,11 +329,21 @@ internal class KerbalKonstructsCompat : ModCompat
             if (string.IsNullOrEmpty(path) || configUrlField.GetValue(instance) is not UrlConfig url)
                 continue;
 
-            Log.Message($"Unloading {path} instance");
+            Log.Debug($"Unloading {path} instance");
             url.config.RemoveNodes("Instances");
             deactivateMethod.Invoke(instance, []);
             var uuid = uuidField.GetValue(instance) as string;
             RemoveInstanceByUuid(uuid);
+        }
+
+        allStaticInstances = (Array)allStaticInstancesField.GetValue(null);
+        Log.Message($"Loaded: {allStaticInstances.Length} instances");
+
+        foreach (var instance in allStaticInstances)
+        {
+            var path = configPathField.GetValue(instance) as string;
+            var uuid = uuidField.GetValue(instance) as string;
+            Log.Message($"Still loaded: {path} [{uuid}]");
         }
 
         if (!hasServerIntegration)

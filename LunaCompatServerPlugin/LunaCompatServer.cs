@@ -41,7 +41,7 @@ public class LunaCompatServer : LmpPlugin
 
     public static string GetLunaCompatBaseDirectory()
     {
-        return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "LunaCompat");
+        return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Universe", "LunaCompat");
     }
 
     public override void OnServerStart()

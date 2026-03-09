@@ -137,17 +137,20 @@ internal class KerbalKonstructsIntegration : ServersideModIntegration
     {
         try
         {
-            Log.Debug($"Sending all static instances to {data.Client.PlayerName}", ModPrefix);
+            Log.Info($"Sending all static instances to {data.Client.PlayerName}", ModPrefix);
 
-            var files = Directory.GetFiles(_baseInstancePath);
+            var files = Directory.GetFiles(_baseInstancePath, "*.cfg", SearchOption.AllDirectories);
 
             foreach (var file in files)
             {
                 try
                 {
+                    Log.Debug($"Sending {file}", ModPrefix);
+
+                    var writtenFileName = file.Remove(0, _baseInstancePath.Length + 1);
                     var baseMessage = new KerbalKonstructChangeStaticInstanceMessage
                     {
-                        ModelName = Path.GetFileNameWithoutExtension(file),
+                        ModelName = Path.GetFileNameWithoutExtension(writtenFileName),
                         Content = FileHandler.ReadFileText(file)
                     };
                     _messageHandler.SendCompatMessage(data.Client, baseMessage);
