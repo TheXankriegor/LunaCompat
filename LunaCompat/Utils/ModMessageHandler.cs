@@ -154,14 +154,24 @@ internal class ModMessageHandler
             if (data.Length <= 0)
                 return;
 
+            T syncMessage = null;
+
             try
             {
-                var syncMessage = SerializationUtil.Deserialize<T>(data);
+                syncMessage = SerializationUtil.Deserialize<T>(data);
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Failed to deserialize {typeof(T).Name} message: {data.Length} size");
+                Log.Exception(ex);
+            }
+
+            try
+            {
                 _messageHandler.Invoke(syncMessage);
             }
             catch (Exception ex)
             {
-                Log.Error($"Failed to deserialize message: {data.Length} size");
                 Log.Exception(ex);
             }
         }
