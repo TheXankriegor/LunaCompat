@@ -6,19 +6,19 @@ using System.Threading.Tasks;
 
 using HarmonyLib;
 
-using KSPBuildTools;
-
 using LmpClient;
 using LmpClient.Events;
 
 using LmpCommon.Enums;
 
-using LunaCompat.Attributes;
 using LunaCompat.Utils;
 
 using LunaCompatCommon.Messages;
 
 using UnityEngine;
+
+using ILogger = LunaCompatCommon.Utils.ILogger;
+using Logger = LunaCompat.Utils.Logger;
 
 namespace LunaCompat;
 
@@ -29,42 +29,45 @@ public class LunaCompat : MonoBehaviour
 
     public static Harmony HarmonyInstance = new("LunaCompat");
 
-    private readonly HashSet<ModCompat> _activePatches = [];
-    private ModMessageHandler _modMessageHandler;
-    private ConfigNode _node;
+    private readonly HashSet<ClientModIntegration> _activePatches = [];
+    private ILogger _logger;
+    private ConfigNode _lunaCompatSettings;
+    private ClientMessageHandler _messageHandler;
 
     public static LunaCompat Singleton { get; set; }
 
     private void Awake()
     {
         Singleton = this;
+        _logger = new Logger();
+
         DontDestroyOnLoad(this);
 
         if (!MainSystem.Singleton || !MainSystem.Singleton.Enabled)
         {
-            Log.Error("Luna Multiplayer does not appear to be running.");
+            _logger.Error("Luna Multiplayer does not appear to be running.");
             return;
         }
 
-        _modMessageHandler = new ModMessageHandler();
+        _messageHandler = new ClientMessageHandler(_logger);
 
         NetworkEvent.onNetworkStatusChanged.Add(OnLmpNetworkStatusChanged);
 
-        _node = ConfigNode.Load(KSPUtil.ApplicationRootPath + ConfigFilePath);
+        _lunaCompatSettings = ConfigNode.Load(KSPUtil.ApplicationRootPath + ConfigFilePath);
 
-        if (_node == null)
+        if (_lunaCompatSettings == null)
         {
-            Log.Error($"Failed to locate config file '{ConfigFilePath}'.");
+            _logger.Error($"Failed to locate config file '{ConfigFilePath}'.");
             return;
         }
 
         // We could load external fixes here as well - but will that ever be needed?
-        var queue = Assembly.GetAssembly(typeof(LunaCompat)).GetTypes().Where(IsLunaFix);
+        var modIntegrations = Assembly.GetExecutingAssembly().GetTypes().Where(x => typeof(ClientModIntegration).IsAssignableFrom(x) && !x.IsAbstract).ToList();
 
-        foreach (var type in queue)
-            SetupModCompat(type, _node);
+        foreach (var type in modIntegrations)
+            SetupModCompat(type, _lunaCompatSettings);
 
-        Log.Message("Xan's Luna Compat Plugin started.");
+        _logger.Info("Xan's Luna Compat Plugin started.");
     }
 
     private void OnDestroy()
@@ -72,7 +75,8 @@ public class LunaCompat : MonoBehaviour
         foreach (var patch in _activePatches)
             patch.Destroy();
 
-        _modMessageHandler.Destroy();
+        _messageHandler.Dispose();
+
         NetworkEvent.onNetworkStatusChanged?.Remove(OnLmpNetworkStatusChanged);
     }
 
@@ -80,20 +84,19 @@ public class LunaCompat : MonoBehaviour
     {
         try
         {
-            var compatInstance = (ModCompat)Activator.CreateInstance(type);
+            var compatInstance = (ClientModIntegration)Activator.CreateInstance(type, _logger);
 
             if (!AssemblyLoader.loadedAssemblies.Contains(compatInstance.PackageName))
                 return;
 
+            compatInstance.Setup(node);
             _activePatches.Add(compatInstance);
 
-            compatInstance.Patch(_modMessageHandler, node);
-
-            Log.Message($"Initialized compatibility for {compatInstance.PackageName}");
+            _logger.Info($"Initialized compatibility for {compatInstance.PackageName}");
         }
         catch (Exception e)
         {
-            Log.Error($"Exception loading {type.Name}: {e}");
+            _logger.Error($"Exception loading {type.Name}: {e}");
         }
     }
 
@@ -104,25 +107,25 @@ public class LunaCompat : MonoBehaviour
             return;
 
         var serverModConfirmed = false;
-        Log.Message("Testing for Luna Compat Server Plugin...");
+        _logger.Info("Testing for Luna Compat Server Plugin...");
 
         var version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
-        _modMessageHandler.RegisterModMessageListener<InitializeMessage>(message =>
+        _messageHandler.RegisterModMessageListener<InitializeMessage>(message =>
         {
-            Log.Message($"Received Luna Compat Server Plugin: {message.Version}");
+            _logger.Info($"Received Luna Compat Server Plugin: {message.Version}");
 
             if (message.Version != version)
             {
-                Log.Warning(
+                _logger.Warning(
                     $"The Luna Compat Server Plugin does not match the installed version: Client: {version}, Server: {message.Version} - Contact the server owner for assistance.");
             }
 
             serverModConfirmed = true;
-            _modMessageHandler.SetServerIntegrationDetermined(true);
+            _messageHandler.SetServerIntegrationDetermined(true);
         });
 
-        _modMessageHandler.SendReliableMessage(new InitializeMessage
+        _messageHandler.SendReliableMessage(new InitializeMessage
         {
             Version = version
         }, false);
@@ -134,17 +137,11 @@ public class LunaCompat : MonoBehaviour
 
             if (!serverModConfirmed)
             {
-                Log.Warning("Luna Compat Server Plugin is missing. Contact the server owner for assistance.");
-                _modMessageHandler.SetServerIntegrationDetermined(false);
+                _logger.Warning("Luna Compat Server Plugin is missing. Contact the server owner for assistance.");
+                _messageHandler.SetServerIntegrationDetermined(false);
             }
 
-            _modMessageHandler.UnregisterModMessageListener<InitializeMessage>();
+            _messageHandler.UnregisterModMessageListener<InitializeMessage>();
         });
-    }
-
-    private static bool IsLunaFix(Type type)
-    {
-        var attributes = type.GetCustomAttributes<LunaFixAttribute>(false);
-        return attributes.Any();
     }
 }

@@ -5,19 +5,26 @@ using HarmonyLib;
 
 using JetBrains.Annotations;
 
-using LunaCompat.Attributes;
-using LunaCompat.Utils;
+using LunaCompatCommon.Utils;
 
 namespace LunaCompat.Mods.TUFX;
 
-[LunaFix]
 [UsedImplicitly]
-internal class TufxCompat : ModCompat
+internal class TufxIntegration : ClientModIntegration
 {
     #region Fields
 
     private static Type tufxGameSettings;
     private static string tufxSettingsFilePath;
+
+    #endregion
+
+    #region Constructors
+
+    public TufxIntegration(ILogger logger)
+        : base(logger)
+    {
+    }
 
     #endregion
 
@@ -32,7 +39,7 @@ internal class TufxCompat : ModCompat
     /// <summary>
     /// Patch TUFX to save settings not in the sfs but in a separate file that does not reset on join.
     /// </summary>
-    public override void Patch(ModMessageHandler modMessageHandler, ConfigNode node)
+    public override void Setup(ConfigNode node)
     {
         var texturesUnlimitedFXLoader = AccessTools.TypeByName("TUFX.TexturesUnlimitedFXLoader");
         var tufxScene = AccessTools.TypeByName("TUFX.TUFXScene");
@@ -46,10 +53,10 @@ internal class TufxCompat : ModCompat
 
         LunaCompat.HarmonyInstance.Patch(AccessTools.Method(texturesUnlimitedFXLoader, "GetProfileNameForScene", [
             tufxScene
-        ]), prefix: new HarmonyMethod(typeof(TufxCompat), nameof(PrefixLoad)));
+        ]), prefix: new HarmonyMethod(typeof(TufxIntegration), nameof(PrefixLoad)));
         LunaCompat.HarmonyInstance.Patch(AccessTools.Method(texturesUnlimitedFXLoader, "ChangeProfileForScene", [
             typeof(string), tufxScene
-        ]), postfix: new HarmonyMethod(typeof(TufxCompat), nameof(PostfixSave)));
+        ]), postfix: new HarmonyMethod(typeof(TufxIntegration), nameof(PostfixSave)));
     }
 
     #endregion

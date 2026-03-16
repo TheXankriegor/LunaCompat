@@ -1,21 +1,20 @@
-﻿using System;
-
-using HarmonyLib;
+﻿using HarmonyLib;
 
 using JetBrains.Annotations;
 
-using LunaCompat.Attributes;
-using LunaCompat.Utils;
+using LunaCompatCommon.Utils;
 
 namespace LunaCompat.Mods.PhysicsRangeExtender;
 
-[LunaFix]
 [UsedImplicitly]
-internal class PhysicsRangeExtenderCompat : ModCompat
+internal class PhysicsRangeExtenderIntegration : ClientModIntegration
 {
-    #region Fields
+    #region Constructors
 
-    private static Type preSettings;
+    public PhysicsRangeExtenderIntegration(ILogger logger)
+        : base(logger)
+    {
+    }
 
     #endregion
 
@@ -31,12 +30,12 @@ internal class PhysicsRangeExtenderCompat : ModCompat
     /// PRE will never work with LMP. Disable it on load if enabled.
     /// </summary>
     [HarmonyPatch]
-    public override void Patch(ModMessageHandler modMessageHandler, ConfigNode node)
+    public override void Setup(ConfigNode node)
     {
-        preSettings = AccessTools.TypeByName("PhysicsRangeExtender.PreSettings");
+        var preSettings = AccessTools.TypeByName("PhysicsRangeExtender.PreSettings");
         var modEnabledSetter = AccessTools.PropertySetter(preSettings, "ModEnabled");
         modEnabledSetter.Invoke(null, [false]);
-        LunaCompat.HarmonyInstance.Patch(modEnabledSetter, prefix: new HarmonyMethod(typeof(PhysicsRangeExtenderCompat), nameof(PrefixEnabledSet)));
+        LunaCompat.HarmonyInstance.Patch(modEnabledSetter, prefix: new HarmonyMethod(typeof(PhysicsRangeExtenderIntegration), nameof(PrefixEnabledSet)));
     }
 
     #endregion

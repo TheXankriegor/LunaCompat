@@ -1,46 +1,139 @@
 ﻿using System;
-using System.Collections.Generic;
-
-using KSPBuildTools;
 
 using LmpClient.Base;
 using LmpClient.Network;
 using LmpClient.Systems.ModApi;
 
+using LmpCommon.Message;
 using LmpCommon.Message.Client;
-using LmpCommon.Message.Data;
 
 using LunaCompatCommon.Messages;
 using LunaCompatCommon.Serializer;
+using LunaCompatCommon.Utils;
 
 namespace LunaCompat.Utils;
 
-internal interface IMessageListener
+internal interface IClientMessageListener : IMessageListener
 {
     void Execute(byte[] data);
 }
 
-internal class ModMessageHandler
+internal class ClientMessageListener<TMessageType> : MessageListener<TMessageType>, IClientMessageListener
+    where TMessageType : class, IModMessage, new()
 {
     #region Fields
 
-    public static ModMessageHandler Instance;
-
-    private readonly EventData<string, byte[]> _onModMessageReceivedEvent;
-    private readonly Dictionary<string, IMessageListener> _modMessageListeners;
-    private readonly SegmentedMessageHandler _segmentedMessageHandler;
+    private readonly Action<TMessageType> _action;
 
     #endregion
 
     #region Constructors
 
-    public ModMessageHandler()
+    public ClientMessageListener(ILogger logger, Action<TMessageType> action)
+        : base(logger)
+    {
+        _action = action;
+    }
+
+    #endregion
+
+    #region Public Methods
+
+    public void Execute(byte[] data)
+    {
+        try
+        {
+            if (!TryDeserializeMessage(data, out var message))
+            {
+                _logger.Error($"Failed to deserialize '{typeof(TMessageType).Name}' message ({data.Length} bytes).");
+                return;
+            }
+
+            _action.Invoke(message);
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex);
+        }
+    }
+
+    #endregion
+}
+
+internal class ClientSegmentedMessageListener : SegmentedMessageListener, IClientMessageListener
+{
+    #region Fields
+
+    private readonly ClientMessageHandler _messageHandler;
+
+    #endregion
+
+    #region Constructors
+
+    public ClientSegmentedMessageListener(ILogger logger, ClientMessageHandler messageHandler)
+        : base(logger)
+    {
+        _messageHandler = messageHandler;
+    }
+
+    #endregion
+
+    #region Public Methods
+
+    public void Execute(byte[] data)
+    {
+        if (TryHandleSegment(data, out var id, out var combinedBytes))
+            _messageHandler.HandleReceivedMessage(id, combinedBytes);
+    }
+
+    #endregion
+}
+
+internal interface IClientMessageSender
+{
+    void SendUnreliableMessage<TMessageType>(TMessageType message, bool relay = true)
+        where TMessageType : class, IModMessage, new();
+
+    void SendReliableMessage<TMessageType>(TMessageType message, bool relay = true)
+        where TMessageType : class, IModMessage, new();
+}
+
+internal interface IClientMessageHandler : IMessageHandler<IClientMessageListener>, IClientMessageSender
+{
+    event EventHandler<bool> HasServerIntegrationChanged;
+
+    bool HasServerIntegration { get; }
+
+    void SetServerIntegrationDetermined(bool hasServerIntegration);
+
+    void HandleReceivedMessage(string id, byte[] data);
+
+    void RegisterModMessageListener<TMessageType>(Action<TMessageType> messageHandler)
+        where TMessageType : class, IModMessage, new();
+
+    void UnregisterModMessageListener<TMessageType>()
+        where TMessageType : class, IModMessage, new();
+}
+
+internal class ClientMessageHandler : MessageHandler<IClientMessageListener>, IClientMessageHandler, IDisposable
+{
+    #region Fields
+
+    private readonly EventData<string, byte[]> _onModMessageReceivedEvent;
+
+    #endregion
+
+    #region Constructors
+
+    public ClientMessageHandler(ILogger logger)
+        : base(logger, new ClientMessageFactory())
     {
         Instance = this;
-        _modMessageListeners = [];
-        _segmentedMessageHandler = new SegmentedMessageHandler(_modMessageListeners);
+
+        _modMessageListeners.Add(SerializationUtil.CreatePrefixedModMessageId<SegmentedMessage>(), new ClientSegmentedMessageListener(logger, this));
+
         _onModMessageReceivedEvent = GameEvents.FindEvent<EventData<string, byte[]>>("onModMessageReceived");
-        _onModMessageReceivedEvent?.Add(HandleModMessage);
+        _onModMessageReceivedEvent?.Add(HandleReceivedMessage);
     }
 
     #endregion
@@ -52,6 +145,8 @@ internal class ModMessageHandler
     #endregion
 
     #region Properties
+
+    public static ClientMessageHandler Instance { get; private set; }
 
     public bool HasServerIntegration { get; private set; }
 
@@ -65,118 +160,50 @@ internal class ModMessageHandler
         HasServerIntegrationChanged?.Invoke(this, hasServerIntegration);
     }
 
+    public void HandleReceivedMessage(string id, byte[] data)
+    {
+        if (!id.StartsWith(Constants.Prefix) || !TryGetMessageListener(id, out var messageListener))
+            return;
+
+        messageListener.Execute(data);
+    }
+
     public void RegisterModMessageListener<TMessageType>(Action<TMessageType> messageHandler)
         where TMessageType : class, IModMessage, new()
     {
-        _modMessageListeners.TryAdd(SerializationUtil.CreatePrefixedModMessageId<TMessageType>(), new MessageListener<TMessageType>(messageHandler));
+        _modMessageListeners.TryAdd(SerializationUtil.CreatePrefixedModMessageId<TMessageType>(),
+                                    new ClientMessageListener<TMessageType>(_logger, messageHandler));
     }
 
     public void UnregisterModMessageListener<TMessageType>()
+        where TMessageType : class, IModMessage, new()
     {
         _modMessageListeners.Remove(SerializationUtil.CreatePrefixedModMessageId<TMessageType>());
     }
 
-    public void Destroy()
+    public void SendUnreliableMessage<TMessageType>(TMessageType message, bool relay = true)
+        where TMessageType : class, IModMessage, new()
     {
-        _onModMessageReceivedEvent?.Remove(HandleModMessage);
-    }
-
-    public void SendUnreliableMessage<T>(T messageToSend, bool relay = true)
-        where T : class, IModMessage, new()
-    {
-        var messageToBeSend = SerializationUtil.Serialize(messageToSend);
-        ModApiSystem.Singleton.SendModMessage(SerializationUtil.CreatePrefixedModMessageId<T>(), messageToBeSend, messageToBeSend.Length, relay);
-    }
-
-    public void SendReliableMessage<T>(T messageToSend, bool relay = true)
-        where T : class, IModMessage, new()
-    {
-        var messageToBeSend = SerializationUtil.Serialize(messageToSend);
-
-        var msgData = NetworkMain.CliMsgFactory.CreateNewMessageData<ModMsgData>();
-        if (msgData.Data.Length < messageToBeSend.Length)
-            msgData.Data = new byte[messageToBeSend.Length];
-
-        Array.Copy(messageToBeSend, msgData.Data, messageToBeSend.Length);
-
-        msgData.NumBytes = messageToBeSend.Length;
-        msgData.Relay = relay;
-        msgData.ModName = SerializationUtil.CreatePrefixedModMessageId<T>();
-
-        // set message to reliable so that it gets split
-        msgData.Reliable = true;
-
-        var msg = SystemBase.MessageFactory.CreateNew<ModCliMsg>(msgData);
-        SystemBase.TaskFactory.StartNew(() => NetworkSender.QueueOutgoingMessage(msg));
-    }
-
-    #endregion
-
-    #region Non-Public Methods
-
-    private void HandleModMessage(string id, byte[] data)
-    {
-        if (id == SerializationUtil.CreatePrefixedModMessageId<SegmentedMessage>())
-            _segmentedMessageHandler.HandleSegment(data);
-
-        if (!_modMessageListeners.TryGetValue(id, out var mod))
-            return;
-
-        mod.Execute(data);
-    }
-
-    #endregion
-
-    #region Nested Types
-
-    private class MessageListener<T> : IMessageListener
-        where T : class, IModMessage, new()
-    {
-        #region Fields
-
-        private readonly Action<T> _messageHandler;
-
-        #endregion
-
-        #region Constructors
-
-        public MessageListener(Action<T> messageHandler)
+        SendMessageInternal(message, msgData =>
         {
-            _messageHandler = messageHandler;
-        }
+            ModApiSystem.Singleton.SendModMessage(SerializationUtil.CreatePrefixedModMessageId<TMessageType>(), msgData.Data, relay);
+        });
+    }
 
-        #endregion
-
-        #region Public Methods
-
-        public void Execute(byte[] data)
+    public void SendReliableMessage<TMessageType>(TMessageType message, bool relay = true)
+        where TMessageType : class, IModMessage, new()
+    {
+        SendMessageInternal(message, msgData =>
         {
-            if (data.Length <= 0)
-                return;
+            msgData.Relay = relay;
+            var msg = SystemBase.MessageFactory.CreateNew<ModCliMsg>(msgData);
+            SystemBase.TaskFactory.StartNew(() => NetworkSender.QueueOutgoingMessage(msg));
+        });
+    }
 
-            T syncMessage = null;
-
-            try
-            {
-                syncMessage = SerializationUtil.Deserialize<T>(data);
-            }
-            catch (Exception ex)
-            {
-                Log.Error($"Failed to deserialize {typeof(T).Name} message: {data.Length} size");
-                Log.Exception(ex);
-            }
-
-            try
-            {
-                _messageHandler.Invoke(syncMessage);
-            }
-            catch (Exception ex)
-            {
-                Log.Exception(ex);
-            }
-        }
-
-        #endregion
+    public void Dispose()
+    {
+        _onModMessageReceivedEvent?.Remove(HandleReceivedMessage);
     }
 
     #endregion

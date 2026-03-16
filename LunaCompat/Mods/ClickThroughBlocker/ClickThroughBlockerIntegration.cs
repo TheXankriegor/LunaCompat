@@ -1,23 +1,32 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 
 using HarmonyLib;
 
 using JetBrains.Annotations;
 
-using LunaCompat.Attributes;
 using LunaCompat.Utils;
+
+using LunaCompatCommon.Utils;
 
 namespace LunaCompat.Mods.ClickThroughBlocker;
 
-[LunaFix]
 [UsedImplicitly]
-internal class ClickThroughBlockerCompat : ModCompat
+internal class ClickThroughBlockerIntegration : ClientModIntegration
 {
     #region Fields
 
-    private static Type ctbParameters;
+    private static ReflectedType ctbType;
+
     private static string ctbSettingsFilePath;
+
+    #endregion
+
+    #region Constructors
+
+    public ClickThroughBlockerIntegration(ILogger logger)
+        : base(logger)
+    {
+    }
 
     #endregion
 
@@ -29,10 +38,10 @@ internal class ClickThroughBlockerCompat : ModCompat
 
     #region Public Methods
 
-    public override void Patch(ModMessageHandler modMessageHandler, ConfigNode node)
+    public override void Setup(ConfigNode node)
     {
-        var oneTimePopup = AccessTools.TypeByName("ClickThroughFix.OneTimePopup");
-        ctbParameters = AccessTools.TypeByName("ClickThroughFix.CTB");
+        var oneTimePopupType = new ReflectedType("ClickThroughFix.OneTimePopup");
+        ctbType = new ReflectedType("ClickThroughFix.CTB");
 
         var saveGamePath = Path.Combine(KSPUtil.ApplicationRootPath, "saves", HighLogic.SaveFolder);
         if (!Directory.Exists(saveGamePath))
@@ -40,10 +49,10 @@ internal class ClickThroughBlockerCompat : ModCompat
 
         ctbSettingsFilePath = Path.Combine(saveGamePath, "CTBSettings.cfg");
 
-        LunaCompat.HarmonyInstance.Patch(AccessTools.Method(oneTimePopup, "Awake", []),
-                                         prefix: new HarmonyMethod(typeof(ClickThroughBlockerCompat), nameof(PrefixAwake)));
-        LunaCompat.HarmonyInstance.Patch(AccessTools.Method(oneTimePopup, "CreatePopUpFlagFile", []),
-                                         prefix: new HarmonyMethod(typeof(ClickThroughBlockerCompat), nameof(PrefixPopUpFile)));
+        LunaCompat.HarmonyInstance.Patch(oneTimePopupType.Method("Awake"),
+                                         prefix: new HarmonyMethod(typeof(ClickThroughBlockerIntegration), nameof(PrefixAwake)));
+        LunaCompat.HarmonyInstance.Patch(oneTimePopupType.Method("CreatePopUpFlagFile"),
+                                         prefix: new HarmonyMethod(typeof(ClickThroughBlockerIntegration), nameof(PrefixPopUpFile)));
     }
 
     #endregion
@@ -57,12 +66,12 @@ internal class ClickThroughBlockerCompat : ModCompat
 
         var node = ConfigNode.Load(ctbSettingsFilePath);
 
-        HighLogic.CurrentGame?.Parameters?.CustomParams(ctbParameters).Load(node);
+        HighLogic.CurrentGame?.Parameters?.CustomParams(ctbType.Type).Load(node);
     }
 
     private static void PrefixPopUpFile()
     {
-        var settings = HighLogic.CurrentGame?.Parameters?.CustomParams(ctbParameters);
+        var settings = HighLogic.CurrentGame?.Parameters?.CustomParams(ctbType.Type);
         if (settings == null)
             return;
 

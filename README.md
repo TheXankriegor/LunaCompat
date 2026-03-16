@@ -9,6 +9,7 @@ Compatibility patches to make KSP's [Luna Multiplayer Mod](https://github.com/Lu
   - [Installation](#installation)
     - [CKAN](#ckan)
     - [Manual installation](#manual-installation)
+    - [Server plugin](#server-plugin)
     - [Dependencies](#dependencies)
   - [Creating a release](#creating-a-release)
 
@@ -29,6 +30,7 @@ Check the repository to see the full list of supported mods.
 - [TUFX](https://github.com/KSPModStewards/TUFX): Keep settings between disconnects
 - [ClickThroughBlocker](https://github.com/linuxgurugamer/ClickThroughBlocker): Keep settings between disconnects
 - [PhysicsRangeExtender](https://github.com/jrodrigv/PhysicsRangeExtender): Force disable PRE at all times
+- [Kerbal-Konstructs](github.com/KSP-RO/Kerbal-Konstructs): Sync instances across clients (see [Server plugin](#server-plugin))
 
 ### Part Syncs
 
@@ -75,6 +77,13 @@ The mod is available on CKAN - just search for 'Luna Compat'!
 - Download the latest `LunaCompat.zip` from the [Releases](https://github.com/TheXankriegor/LunaCompat/releases)
 - Unpack into your Kerbal Space Program folder
   - The ZIP file contents in `GameData/LunaMultiplayer/` should be merged with your existing LMP mod folder
+
+### Server plugin
+
+Certain mods require the LunaCompat server plugin to function correctly. 
+
+- Download the latest `LunaCompatServerPlugin.zip` from the [Releases](https://github.com/TheXankriegor/LunaCompat/releases)
+- Unpack into your Luna Multiplayer Server `Plugins` folder (create a new folder if it does not exist)
 
 ### Dependencies
 

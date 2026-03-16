@@ -1,9 +1,5 @@
-﻿using LmpCommon.Message.Data;
-
-using LunaCompatCommon.Messages;
-using LunaCompatCommon.Serializer;
-
-using LunaCompatServerPlugin.Utils;
+﻿using LunaCompatCommon.Messages.ModMessages;
+using LunaCompatCommon.Utils;
 
 using LunaConfigNode.CfgNode;
 
@@ -12,34 +8,46 @@ using Server.System;
 
 namespace LunaCompatServerPlugin.Mods;
 
-internal class KerbalKonstructsIntegration : ServersideModIntegration
+internal class KerbalKonstructsIntegration : ServerModIntegration
 {
     #region Fields
 
-    private ServerModMessageHandler _messageHandler;
-    private string _baseInstancePath;
-    private string _baseGroupsPath;
+    private readonly string _baseInstancePath;
+    private readonly string _baseGroupsPath;
+
+    #endregion
+
+    #region Constructors
+
+    public KerbalKonstructsIntegration(ILogger logger, ServerMessageHandler messageHandler)
+        : base(logger, messageHandler)
+    {
+        _baseInstancePath = Path.Combine(LunaCompatServer.GetLunaCompatBaseDirectory(), "KerbalKonstructs", "NewInstances");
+        _baseGroupsPath = Path.Combine(LunaCompatServer.GetLunaCompatBaseDirectory(), "KerbalKonstructs", "Groups");
+    }
 
     #endregion
 
     #region Properties
 
-    public override string ModPrefix => "KerbalKonstructs";
+    public override string PackageName => "KerbalKonstructs";
 
     #endregion
 
     #region Public Methods
 
-    public override void Setup(ServerModMessageHandler messageHandler)
+    public override void Setup()
     {
-        _messageHandler = messageHandler;
+        _messageHandler.RegisterModMessageListener<KerbalKonstructsRequestInstancesMessage>(OnRequestInstancesMessageReceived);
 
-        _messageHandler.OnCompatMessageReceived += OnCompatMessageReceived;
+        _messageHandler.RegisterModMessageListener<KerbalKonstructsChangeStaticInstanceMessage>(OnChangeStaticInstanceMessageReceived);
+        _messageHandler.RegisterModMessageListener<KerbalKonstructsDeleteStaticInstanceMessage>(OnDeleteStaticInstanceMessageReceived);
 
-        _baseInstancePath = Path.Combine(LunaCompatServer.GetLunaCompatBaseDirectory(), "KerbalKonstructs", "NewInstances");
+        _messageHandler.RegisterModMessageListener<KerbalKonstructsChangeGroupCenterMessage>(OnChangeGroupCenterMessageReceived);
+        _messageHandler.RegisterModMessageListener<KerbalKonstructsDeleteGroupCenterMessage>(OnDeleteGroupCenterMessageReceived);
+
         if (!FileHandler.FolderExists(_baseInstancePath))
             FileHandler.FolderCreate(_baseInstancePath);
-        _baseGroupsPath = Path.Combine(LunaCompatServer.GetLunaCompatBaseDirectory(), "KerbalKonstructs", "Groups");
         if (!FileHandler.FolderExists(_baseGroupsPath))
             FileHandler.FolderCreate(_baseGroupsPath);
     }
@@ -48,56 +56,35 @@ internal class KerbalKonstructsIntegration : ServersideModIntegration
 
     #region Non-Public Methods
 
-    private void OnCompatMessageReceived(object sender, (ClientStructure Client, ModMsgData Data) e)
-    {
-        if (SerializationUtil.IsMessageOfType<KerbalKonstructsRequestInstancesMessage>(e.Data.ModName))
-            Task.Run(() => SendAllInstances(e));
-
-        if (SerializationUtil.IsMessageOfType<KerbalKonstructsDeleteStaticInstanceMessage>(e.Data.ModName))
-            Task.Run(() => DeleteStaticInstance(e));
-        if (SerializationUtil.IsMessageOfType<KerbalKonstructsDeleteGroupCenterMessage>(e.Data.ModName))
-            Task.Run(() => DeleteGroupCenter(e));
-
-        if (SerializationUtil.IsMessageOfType<KerbalKonstructsChangeStaticInstanceMessage>(e.Data.ModName))
-            Task.Run(() => UpdateStaticInstance(e));
-
-        if (SerializationUtil.IsMessageOfType<KerbalKonstructsChangeGroupCenterMessage>(e.Data.ModName))
-            Task.Run(() => UpdateGroupCenter(e));
-    }
-
-    private void UpdateGroupCenter((ClientStructure Client, ModMsgData Data) data)
+    private void OnChangeGroupCenterMessageReceived(ClientStructure client, KerbalKonstructsChangeGroupCenterMessage msg)
     {
         try
         {
-            var message = SerializationUtil.Deserialize<KerbalKonstructsChangeGroupCenterMessage>(data.Data.Data);
+            _logger.Debug($"Received group center update for {msg.ModelName} ({msg.Uuid})", PackageName);
 
-            Log.Debug($"Received group center update for {message.ModelName} ({message.Uuid})", ModPrefix);
-
-            var uniquePath = Path.Combine(_baseGroupsPath, message.Uuid);
+            var uniquePath = Path.Combine(_baseGroupsPath, msg.Uuid);
 
             if (!Directory.Exists(uniquePath))
                 Directory.CreateDirectory(uniquePath);
 
-            var groupPath = Path.Combine(uniquePath, $"{message.ModelName}.cfg");
+            var groupPath = Path.Combine(uniquePath, $"{msg.ModelName}.cfg");
 
             // for groups, we can just replace the whole thing
-            FileHandler.WriteToFile(groupPath, message.Content);
+            FileHandler.WriteToFile(groupPath, msg.Content);
         }
         catch (Exception ex)
         {
-            Log.Error(ex.ToString(), ModPrefix);
+            _logger.Error(ex.ToString(), PackageName);
         }
     }
 
-    private void UpdateStaticInstance((ClientStructure Client, ModMsgData Data) data)
+    private void OnChangeStaticInstanceMessageReceived(ClientStructure client, KerbalKonstructsChangeStaticInstanceMessage msg)
     {
         try
         {
-            var message = SerializationUtil.Deserialize<KerbalKonstructsChangeStaticInstanceMessage>(data.Data.Data);
+            _logger.Debug($"Received static instance update for {msg.ModelName}", PackageName);
 
-            Log.Debug($"Received static instance update for {message.ModelName}", ModPrefix);
-
-            var instancePath = Path.Combine(_baseInstancePath, $"{message.ModelName}.cfg");
+            var instancePath = Path.Combine(_baseInstancePath, $"{msg.ModelName}.cfg");
 
             if (File.Exists(instancePath))
             {
@@ -107,13 +94,12 @@ internal class KerbalKonstructsIntegration : ServersideModIntegration
 
                 if (existingInstances == null)
                 {
-                    Log.Warning($"Received empty static instance definition from {data.Client.PlayerName} for {message.ModelName}: {message.Content}",
-                                ModPrefix);
+                    _logger.Warning($"Received empty static instance definition from {client.PlayerName} for {msg.ModelName}: {msg.Content}", PackageName);
                     return;
                 }
 
                 var eN = existingInstances.GetNodes("Instances");
-                var update = new ConfigNode(message.Content);
+                var update = new ConfigNode(msg.Content);
                 var uN = update.GetNode("root").Value.GetNode("STATIC").Value.GetNodes("Instances");
 
                 foreach (var newInstance in uN)
@@ -129,27 +115,25 @@ internal class KerbalKonstructsIntegration : ServersideModIntegration
                 FileHandler.WriteToFile(instancePath, existing.ToString());
             }
             else
-                FileHandler.WriteToFile(instancePath, message.Content);
+                FileHandler.WriteToFile(instancePath, msg.Content);
         }
         catch (Exception ex)
         {
-            Log.Error(ex.ToString(), ModPrefix);
+            _logger.Error(ex.ToString(), PackageName);
         }
     }
 
-    private void DeleteGroupCenter((ClientStructure Client, ModMsgData Data) data)
+    private void OnDeleteGroupCenterMessageReceived(ClientStructure client, KerbalKonstructsDeleteGroupCenterMessage msg)
     {
         try
         {
-            var message = SerializationUtil.Deserialize<KerbalKonstructsDeleteGroupCenterMessage>(data.Data.Data);
+            _logger.Debug($"Received group delete for {msg.Uuid}", PackageName);
 
-            Log.Debug($"Received group delete for {message.Uuid}", ModPrefix);
-
-            var groupPath = Path.Combine(_baseGroupsPath, message.Uuid);
+            var groupPath = Path.Combine(_baseGroupsPath, msg.Uuid);
 
             if (!Directory.Exists(groupPath))
             {
-                Log.Warning($"Trying to delete group center which does not exist on the server ({message.Uuid}).", ModPrefix);
+                _logger.Warning($"Trying to delete group center which does not exist on the server ({msg.Uuid}).", PackageName);
                 return;
             }
 
@@ -157,23 +141,21 @@ internal class KerbalKonstructsIntegration : ServersideModIntegration
         }
         catch (Exception ex)
         {
-            Log.Error(ex.ToString(), ModPrefix);
+            _logger.Error(ex.ToString(), PackageName);
         }
     }
 
-    private void DeleteStaticInstance((ClientStructure Client, ModMsgData Data) data)
+    private void OnDeleteStaticInstanceMessageReceived(ClientStructure client, KerbalKonstructsDeleteStaticInstanceMessage msg)
     {
         try
         {
-            var message = SerializationUtil.Deserialize<KerbalKonstructsDeleteStaticInstanceMessage>(data.Data.Data);
+            _logger.Debug($"Received static instance delete for {msg.ModelName} ({msg.Uuid})", PackageName);
 
-            Log.Debug($"Received static instance delete for {message.ModelName} ({message.Uuid})", ModPrefix);
-
-            var instancePath = Path.Combine(_baseInstancePath, $"{message.ModelName}.cfg");
+            var instancePath = Path.Combine(_baseInstancePath, $"{msg.ModelName}.cfg");
 
             if (!File.Exists(instancePath))
             {
-                Log.Warning($"Trying to delete static instance which does not exist on the server ({message.ModelName}).", ModPrefix);
+                _logger.Warning($"Trying to delete static instance which does not exist on the server ({msg.ModelName}).", PackageName);
                 return;
             }
 
@@ -184,7 +166,7 @@ internal class KerbalKonstructsIntegration : ServersideModIntegration
 
             foreach (var instance in instances)
             {
-                if (instance.Value.GetValue("UUID").Value != message.Uuid)
+                if (instance.Value.GetValue("UUID").Value != msg.Uuid)
                     continue;
 
                 // Workaround for RepeatedItems in the MixedCollection not deleting properly
@@ -200,24 +182,24 @@ internal class KerbalKonstructsIntegration : ServersideModIntegration
         }
         catch (Exception ex)
         {
-            Log.Error(ex.ToString(), ModPrefix);
+            _logger.Error(ex.ToString(), PackageName);
         }
     }
 
-    private void SendAllInstances((ClientStructure Client, ModMsgData Data) data)
+    private void OnRequestInstancesMessageReceived(ClientStructure client, KerbalKonstructsRequestInstancesMessage msg)
     {
         try
         {
-            Log.Info($"Sending all KK instances to {data.Client.PlayerName}", ModPrefix);
+            _logger.Info($"Sending all KK instances to {client.PlayerName}", PackageName);
 
-            SendAllGroupCenters(data.Client);
-            SendAllStaticInstances(data.Client);
+            SendAllGroupCenters(client);
+            SendAllStaticInstances(client);
 
-            _messageHandler.SendCompatMessage(data.Client, new KerbalKonstructsRequestInstancesMessage());
+            _messageHandler.SendCompatMessage(client, new KerbalKonstructsRequestInstancesMessage());
         }
         catch (Exception ex)
         {
-            Log.Error(ex.ToString(), ModPrefix);
+            _logger.Error(ex.ToString(), PackageName);
         }
     }
 
@@ -229,7 +211,7 @@ internal class KerbalKonstructsIntegration : ServersideModIntegration
         {
             try
             {
-                Log.Debug($"Sending {file}", ModPrefix);
+                _logger.Debug($"Sending {file}", PackageName);
 
                 var writtenFileName = file.Substring(_baseInstancePath.Length + 1);
                 var baseMessage = new KerbalKonstructsChangeStaticInstanceMessage
@@ -241,7 +223,7 @@ internal class KerbalKonstructsIntegration : ServersideModIntegration
             }
             catch (Exception ex)
             {
-                Log.Error($"Failed to send {file}: {ex}", ModPrefix);
+                _logger.Error($"Failed to send {file}: {ex}", PackageName);
             }
         }
     }
@@ -264,7 +246,7 @@ internal class KerbalKonstructsIntegration : ServersideModIntegration
                 var uuid = parts[0];
                 var modelName = parts[1];
 
-                Log.Debug($"Sending {modelName} - {uuid}", ModPrefix);
+                _logger.Debug($"Sending {modelName} - {uuid}", PackageName);
 
                 var baseMessage = new KerbalKonstructsChangeGroupCenterMessage
                 {
@@ -276,7 +258,7 @@ internal class KerbalKonstructsIntegration : ServersideModIntegration
             }
             catch (Exception ex)
             {
-                Log.Error($"Failed to send {group}: {ex}", ModPrefix);
+                _logger.Error($"Failed to send {group}: {ex}", PackageName);
             }
         }
     }

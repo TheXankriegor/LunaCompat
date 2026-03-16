@@ -9,7 +9,11 @@
     <Import_RootNamespace>LunaCompatCommon</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)Messages\KerbalKonstructMessages.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\MessageHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\MessageListener.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\ModMessages\KerbalKonstructMessages.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\SegmentedMessageListener.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ModIntegration\ModIntegration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serializer\SerializationReader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serializer\SerializationUtil.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serializer\SerializationWriter.cs" />
@@ -18,7 +22,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Utils\Constants.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Messages\IModMessage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Messages\InitializeMessage.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Messages\ScanSatMessages.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\ModMessages\ScanSatMessages.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Messages\SegmentedMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utils\BaseLogger.cs" />
   </ItemGroup>
 </Project>

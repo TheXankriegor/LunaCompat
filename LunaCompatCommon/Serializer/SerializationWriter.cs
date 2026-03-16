@@ -1,4 +1,5 @@
 // ReSharper disable RedundantUsingDirective
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -175,12 +176,10 @@ namespace LunaCompatCommon.Serializer
                     return;
                 }
 
-
                 // Reference type null
                 _ms.WriteByte(0); // has-value = false
                 return;
             }
-
 
             // Resolve the actual runtime type for dispatch
             if (type == typeof(bool))
@@ -306,6 +305,7 @@ namespace LunaCompatCommon.Serializer
             // Complex object: serialize public properties
             WriteComplexObject(value, type);
         }
+
         private void WriteComplexObject(object obj, Type type)
         {
             if (obj == null)

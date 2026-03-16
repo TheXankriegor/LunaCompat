@@ -1,14 +1,21 @@
 ﻿using JetBrains.Annotations;
 
-using LunaCompat.Attributes;
-using LunaCompat.Utils;
+using LunaCompatCommon.Utils;
 
 namespace LunaCompat.Mods.KerbalPlanetaryBaseSystems;
 
-[LunaFix]
 [UsedImplicitly]
-internal class PlanetaryBaseSystemsCompat : ModCompat
+internal class PlanetaryBaseSystemsIntegration : ClientModIntegration
 {
+    #region Constructors
+
+    public PlanetaryBaseSystemsIntegration(ILogger logger)
+        : base(logger)
+    {
+    }
+
+    #endregion
+
     #region Properties
 
     public override string PackageName => "PlanetarySurfaceStructures";
@@ -17,7 +24,7 @@ internal class PlanetaryBaseSystemsCompat : ModCompat
 
     #region Public Methods
 
-    public override void Patch(ModMessageHandler modMessageHandler, ConfigNode node)
+    public override void Setup(ConfigNode node)
     {
         // TODO add Kerbal Planetary Base Systems fixes here
     }

@@ -1,7 +1,8 @@
 ﻿// ReSharper disable once RedundantUsingDirective
+
 using System;
 
-namespace LunaCompatCommon.Messages
+namespace LunaCompatCommon.Messages.ModMessages
 {
     public class ScanSatSyncMessage : IModMessage
     {
