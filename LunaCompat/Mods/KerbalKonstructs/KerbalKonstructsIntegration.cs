@@ -134,8 +134,8 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
         if (!initialized || isDeleting || !ClientMessageHandler.Instance.HasServerIntegration)
             return;
 
-        var uuid = staticInstanceType.Field("UUID").GetValue(__0) as string;
-        var model = staticInstanceType.Field("model").GetValue(__0);
+        var uuid = staticInstanceType.GetField("UUID", __0) as string;
+        var model = staticInstanceType.GetField("model", __0);
         var name = staticModelType.GetField("name", model) as string;
 
         Logger.Instance.Info($"KerbalKonstructs delete: {name} ({uuid})");
@@ -447,7 +447,7 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
 
         Logger.Instance.Warning($"Loaded KK groups: {groupDictionary.Count}.");
 
-        var allCenters = (IDictionary)staticDatabaseType.Field("allCenters").GetValue(null);
+        var allCenters = (IDictionary)staticDatabaseType.GetField("allCenters", null);
         Logger.Instance.Info($"Loaded in KK: {allCenters.Count} instances");
     }
 
@@ -491,7 +491,7 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
         var modelName = staticNode.GetValue("pointername");
         var model = staticDatabaseType.Invoke("GetModelByName", null, [modelName]);
 
-        var kkInstance = kerbalKonstructsType.Field("instance").GetValue(null);
+        var kkInstance = kerbalKonstructsType.GetField("instance", null);
 
         if (model != null)
             kerbalKonstructsType.Invoke("LoadInstances", kkInstance, [config, model]);
@@ -509,7 +509,7 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
                 staticInstanceType.SetField("configPath", instance, subPath);
         }
 
-        var allStaticInstances = (Array)staticDatabaseType.Field("allStaticInstances").GetValue(null);
+        var allStaticInstances = (Array)staticDatabaseType.GetField("allStaticInstances", null);
         Logger.Instance.Info($"Loaded: {allStaticInstances.Length} instances");
 
         if (!initialized)
@@ -520,7 +520,7 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
 
     private static void OnAllInstancesAvailableMessageReceived(KerbalKonstructsRequestInstancesMessage msg)
     {
-        var kkInstance = kerbalKonstructsType.Field("instance").GetValue(null);
+        var kkInstance = kerbalKonstructsType.GetField("instance", null);
         kerbalKonstructsType.Invoke("OnLevelWasLoad", kkInstance, [HighLogic.LoadedScene]);
         initialized = true;
     }
@@ -586,9 +586,36 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
     {
         FixSaveLocations();
 
-        // also unload groups
+        var allCenters = (IDictionary)staticDatabaseType.GetField("allCenters", null);
+        var groupsToUnload = new List<string>();
 
-        var allStaticInstances = (Array)staticDatabaseType.Field("allStaticInstances").GetValue(null);
+        foreach (var fgn in allCenters.Keys)
+        {
+            if (fgn is not string groupName)
+                continue;
+
+            var groupObject = allCenters[fgn];
+            var path = groupCenterType.GetField("configPath", groupObject) as string;
+
+            if (string.IsNullOrEmpty(path) || !path.Contains("KerbalKonstructs/NewInstances") ||
+                groupCenterType.GetField("configUrl", groupObject) is not UrlConfig url)
+                continue;
+
+            url.config.RemoveNodes("Instances");
+            groupsToUnload.Add(groupName);
+        }
+
+        foreach (var group in groupsToUnload)
+        {
+            var nameParts = group.Split(['_'], 2);
+            if (nameParts.Length != 2)
+                continue;
+
+            _logger.Info($"Unloading group '{group}'.");
+            apiType.Invoke("RemoveGroup", null, [nameParts[1], nameParts[0]]);
+        }
+
+        var allStaticInstances = (Array)staticDatabaseType.GetField("allStaticInstances", null);
 
         foreach (var instance in allStaticInstances)
         {
@@ -605,7 +632,7 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
             apiType.Invoke("RemoveStatic", null, [uuid]);
         }
 
-        allStaticInstances = (Array)staticDatabaseType.Field("allStaticInstances").GetValue(null);
+        allStaticInstances = (Array)staticDatabaseType.GetField("allStaticInstances", null);
         _logger.Info($"Loaded: {allStaticInstances.Length} instances");
 
         foreach (var instance in allStaticInstances)

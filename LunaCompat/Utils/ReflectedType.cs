@@ -73,7 +73,11 @@ namespace LunaCompat.Utils
             Property(propertyName).SetValue(instance, value);
         }
 
-        public FieldInfo Field(string fieldName)
+        #endregion
+
+        #region Non-Public Methods
+
+        private FieldInfo Field(string fieldName)
         {
             if (!_fields.TryGetValue(fieldName, out var field))
             {
@@ -84,7 +88,7 @@ namespace LunaCompat.Utils
             return field;
         }
 
-        public PropertyInfo Property(string propertyName)
+        private PropertyInfo Property(string propertyName)
         {
             if (!_properties.TryGetValue(propertyName, out var property))
             {

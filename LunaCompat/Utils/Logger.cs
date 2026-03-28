@@ -18,7 +18,7 @@ namespace LunaCompat.Utils
 
         public Logger()
         {
-            Instance = new Logger();
+            Instance = this;
         }
 
         #endregion
