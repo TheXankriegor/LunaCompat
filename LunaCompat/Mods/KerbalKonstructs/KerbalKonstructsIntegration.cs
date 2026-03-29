@@ -30,6 +30,8 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
 {
     #region Fields
 
+    private static ReflectedType decalsDatabaseType;
+    private static ReflectedType mapDecalInstanceType;
     private static MethodInfo groupCenterUpdateInvokeActionMethod;
     private static ReflectedType configParserType;
     private static ReflectedType groupCenterType;
@@ -42,6 +44,7 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
     private static ReflectedType kerbalKonstructsType;
 
     private static Dictionary<string, object> groupDictionary;
+    private static List<CelestialBody> queuedCelestialsToRebuild;
 
     private static bool initialized;
     private static bool isDeleting;
@@ -68,6 +71,7 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
     public override void Setup(ConfigNode node)
     {
         groupDictionary = new Dictionary<string, object>();
+        queuedCelestialsToRebuild = new List<CelestialBody>();
 
         ReflectKerbalKonstructsTypes();
 
@@ -82,16 +86,21 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
         LunaCompat.HarmonyInstance.Patch(kerbalKonstructsType.Method("DeleteInstance"),
                                          new HarmonyMethod(typeof(KerbalKonstructsIntegration), nameof(PrefixStaticInstanceDelete)));
 
-        // groups KerbalKonstructs.Core.GroupCenter.Save DeleteGroupCenter
-        //var groupCenterType = AccessTools.TypeByName("KerbalKonstructs.Core.GroupCenter");
         LunaCompat.HarmonyInstance.Patch(groupCenterType.Method("Save"),
                                          postfix: new HarmonyMethod(typeof(KerbalKonstructsIntegration), nameof(PostfixSaveGroupCenter)));
         LunaCompat.HarmonyInstance.Patch(groupCenterType.Method("DeleteGroupCenter"),
                                          prefix: new HarmonyMethod(typeof(KerbalKonstructsIntegration), nameof(PrefixDeleteGroupCenter)));
 
+        LunaCompat.HarmonyInstance.Patch(configParserType.Method("SaveMapDecalInstance"),
+                                         postfix: new HarmonyMethod(typeof(KerbalKonstructsIntegration), nameof(PostfixSaveMapDecalInstance)));
+        LunaCompat.HarmonyInstance.Patch(decalsDatabaseType.Method("DeleteMapDecalInstance"),
+                                         postfix: new HarmonyMethod(typeof(KerbalKonstructsIntegration), nameof(PostfixDeleteMapDecalInstance)));
+
         ClientMessageHandler.Instance.HasServerIntegrationChanged += OnServerIntegrationDetermined;
         ClientMessageHandler.Instance.RegisterModMessageListener<KerbalKonstructsChangeGroupCenterMessage>(OnChangeGroupCenterMessageReceived);
         ClientMessageHandler.Instance.RegisterModMessageListener<KerbalKonstructsDeleteGroupCenterMessage>(OnDeleteGroupCenterMessageReceived);
+        ClientMessageHandler.Instance.RegisterModMessageListener<KerbalKonstructsChangeMapDecalMessage>(OnChangeMapDecalMessageReceived);
+        ClientMessageHandler.Instance.RegisterModMessageListener<KerbalKonstructsDeleteMapDecalMessage>(OnDeleteMapDecalMessageReceived);
         ClientMessageHandler.Instance.RegisterModMessageListener<KerbalKonstructsChangeStaticInstanceMessage>(OnChangeStaticInstanceMessageReceived);
         ClientMessageHandler.Instance.RegisterModMessageListener<KerbalKonstructsDeleteStaticInstanceMessage>(OnDeleteStaticInstanceMessageReceived);
         ClientMessageHandler.Instance.RegisterModMessageListener<KerbalKonstructsRequestInstancesMessage>(OnAllInstancesAvailableMessageReceived);
@@ -126,6 +135,8 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
         kkCustomParameters1Type = new ReflectedType("KerbalKonstructs.Core.KKCustomParameters1");
         staticsEditorGuiType = new ReflectedType("KerbalKonstructs.UI.StaticsEditorGUI");
         groupCenterType = new ReflectedType("KerbalKonstructs.Core.GroupCenter");
+        mapDecalInstanceType = new ReflectedType("KerbalKonstructs.Core.MapDecalInstance");
+        decalsDatabaseType = new ReflectedType("KerbalKonstructs.Core.DecalsDatabase");
         groupCenterUpdateInvokeActionMethod = AccessTools.Method(typeof(Action<>).MakeGenericType(groupCenterType.Type), "Invoke");
     }
 
@@ -143,7 +154,7 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
         ClientMessageHandler.Instance.SendReliableMessage(new KerbalKonstructsDeleteStaticInstanceMessage
         {
             ModelName = name,
-            Uuid = uuid
+            Identifier = uuid
         });
     }
 
@@ -180,11 +191,10 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
 
             ClientMessageHandler.Instance.SendReliableMessage(new KerbalKonstructsDeleteGroupCenterMessage
             {
-                Uuid = existing.Key,
+                Identifier = existing.Key,
             });
             groupDictionary.Remove(existing.Key);
         }
-
         catch (Exception ex)
         {
             Logger.Instance.Error(ex);
@@ -234,8 +244,6 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
             var groupCenter = __instance;
             var existing = groupDictionary.SingleOrDefault(x => x.Value == groupCenter);
 
-            // update attached static instances to account for name changes
-
             string uuid;
 
             if (existing.Key != null)
@@ -254,14 +262,83 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
             ClientMessageHandler.Instance.SendReliableMessage(new KerbalKonstructsChangeGroupCenterMessage
             {
                 Uuid = uuid,
-                ModelName = Path.GetFileNameWithoutExtension(writtenFileName),
+                Name = Path.GetFileNameWithoutExtension(writtenFileName),
                 Content = node.ToString()
             });
 
+            // update attached static instances to account for name changes
             var instances = (IEnumerable)groupCenterType.GetField("childInstances", __instance);
 
             foreach (var instance in instances)
                 staticInstanceType.Invoke("SaveConfig", instance, []);
+        }
+        catch (Exception ex)
+        {
+            Logger.Instance.Error(ex);
+        }
+    }
+
+    private static void PostfixDeleteMapDecalInstance(ref object instance)
+    {
+        if (!initialized || isDeleting || !ClientMessageHandler.Instance.HasServerIntegration)
+            return;
+
+        try
+        {
+            var decalSavePath = mapDecalInstanceType.GetField("configPath", instance) as string;
+
+            Logger.Instance.Info($"KerbalKonstructs map decal deleted: {decalSavePath}.");
+
+            ClientMessageHandler.Instance.SendReliableMessage(new KerbalKonstructsDeleteMapDecalMessage
+            {
+                Identifier = Path.GetFileNameWithoutExtension(decalSavePath),
+            });
+        }
+        catch (Exception ex)
+        {
+            Logger.Instance.Error(ex);
+        }
+    }
+
+    private static void PostfixSaveMapDecalInstance(ref object instance)
+    {
+        try
+        {
+            if (!initialized || isDeleting || !ClientMessageHandler.Instance.HasServerIntegration)
+                return;
+
+            var isInSavegame = mapDecalInstanceType.GetField("isInSavegame", instance);
+
+            // set isInSavegame to false to avoid KC scenario saves
+            if (isInSavegame is true)
+            {
+                Logger.Instance.Info($"KerbalKonstructs - fixing savegame setting for {instance}");
+                mapDecalInstanceType.SetField("isInSavegame", instance, false);
+                configParserType.Invoke("SaveMapDecalInstance", null, [instance]);
+                return;
+            }
+
+            var decalSavePath = mapDecalInstanceType.GetField("configPath", instance) as string;
+
+            if (!decalSavePath.Contains("KerbalKonstructs/NewInstances"))
+            {
+                Logger.Instance.Info($"Ignoring save for local map decal: ({decalSavePath})");
+                return;
+            }
+
+            var basePath = Path.Combine(KSPUtil.ApplicationRootPath, "GameData");
+            var nodePath = Path.Combine(basePath, decalSavePath);
+
+            var node = ConfigNode.Load(nodePath);
+            var name = node.GetNode("KK_MapDecal")?.GetValue("Name");
+
+            Logger.Instance.Info($"KerbalKonstructs map decal saved: {name} ({nodePath}).");
+
+            ClientMessageHandler.Instance.SendReliableMessage(new KerbalKonstructsChangeMapDecalMessage
+            {
+                Name = Path.GetFileNameWithoutExtension(nodePath),
+                Content = node.ToString()
+            });
         }
         catch (Exception ex)
         {
@@ -291,7 +368,7 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
 
             ClientMessageHandler.Instance.SendReliableMessage(new KerbalKonstructsChangeStaticInstanceMessage
             {
-                ModelName = name,
+                Name = name,
                 Content = node.ToString()
             });
         }
@@ -328,7 +405,7 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
 
                 foreach (var instance in existingInstances.GetNodes("Instances"))
                 {
-                    if (instance.GetValue("UUID") == msg.Uuid)
+                    if (instance.GetValue("UUID") == msg.Identifier)
                     {
                         existingInstances.RemoveNode(instance);
                         break;
@@ -344,16 +421,14 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
         });
 
         CloseUiIfOpen();
-        apiType.Invoke("RemoveStatic", null, [msg.Uuid]);
+        apiType.Invoke("RemoveStatic", null, [msg.Identifier]);
     }
 
     private static void OnChangeStaticInstanceMessageReceived(KerbalKonstructsChangeStaticInstanceMessage msg)
     {
-        Logger.Instance.Info($"KerbalKonstructs received: {msg.ModelName}");
+        Logger.Instance.Info($"KerbalKonstructs received: {msg.Name}");
 
-        var targetPath = Path.Combine(KSPUtil.ApplicationRootPath, "saves/LunaMultiplayer/KerbalKonstructs/NewInstances", $"{msg.ModelName}.cfg");
-
-        // move to matching uuid folder?
+        var targetPath = Path.Combine(KSPUtil.ApplicationRootPath, "saves/LunaMultiplayer/KerbalKonstructs/NewInstances", $"{msg.Name}.cfg");
 
         Task.Run(() =>
         {
@@ -523,6 +598,167 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
         var kkInstance = kerbalKonstructsType.GetField("instance", null);
         kerbalKonstructsType.Invoke("OnLevelWasLoad", kkInstance, [HighLogic.LoadedScene]);
         initialized = true;
+
+        // update spheres once after initialization
+        foreach (var sphere in queuedCelestialsToRebuild.Distinct())
+            sphere.pqsController.RebuildSphere();
+        queuedCelestialsToRebuild.Clear();
+    }
+
+    private static void DeleteMapDecal(object instance)
+    {
+        isDeleting = true;
+        var decalObject = mapDecalInstanceType.GetField("gameObject", instance) as GameObject;
+
+        if (decalObject)
+        {
+            decalObject.transform.parent = null;
+            decalObject.DestroyGameObject();
+        }
+
+        var mapDecal = mapDecalInstanceType.GetField("mapDecal", instance) as PQSMod_MapDecal;
+        if (mapDecal)
+            mapDecal.transform.parent = null;
+        var body = mapDecalInstanceType.GetField("CelestialBody", instance) as CelestialBody;
+
+        if (body)
+        {
+            if (initialized)
+                body.pqsController.RebuildSphere();
+            else
+                queuedCelestialsToRebuild.Add(body);
+        }
+
+        decalsDatabaseType.Invoke("DeleteMapDecalInstance", null, [instance]);
+        isDeleting = false;
+    }
+
+    private void OnDeleteMapDecalMessageReceived(KerbalKonstructsDeleteMapDecalMessage msg)
+    {
+        if (!initialized || isDeleting || !ClientMessageHandler.Instance.HasServerIntegration)
+            return;
+
+        try
+        {
+            var configPath = Path.Combine("../saves/LunaMultiplayer/KerbalKonstructs/NewInstances", $"{msg.Identifier}.cfg").Replace('\\', '/');
+
+            object existingDecal = null;
+
+            foreach (var decal in (Array)decalsDatabaseType.GetField("allMapDecalInstances", null))
+            {
+                var existingPath = mapDecalInstanceType.GetField("configPath", decal) as string;
+
+                if (configPath.Equals(existingPath, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    existingDecal = decal;
+                    break;
+                }
+            }
+
+            if (existingDecal == null)
+                _logger.Warning($"Map decal '{configPath}' was deleted on server but does not exist.");
+            else
+            {
+                CloseUiIfOpen();
+
+                DeleteMapDecal(existingDecal);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex);
+        }
+    }
+
+    private void OnChangeMapDecalMessageReceived(KerbalKonstructsChangeMapDecalMessage msg)
+    {
+        Logger.Instance.Info($"KerbalKonstructs received: {msg.Name}");
+
+        var relativePath = Path.Combine("../saves/LunaMultiplayer/KerbalKonstructs/NewInstances", $"{msg.Name}.cfg").Replace('\\', '/');
+        var targetPath = Path.Combine(KSPUtil.ApplicationRootPath, "GameData", relativePath);
+
+        Task.Run(() =>
+        {
+            try
+            {
+                File.WriteAllText(targetPath, msg.Content);
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.Error(ex);
+            }
+        });
+
+        CloseUiIfOpen();
+        var node = ConfigNode.Parse(msg.Content);
+        LoadMapDecal(targetPath, node, relativePath);
+    }
+
+    private void LoadMapDecal(string targetPath, ConfigNode node, string relativePath)
+    {
+        var urlDir = new UrlDir([new ConfigDirectory("", "../saves/LunaMultiplayer/KerbalKonstructs/NewInstances", DirectoryType.GameData)],
+                                [new ConfigFileType(FileType.Config, ["cfg"])]);
+        var collectionFile = new UrlFile(urlDir, new FileInfo(targetPath));
+        var decalNode = node.GetNode("root")?.GetNode("KK_MapDecal");
+
+        object existingDecal = null;
+
+        foreach (var decal in (Array)decalsDatabaseType.GetField("allMapDecalInstances", null))
+        {
+            var existingPath = mapDecalInstanceType.GetField("configPath", decal) as string;
+            _logger.Info($"Comparing decal {relativePath} with {existingPath}");
+
+            if (relativePath.Equals(existingPath, StringComparison.InvariantCultureIgnoreCase))
+            {
+                existingDecal = decal;
+                _logger.Info($"Deleting {existingPath}");
+                break;
+            }
+        }
+
+        if (existingDecal != null)
+            DeleteMapDecal(existingDecal);
+
+        var config = new UrlConfig(collectionFile, decalNode);
+        collectionFile.configs.Add(config);
+        GameDatabase.Instance.root.children.First().files.Add(collectionFile);
+
+        var newInstance = Activator.CreateInstance(mapDecalInstanceType.Type, true);
+        configParserType.Invoke("ParseMapDecalConfig", null, [newInstance, decalNode]);
+        mapDecalInstanceType.SetField("configPath", newInstance, relativePath);
+
+        if (mapDecalInstanceType.GetField("CelestialBody", newInstance) == null)
+        {
+            isDeleting = true;
+            decalsDatabaseType.Invoke("DeleteMapDecalInstance", null, [newInstance]);
+            isDeleting = false;
+        }
+
+        else
+        {
+            var mapDecal = mapDecalInstanceType.GetField("mapDecal", newInstance) as PQSMod_MapDecal;
+            var body = mapDecalInstanceType.GetField("CelestialBody", newInstance) as CelestialBody;
+
+            if (mapDecal && body)
+            {
+                var lat = (double)mapDecalInstanceType.GetField("Latitude", newInstance);
+                var lng = (double)mapDecalInstanceType.GetField("Longitude", newInstance);
+                var offset = (float)mapDecalInstanceType.GetField("AbsolutOffset", newInstance);
+
+                mapDecal.transform.position = body.GetWorldSurfacePosition(lat, lng, offset);
+                mapDecal.transform.up = body.GetSurfaceNVector(lat, lng);
+            }
+
+            mapDecalInstanceType.Invoke("Update", newInstance, [false]);
+
+            if (body)
+            {
+                if (initialized)
+                    body.pqsController.RebuildSphere();
+                else
+                    queuedCelestialsToRebuild.Add(body);
+            }
+        }
     }
 
     private void OnDeleteGroupCenterMessageReceived(KerbalKonstructsDeleteGroupCenterMessage msg)
@@ -532,13 +768,13 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
 
         try
         {
-            if (!groupDictionary.TryGetValue(msg.Uuid, out var group))
+            if (!groupDictionary.TryGetValue(msg.Identifier, out var group))
             {
                 _logger.Warning("Deleted group on server did not exist locally.");
                 return;
             }
 
-            _logger.Info($"KerbalKonstructs received group center deletion: {msg.Uuid}");
+            _logger.Info($"KerbalKonstructs received group center deletion: {msg.Identifier}");
 
             var groupName = groupCenterType.GetField("Group", group);
             var body = groupCenterType.GetField("CelestialBody", group) as CelestialBody;
@@ -548,7 +784,7 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
             CloseUiIfOpen();
 
             apiType.Invoke("RemoveGroup", null, [groupName, body?.name]);
-            groupDictionary.Remove(msg.Uuid);
+            groupDictionary.Remove(msg.Identifier);
 
             isDeleting = false;
         }
@@ -560,9 +796,9 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
 
     private void OnChangeGroupCenterMessageReceived(KerbalKonstructsChangeGroupCenterMessage msg)
     {
-        _logger.Info($"KerbalKonstructs received group center update: {msg.Uuid} - {msg.ModelName}");
+        _logger.Info($"KerbalKonstructs received group center update: {msg.Uuid} - {msg.Name}");
 
-        var subPath = Path.Combine("saves/LunaMultiplayer/KerbalKonstructs/NewInstances", $"{msg.ModelName}.cfg");
+        var subPath = Path.Combine("saves/LunaMultiplayer/KerbalKonstructs/NewInstances", $"{msg.Name}.cfg");
         var targetPath = Path.Combine(KSPUtil.ApplicationRootPath, subPath);
 
         Task.Run(() =>
@@ -586,6 +822,75 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
     {
         FixSaveLocations();
 
+        UnloadAllGroupCenters();
+        UnloadAllMapDecals();
+        UnloadAllStaticInstances();
+
+        if (!hasServerIntegration)
+            return;
+
+        var instancePath = Path.Combine(KSPUtil.ApplicationRootPath, "saves/LunaMultiplayer/KerbalKonstructs/NewInstances");
+
+        if (Directory.Exists(instancePath) && Directory.EnumerateFiles(instancePath).Any())
+            Directory.Delete(instancePath, true);
+
+        Directory.CreateDirectory(instancePath);
+
+        ClientMessageHandler.Instance.SendReliableMessage(new KerbalKonstructsRequestInstancesMessage(), false);
+    }
+
+    private void UnloadAllStaticInstances()
+    {
+        var allStaticInstances = (Array)staticDatabaseType.GetField("allStaticInstances", null);
+
+        foreach (var instance in allStaticInstances)
+        {
+            var path = staticInstanceType.GetField("configPath", instance) as string;
+
+            if (string.IsNullOrEmpty(path) || !path.Contains("KerbalKonstructs/NewInstances") ||
+                staticInstanceType.GetField("configUrl", instance) is not UrlConfig url)
+                continue;
+
+            _logger.Debug($"Unloading {path} instance");
+            url.config.RemoveNodes("Instances");
+            staticInstanceType.Invoke("Deactivate", instance, []);
+            var uuid = staticInstanceType.GetField("UUID", instance) as string;
+            apiType.Invoke("RemoveStatic", null, [uuid]);
+        }
+
+        allStaticInstances = (Array)staticDatabaseType.GetField("allStaticInstances", null);
+        _logger.Info($"Loaded: {allStaticInstances.Length} instances");
+
+        foreach (var instance in allStaticInstances)
+        {
+            var path = staticInstanceType.GetField("configPath", instance) as string;
+            var uuid = staticInstanceType.GetField("UUID", instance) as string;
+            _logger.Info($"Still loaded: {path} [{uuid}]");
+        }
+    }
+
+    private void UnloadAllMapDecals()
+    {
+        var decalsToUnload = new List<object>();
+
+        foreach (var decal in (Array)decalsDatabaseType.GetField("allMapDecalInstances", null))
+        {
+            var path = mapDecalInstanceType.GetField("configPath", decal) as string;
+
+            if (string.IsNullOrEmpty(path) || !path.Contains("KerbalKonstructs/NewInstances") ||
+                mapDecalInstanceType.GetField("configUrl", decal) is not UrlConfig url)
+                continue;
+
+            url.config.RemoveNodes("KK_MapDecal");
+            decalsToUnload.Add(decal);
+        }
+
+        foreach (var decal in decalsToUnload)
+            DeleteMapDecal(decal);
+    }
+
+    private void UnloadAllGroupCenters()
+    {
         var allCenters = (IDictionary)staticDatabaseType.GetField("allCenters", null);
         var groupsToUnload = new List<string>();
 
@@ -614,45 +919,6 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
             _logger.Info($"Unloading group '{group}'.");
             apiType.Invoke("RemoveGroup", null, [nameParts[1], nameParts[0]]);
         }
-
-        var allStaticInstances = (Array)staticDatabaseType.GetField("allStaticInstances", null);
-
-        foreach (var instance in allStaticInstances)
-        {
-            var path = staticInstanceType.GetField("configPath", instance) as string;
-
-            if (string.IsNullOrEmpty(path) || !path.Contains("KerbalKonstructs/NewInstances") ||
-                staticInstanceType.GetField("configUrl", instance) is not UrlConfig url)
-                continue;
-
-            _logger.Debug($"Unloading {path} instance");
-            url.config.RemoveNodes("Instances");
-            staticInstanceType.Invoke("Deactivate", instance, []);
-            var uuid = staticInstanceType.GetField("UUID", instance) as string;
-            apiType.Invoke("RemoveStatic", null, [uuid]);
-        }
-
-        allStaticInstances = (Array)staticDatabaseType.GetField("allStaticInstances", null);
-        _logger.Info($"Loaded: {allStaticInstances.Length} instances");
-
-        foreach (var instance in allStaticInstances)
-        {
-            var path = staticInstanceType.GetField("configPath", instance) as string;
-            var uuid = staticInstanceType.GetField("UUID", instance) as string;
-            _logger.Info($"Still loaded: {path} [{uuid}]");
-        }
-
-        if (!hasServerIntegration)
-            return;
-
-        var instancePath = Path.Combine(KSPUtil.ApplicationRootPath, "saves/LunaMultiplayer/KerbalKonstructs/NewInstances");
-
-        if (Directory.Exists(instancePath) && Directory.EnumerateFiles(instancePath).Any())
-            Directory.Delete(instancePath, true);
-
-        Directory.CreateDirectory(instancePath);
-
-        ClientMessageHandler.Instance.SendReliableMessage(new KerbalKonstructsRequestInstancesMessage(), false);
     }
 
     #endregion

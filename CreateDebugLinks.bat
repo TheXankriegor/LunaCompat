@@ -9,4 +9,4 @@ cd LunaMultiplayer/PartSync
 mklink /j LunaCompat "%CURRENT_DIR%/Build/GameData/LunaMultiplayer/PartSync/LunaCompat"
 
 cd /d %LUNA_SERVER_PATH%/Plugins
-mklink /j LunaCompat "%CURRENT_DIR%/Build/net6.0"
+mklink /j LunaCompat "%CURRENT_DIR%/Build/LunaCompat"

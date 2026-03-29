@@ -14,6 +14,7 @@ internal class KerbalKonstructsIntegration : ServerModIntegration
 
     private readonly string _baseInstancePath;
     private readonly string _baseGroupsPath;
+    private readonly string _baseMapDecalsPath;
 
     #endregion
 
@@ -22,8 +23,10 @@ internal class KerbalKonstructsIntegration : ServerModIntegration
     public KerbalKonstructsIntegration(ILogger logger, ServerMessageHandler messageHandler)
         : base(logger, messageHandler)
     {
-        _baseInstancePath = Path.Combine(LunaCompatServer.GetLunaCompatBaseDirectory(), "KerbalKonstructs", "NewInstances");
-        _baseGroupsPath = Path.Combine(LunaCompatServer.GetLunaCompatBaseDirectory(), "KerbalKonstructs", "Groups");
+        var baseDir = Path.Combine(LunaCompatServer.GetLunaCompatBaseDirectory(), "KerbalKonstructs");
+        _baseInstancePath = Path.Combine(baseDir, "NewInstances");
+        _baseMapDecalsPath = Path.Combine(baseDir, "MapDecals");
+        _baseGroupsPath = Path.Combine(baseDir, "Groups");
     }
 
     #endregion
@@ -46,10 +49,15 @@ internal class KerbalKonstructsIntegration : ServerModIntegration
         _messageHandler.RegisterModMessageListener<KerbalKonstructsChangeGroupCenterMessage>(OnChangeGroupCenterMessageReceived);
         _messageHandler.RegisterModMessageListener<KerbalKonstructsDeleteGroupCenterMessage>(OnDeleteGroupCenterMessageReceived);
 
+        _messageHandler.RegisterModMessageListener<KerbalKonstructsChangeMapDecalMessage>(OnChangeMapDecalMessageReceived);
+        _messageHandler.RegisterModMessageListener<KerbalKonstructsDeleteMapDecalMessage>(OnDeleteMapDecalMessageReceived);
+
         if (!FileHandler.FolderExists(_baseInstancePath))
             FileHandler.FolderCreate(_baseInstancePath);
         if (!FileHandler.FolderExists(_baseGroupsPath))
             FileHandler.FolderCreate(_baseGroupsPath);
+        if (!FileHandler.FolderExists(_baseMapDecalsPath))
+            FileHandler.FolderCreate(_baseMapDecalsPath);
     }
 
     #endregion
@@ -60,14 +68,14 @@ internal class KerbalKonstructsIntegration : ServerModIntegration
     {
         try
         {
-            _logger.Debug($"Received group center update for {msg.ModelName} ({msg.Uuid})", PackageName);
+            _logger.Debug($"Received group center update for {msg.Name} ({msg.Uuid})", PackageName);
 
             var uniquePath = Path.Combine(_baseGroupsPath, msg.Uuid);
 
             if (!Directory.Exists(uniquePath))
                 Directory.CreateDirectory(uniquePath);
 
-            var groupPath = Path.Combine(uniquePath, $"{msg.ModelName}.cfg");
+            var groupPath = Path.Combine(uniquePath, $"{msg.Name}.cfg");
 
             // for groups, we can just replace the whole thing
             FileHandler.WriteToFile(groupPath, msg.Content);
@@ -82,9 +90,9 @@ internal class KerbalKonstructsIntegration : ServerModIntegration
     {
         try
         {
-            _logger.Debug($"Received static instance update for {msg.ModelName}", PackageName);
+            _logger.Debug($"Received static instance update for {msg.Name}", PackageName);
 
-            var instancePath = Path.Combine(_baseInstancePath, $"{msg.ModelName}.cfg");
+            var instancePath = Path.Combine(_baseInstancePath, $"{msg.Name}.cfg");
 
             if (File.Exists(instancePath))
             {
@@ -94,7 +102,7 @@ internal class KerbalKonstructsIntegration : ServerModIntegration
 
                 if (existingInstances == null)
                 {
-                    _logger.Warning($"Received empty static instance definition from {client.PlayerName} for {msg.ModelName}: {msg.Content}", PackageName);
+                    _logger.Warning($"Received empty static instance definition from {client.PlayerName} for {msg.Name}: {msg.Content}", PackageName);
                     return;
                 }
 
@@ -123,17 +131,54 @@ internal class KerbalKonstructsIntegration : ServerModIntegration
         }
     }
 
+    private void OnChangeMapDecalMessageReceived(ClientStructure client, KerbalKonstructsChangeMapDecalMessage msg)
+    {
+        try
+        {
+            _logger.Debug($"Received map decal update for {msg.Name}", PackageName);
+
+            var decalPath = Path.Combine(_baseMapDecalsPath, $"{msg.Name}.cfg");
+            FileHandler.WriteToFile(decalPath, msg.Content);
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex.ToString(), PackageName);
+        }
+    }
+
+    private void OnDeleteMapDecalMessageReceived(ClientStructure client, KerbalKonstructsDeleteMapDecalMessage msg)
+    {
+        try
+        {
+            _logger.Debug($"Received map decal delete for {msg.Identifier}", PackageName);
+
+            var decalPath = Path.Combine(_baseMapDecalsPath, $"{msg.Identifier}.cfg");
+
+            if (!File.Exists(decalPath))
+            {
+                _logger.Warning($"Trying to delete map decal which does not exist on the server ({msg.Identifier}).", PackageName);
+                return;
+            }
+
+            File.Delete(decalPath);
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex.ToString(), PackageName);
+        }
+    }
+
     private void OnDeleteGroupCenterMessageReceived(ClientStructure client, KerbalKonstructsDeleteGroupCenterMessage msg)
     {
         try
         {
-            _logger.Debug($"Received group delete for {msg.Uuid}", PackageName);
+            _logger.Debug($"Received group delete for {msg.Identifier}", PackageName);
 
-            var groupPath = Path.Combine(_baseGroupsPath, msg.Uuid);
+            var groupPath = Path.Combine(_baseGroupsPath, msg.Identifier);
 
             if (!Directory.Exists(groupPath))
             {
-                _logger.Warning($"Trying to delete group center which does not exist on the server ({msg.Uuid}).", PackageName);
+                _logger.Warning($"Trying to delete group center which does not exist on the server ({msg.Identifier}).", PackageName);
                 return;
             }
 
@@ -149,7 +194,7 @@ internal class KerbalKonstructsIntegration : ServerModIntegration
     {
         try
         {
-            _logger.Debug($"Received static instance delete for {msg.ModelName} ({msg.Uuid})", PackageName);
+            _logger.Debug($"Received static instance delete for {msg.ModelName} ({msg.Identifier})", PackageName);
 
             var instancePath = Path.Combine(_baseInstancePath, $"{msg.ModelName}.cfg");
 
@@ -166,7 +211,7 @@ internal class KerbalKonstructsIntegration : ServerModIntegration
 
             foreach (var instance in instances)
             {
-                if (instance.Value.GetValue("UUID").Value != msg.Uuid)
+                if (instance.Value.GetValue("UUID").Value != msg.Identifier)
                     continue;
 
                 // Workaround for RepeatedItems in the MixedCollection not deleting properly
@@ -193,6 +238,7 @@ internal class KerbalKonstructsIntegration : ServerModIntegration
             _logger.Info($"Sending all KK instances to {client.PlayerName}", PackageName);
 
             SendAllGroupCenters(client);
+            SendAllMapDecals(client);
             SendAllStaticInstances(client);
 
             _messageHandler.SendCompatMessage(client, new KerbalKonstructsRequestInstancesMessage());
@@ -201,6 +247,33 @@ internal class KerbalKonstructsIntegration : ServerModIntegration
         {
             _logger.Error(ex.ToString(), PackageName);
         }
+    }
+
+    private void SendAllMapDecals(ClientStructure client)
+    {
+        var files = Directory.GetFiles(_baseMapDecalsPath, "*.cfg", SearchOption.AllDirectories);
+
+        foreach (var file in files)
+        {
+            try
+            {
+                _logger.Debug($"Sending {file}", PackageName);
+
+                var writtenFileName = file.Substring(_baseMapDecalsPath.Length + 1);
+                var baseMessage = new KerbalKonstructsChangeMapDecalMessage
+                {
+                    Name = Path.GetFileNameWithoutExtension(writtenFileName),
+                    Content = FileHandler.ReadFileText(file)
+                };
+                _messageHandler.SendCompatMessage(client, baseMessage);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"Failed to send {file}: {ex}", PackageName);
+            }
+        }
+
+        ;
     }
 
     private void SendAllStaticInstances(ClientStructure client)
@@ -216,7 +289,7 @@ internal class KerbalKonstructsIntegration : ServerModIntegration
                 var writtenFileName = file.Substring(_baseInstancePath.Length + 1);
                 var baseMessage = new KerbalKonstructsChangeStaticInstanceMessage
                 {
-                    ModelName = Path.GetFileNameWithoutExtension(writtenFileName),
+                    Name = Path.GetFileNameWithoutExtension(writtenFileName),
                     Content = FileHandler.ReadFileText(file)
                 };
                 _messageHandler.SendCompatMessage(client, baseMessage);
@@ -251,7 +324,7 @@ internal class KerbalKonstructsIntegration : ServerModIntegration
                 var baseMessage = new KerbalKonstructsChangeGroupCenterMessage
                 {
                     Uuid = uuid,
-                    ModelName = Path.GetFileNameWithoutExtension(modelName),
+                    Name = Path.GetFileNameWithoutExtension(modelName),
                     Content = FileHandler.ReadFileText(group)
                 };
                 _messageHandler.SendCompatMessage(client, baseMessage);

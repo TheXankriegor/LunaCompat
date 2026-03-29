@@ -8,7 +8,7 @@
     {
         #region Properties
 
-        public string Uuid { get; set; }
+        public string Identifier { get; set; }
 
         #endregion
     }
@@ -19,7 +19,7 @@
 
         public string Content { get; set; }
 
-        public string ModelName { get; set; }
+        public string Name { get; set; }
 
         #endregion
     }
@@ -44,6 +44,14 @@
         public string Uuid { get; set; }
 
         #endregion
+    }
+
+    public class KerbalKonstructsChangeMapDecalMessage : KerbalKonstructsChangeMessage
+    {
+    }
+
+    public class KerbalKonstructsDeleteMapDecalMessage : KerbalKonstructsDeleteMessage
+    {
     }
 
     public class KerbalKonstructsDeleteGroupCenterMessage : KerbalKonstructsDeleteMessage
