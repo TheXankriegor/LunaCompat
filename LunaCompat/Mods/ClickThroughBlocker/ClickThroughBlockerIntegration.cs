@@ -23,8 +23,8 @@ internal class ClickThroughBlockerIntegration : ClientModIntegration
 
     #region Constructors
 
-    public ClickThroughBlockerIntegration(ILogger logger)
-        : base(logger)
+    public ClickThroughBlockerIntegration(ILogger logger, ModSettingsProvider settingsProvider)
+        : base(logger, settingsProvider)
     {
     }
 
@@ -38,7 +38,7 @@ internal class ClickThroughBlockerIntegration : ClientModIntegration
 
     #region Public Methods
 
-    public override void Setup(ModSettingsProvider node)
+    public override void Setup()
     {
         var oneTimePopupType = new ReflectedType("ClickThroughFix.OneTimePopup");
         ctbType = new ReflectedType("ClickThroughFix.CTB");

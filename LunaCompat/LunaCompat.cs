@@ -79,7 +79,7 @@ public class LunaCompat : MonoBehaviour
     {
         try
         {
-            var compatInstance = (ClientModIntegration)Activator.CreateInstance(type, _logger);
+            var compatInstance = (ClientModIntegration)Activator.CreateInstance(type, _logger, _settingsProvider);
 
             if (bool.TryParse(_settingsProvider.GetValue(compatInstance.PackageName, compatInstance.IsIntegrationEnabledKey, true) as string,
                               out var integrationEnabled))
@@ -96,7 +96,7 @@ public class LunaCompat : MonoBehaviour
             if (!AssemblyLoader.loadedAssemblies.Contains(compatInstance.PackageName))
                 return;
 
-            compatInstance.Setup(_settingsProvider);
+            compatInstance.Setup();
             _activePatches.Add(compatInstance);
 
             _logger.Info($"Initialized compatibility for {compatInstance.PackageName}");

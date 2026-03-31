@@ -14,6 +14,7 @@ using LmpClient.Systems.VesselProtoSys;
 using LunaCompat.Utils;
 
 using LunaCompatCommon.Messages.ModMessages;
+using LunaCompatCommon.ModIntegration;
 
 using UnityEngine;
 
@@ -41,8 +42,8 @@ internal class ScanSatIntegration : ClientModIntegration
 
     #region Constructors
 
-    public ScanSatIntegration(ILogger logger)
-        : base(logger)
+    public ScanSatIntegration(ILogger logger, IModSettingsProvider settingsProvider)
+        : base(logger, settingsProvider)
     {
     }
 
@@ -64,7 +65,7 @@ internal class ScanSatIntegration : ClientModIntegration
     /// - Sync changes in loaded vessels of other players to the primary client, see <see cref="PostfixStartScan" /> and
     /// <see cref="PostfixStopScan" />
     /// </summary>
-    public override void Setup(ModSettingsProvider node)
+    public override void Setup()
     {
         ReflectScanSatTypes();
 
@@ -76,8 +77,7 @@ internal class ScanSatIntegration : ClientModIntegration
         LunaCompat.HarmonyInstance.Patch(scanSatType.Method("startScan"), postfix: new HarmonyMethod(typeof(ScanSatIntegration), nameof(PostfixStartScan)));
         LunaCompat.HarmonyInstance.Patch(scanSatType.Method("stopScan"), postfix: new HarmonyMethod(typeof(ScanSatIntegration), nameof(PostfixStopScan)));
 
-        // add a custom scenario handler for map progress
-        var intervalString = node.GetValue(PackageName, $"{PackageName}_SyncInterval", 5);
+        var intervalString = _settingsProvider.GetValue(PackageName, "SyncInterval", 5);
 
         if (!int.TryParse((string)intervalString, out _syncInterval))
             _syncInterval = 5;

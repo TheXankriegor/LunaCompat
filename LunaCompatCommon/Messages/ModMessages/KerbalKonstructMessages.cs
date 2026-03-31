@@ -1,5 +1,18 @@
 ﻿namespace LunaCompatCommon.Messages.ModMessages
 {
+    public static class KerbalKonstructsConstants
+    {
+        #region Constants
+
+        public const string DisableRemoteRecovery = "disableRemoteRecovery";
+        public const string FacilityUseRange = "facilityUseRange";
+        public const string EnableRT = "enableRT";
+        public const string EnableCommNet = "enableCommNet";
+        public const string DisableRemoteBaseOpening = "disableRemoteBaseOpening";
+
+        #endregion
+    }
+
     public class KerbalKonstructsRequestInstancesMessage : IModMessage
     {
     }
@@ -55,6 +68,10 @@
     }
 
     public class KerbalKonstructsDeleteGroupCenterMessage : KerbalKonstructsDeleteMessage
+    {
+    }
+
+    public class KerbalKonstructsSettingsValueMessage : SettingsValueMessage
     {
     }
 }

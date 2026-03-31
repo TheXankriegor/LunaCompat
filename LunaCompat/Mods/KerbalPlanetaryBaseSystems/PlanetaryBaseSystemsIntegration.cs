@@ -1,7 +1,6 @@
 ﻿using JetBrains.Annotations;
 
-using LunaCompat.Utils;
-
+using LunaCompatCommon.ModIntegration;
 using LunaCompatCommon.Utils;
 
 namespace LunaCompat.Mods.KerbalPlanetaryBaseSystems;
@@ -11,8 +10,8 @@ internal class PlanetaryBaseSystemsIntegration : ClientModIntegration
 {
     #region Constructors
 
-    public PlanetaryBaseSystemsIntegration(ILogger logger)
-        : base(logger)
+    public PlanetaryBaseSystemsIntegration(ILogger logger, IModSettingsProvider settingsProvider)
+        : base(logger, settingsProvider)
     {
     }
 
@@ -26,7 +25,7 @@ internal class PlanetaryBaseSystemsIntegration : ClientModIntegration
 
     #region Public Methods
 
-    public override void Setup(ModSettingsProvider node)
+    public override void Setup()
     {
         // TODO add Kerbal Planetary Base Systems fixes here
     }

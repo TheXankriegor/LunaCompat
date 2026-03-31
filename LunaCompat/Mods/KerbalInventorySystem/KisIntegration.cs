@@ -4,7 +4,7 @@ using JetBrains.Annotations;
 
 using LmpClient.Systems.VesselProtoSys;
 
-using LunaCompat.Utils;
+using LunaCompatCommon.ModIntegration;
 
 using UnityEngine;
 
@@ -17,8 +17,8 @@ internal class KisIntegration : ClientModIntegration
 {
     #region Constructors
 
-    public KisIntegration(ILogger logger)
-        : base(logger)
+    public KisIntegration(ILogger logger, IModSettingsProvider settingsProvider)
+        : base(logger, settingsProvider)
     {
     }
 
@@ -32,7 +32,7 @@ internal class KisIntegration : ClientModIntegration
 
     #region Public Methods
 
-    public override void Setup(ModSettingsProvider node)
+    public override void Setup()
     {
         var kisShared = AccessTools.TypeByName("KIS.KIS_Shared");
         var onPartReady = kisShared.GetNestedType("OnPartReady");

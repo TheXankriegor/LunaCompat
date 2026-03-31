@@ -6,6 +6,7 @@ using LmpClient.Systems.TimeSync;
 
 using LunaCompat.Utils;
 
+using LunaCompatCommon.ModIntegration;
 using LunaCompatCommon.Utils;
 
 namespace LunaCompat.Mods.Kethane;
@@ -15,8 +16,8 @@ internal class KethaneIntegration : ClientModIntegration
 {
     #region Constructors
 
-    public KethaneIntegration(ILogger logger)
-        : base(logger)
+    public KethaneIntegration(ILogger logger, IModSettingsProvider settingsProvider)
+        : base(logger, settingsProvider)
     {
     }
 
@@ -30,7 +31,7 @@ internal class KethaneIntegration : ClientModIntegration
 
     #region Public Methods
 
-    public override void Setup(ModSettingsProvider node)
+    public override void Setup()
     {
         var legacyResourceGenerator = AccessTools.TypeByName("Kethane.Generators.LegacyResourceGenerator");
 

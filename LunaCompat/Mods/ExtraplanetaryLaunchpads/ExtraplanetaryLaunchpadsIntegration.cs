@@ -6,8 +6,7 @@ using JetBrains.Annotations;
 
 using LmpClient.Systems.TimeSync;
 
-using LunaCompat.Utils;
-
+using LunaCompatCommon.ModIntegration;
 using LunaCompatCommon.Utils;
 
 namespace LunaCompat.Mods.ExtraplanetaryLaunchpads;
@@ -23,8 +22,8 @@ internal class ExtraplanetaryLaunchpadsIntegration : ClientModIntegration
 
     #region Constructors
 
-    public ExtraplanetaryLaunchpadsIntegration(ILogger logger)
-        : base(logger)
+    public ExtraplanetaryLaunchpadsIntegration(ILogger logger, IModSettingsProvider settingsProvider)
+        : base(logger, settingsProvider)
     {
     }
 
@@ -38,7 +37,7 @@ internal class ExtraplanetaryLaunchpadsIntegration : ClientModIntegration
 
     #region Public Methods
 
-    public override void Setup(ModSettingsProvider node)
+    public override void Setup()
     {
         // TODO add Extraplanetary Launchpads fixes here
         // building progress and basic launch + decouple works

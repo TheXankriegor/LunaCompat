@@ -1,7 +1,6 @@
 ﻿using JetBrains.Annotations;
 
-using LunaCompat.Utils;
-
+using LunaCompatCommon.ModIntegration;
 using LunaCompatCommon.Utils;
 
 namespace LunaCompat.Mods.WildBlueTools;
@@ -11,8 +10,8 @@ internal class WildBlueToolsIntegration : ClientModIntegration
 {
     #region Constructors
 
-    public WildBlueToolsIntegration(ILogger logger)
-        : base(logger)
+    public WildBlueToolsIntegration(ILogger logger, IModSettingsProvider settingsProvider)
+        : base(logger, settingsProvider)
     {
     }
 
@@ -26,7 +25,7 @@ internal class WildBlueToolsIntegration : ClientModIntegration
 
     #region Public Methods
 
-    public override void Setup(ModSettingsProvider node)
+    public override void Setup()
     {
         // TODO: WildBlueTools seems to have some background processing for OmniConverters. This will probably need a similar handling as SCANsat
     }

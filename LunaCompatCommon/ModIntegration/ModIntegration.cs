@@ -14,14 +14,16 @@ namespace LunaCompatCommon.ModIntegration
         #region Fields
 
         protected readonly ILogger _logger;
+        protected readonly IModSettingsProvider _settingsProvider;
 
         #endregion
 
         #region Constructors
 
-        protected ModIntegration(ILogger logger)
+        protected ModIntegration(ILogger logger, IModSettingsProvider settingsProvider)
         {
             _logger = logger;
+            _settingsProvider = settingsProvider;
         }
 
         #endregion

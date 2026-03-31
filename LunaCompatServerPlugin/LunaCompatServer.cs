@@ -68,7 +68,7 @@ public class LunaCompatServer : LmpPlugin
         {
             try
             {
-                var instance = (ServerModIntegration)Activator.CreateInstance(integration, _logger, _messageHandler)!;
+                var instance = (ServerModIntegration)Activator.CreateInstance(integration, _logger, _settingsProvider, _messageHandler)!;
 
                 if (!settingsValid)
                     instance.InitializeSettings(_settingsProvider);

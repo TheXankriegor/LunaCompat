@@ -1,4 +1,5 @@
 ﻿using LunaCompatCommon.Messages.ModMessages;
+using LunaCompatCommon.ModIntegration;
 using LunaCompatCommon.Utils;
 
 using LunaCompatServerPlugin.ModSettings;
@@ -22,8 +23,8 @@ internal class KerbalKonstructsIntegration : ServerModIntegration
 
     #region Constructors
 
-    public KerbalKonstructsIntegration(ILogger logger, ServerMessageHandler messageHandler)
-        : base(logger, messageHandler)
+    public KerbalKonstructsIntegration(ILogger logger, IModSettingsProvider settingsProvider, ServerMessageHandler messageHandler)
+        : base(logger, settingsProvider, messageHandler)
     {
         var baseDir = Path.Combine(LunaCompatServer.GetLunaCompatBaseDirectory(), "KerbalKonstructs");
         _baseInstancePath = Path.Combine(baseDir, "NewInstances");
@@ -45,23 +46,11 @@ internal class KerbalKonstructsIntegration : ServerModIntegration
     {
         base.InitializeSettings(settingsProvider);
 
-        settingsProvider.SetValue(PackageName, "KKCustomParameters0", @"KKCustomParameters0
-		{
-			blank0 = 
-			enableRT = False
-			enableCommNet = False
-			blank01 = 
-			blank1 = 
-			disableRemoteBaseOpening = False
-			facilityUseRange = 300
-			disableRemoteRecovery = False
-			blank03 = 
-			blank3 = 
-			blank04 = 
-			toggleIconsWithBB = False
-			soundMasterVolume = 1
-			focusLastLaunchSite = True
-		}");
+        settingsProvider.SetValue(PackageName, KerbalKonstructsConstants.EnableRT, false);
+        settingsProvider.SetValue(PackageName, KerbalKonstructsConstants.EnableCommNet, false);
+        settingsProvider.SetValue(PackageName, KerbalKonstructsConstants.DisableRemoteBaseOpening, false);
+        settingsProvider.SetValue(PackageName, KerbalKonstructsConstants.FacilityUseRange, 300);
+        settingsProvider.SetValue(PackageName, KerbalKonstructsConstants.DisableRemoteRecovery, false);
     }
 
     public override void Setup()
@@ -262,6 +251,7 @@ internal class KerbalKonstructsIntegration : ServerModIntegration
         {
             _logger.Info($"Sending all KK instances to {client.PlayerName}", PackageName);
 
+            SendServerSettings(client);
             SendAllGroupCenters(client);
             SendAllMapDecals(client);
             SendAllStaticInstances(client);
@@ -272,6 +262,17 @@ internal class KerbalKonstructsIntegration : ServerModIntegration
         {
             _logger.Error(ex.ToString(), PackageName);
         }
+    }
+
+    private void SendServerSettings(ClientStructure client)
+    {
+        _logger.Debug($"Sending KerbalKonstructs server settings to {client.PlayerName}...", PackageName);
+
+        SendSettingsValue<KerbalKonstructsSettingsValueMessage>(client, KerbalKonstructsConstants.EnableRT, false);
+        SendSettingsValue<KerbalKonstructsSettingsValueMessage>(client, KerbalKonstructsConstants.EnableCommNet, false);
+        SendSettingsValue<KerbalKonstructsSettingsValueMessage>(client, KerbalKonstructsConstants.DisableRemoteBaseOpening, false);
+        SendSettingsValue<KerbalKonstructsSettingsValueMessage>(client, KerbalKonstructsConstants.FacilityUseRange, 300);
+        SendSettingsValue<KerbalKonstructsSettingsValueMessage>(client, KerbalKonstructsConstants.DisableRemoteRecovery, false);
     }
 
     private void SendAllMapDecals(ClientStructure client)

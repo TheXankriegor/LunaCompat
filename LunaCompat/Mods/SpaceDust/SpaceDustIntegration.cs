@@ -1,7 +1,6 @@
 ﻿using JetBrains.Annotations;
 
-using LunaCompat.Utils;
-
+using LunaCompatCommon.ModIntegration;
 using LunaCompatCommon.Utils;
 
 namespace LunaCompat.Mods.SpaceDust;
@@ -11,8 +10,8 @@ internal class SpaceDustIntegration : ClientModIntegration
 {
     #region Constructors
 
-    public SpaceDustIntegration(ILogger logger)
-        : base(logger)
+    public SpaceDustIntegration(ILogger logger, IModSettingsProvider settingsProvider)
+        : base(logger, settingsProvider)
     {
     }
 
@@ -26,7 +25,7 @@ internal class SpaceDustIntegration : ClientModIntegration
 
     #region Public Methods
 
-    public override void Setup(ModSettingsProvider node)
+    public override void Setup()
     {
         // TODO: Will have to actually check and see if SpaceDust is maybe already compatible. At worst will need similar sync as SCANsat...
     }
