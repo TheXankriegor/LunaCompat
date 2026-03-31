@@ -10,6 +10,8 @@ using HarmonyLib;
 
 using JetBrains.Annotations;
 
+using LmpClient.Systems.Scenario;
+
 using LunaCompat.Utils;
 
 using LunaCompatCommon.Messages.ModMessages;
@@ -166,6 +168,7 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
             ModelName = name,
             Identifier = uuid
         });
+        ScenarioSystem.Singleton.SendScenarioModules();
     }
 
     private static void PostfixKKCustomParameter1Interactible()
@@ -381,6 +384,7 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
                 Name = name,
                 Content = node.ToString()
             });
+            ScenarioSystem.Singleton.SendScenarioModules();
         }
         catch (Exception ex)
         {
