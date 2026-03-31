@@ -31,8 +31,8 @@ public class LunaCompat : MonoBehaviour
 
     private readonly HashSet<ClientModIntegration> _activePatches = [];
     private ILogger _logger;
-    private ConfigNode _lunaCompatSettings;
     private ClientMessageHandler _messageHandler;
+    private ModSettingsProvider _settingsProvider;
 
     public static LunaCompat Singleton { get; set; }
 
@@ -53,19 +53,14 @@ public class LunaCompat : MonoBehaviour
 
         NetworkEvent.onNetworkStatusChanged.Add(OnLmpNetworkStatusChanged);
 
-        _lunaCompatSettings = ConfigNode.Load(KSPUtil.ApplicationRootPath + ConfigFilePath);
-
-        if (_lunaCompatSettings == null)
-        {
-            _logger.Error($"Failed to locate config file '{ConfigFilePath}'.");
-            return;
-        }
+        _settingsProvider = new ModSettingsProvider(KSPUtil.ApplicationRootPath + ConfigFilePath, _logger);
+        _settingsProvider.TryLoadSettings();
 
         // We could load external fixes here as well - but will that ever be needed?
         var modIntegrations = Assembly.GetExecutingAssembly().GetTypes().Where(x => typeof(ClientModIntegration).IsAssignableFrom(x) && !x.IsAbstract).ToList();
 
         foreach (var type in modIntegrations)
-            SetupModCompat(type, _lunaCompatSettings);
+            SetupModCompat(type);
 
         _logger.Info("Xan's Luna Compat Plugin started.");
     }
@@ -80,16 +75,28 @@ public class LunaCompat : MonoBehaviour
         NetworkEvent.onNetworkStatusChanged?.Remove(OnLmpNetworkStatusChanged);
     }
 
-    private void SetupModCompat(Type type, ConfigNode node)
+    private void SetupModCompat(Type type)
     {
         try
         {
             var compatInstance = (ClientModIntegration)Activator.CreateInstance(type, _logger);
 
+            if (bool.TryParse(_settingsProvider.GetValue(compatInstance.PackageName, compatInstance.IsIntegrationEnabledKey, true) as string,
+                              out var integrationEnabled))
+            {
+                if (!integrationEnabled)
+                {
+                    _logger.Info($"{compatInstance.PackageName} is disabled.");
+                    return;
+                }
+            }
+            else
+                _logger.Error($"Failed to read {compatInstance.PackageName} switch - are the settings corrupt?.");
+
             if (!AssemblyLoader.loadedAssemblies.Contains(compatInstance.PackageName))
                 return;
 
-            compatInstance.Setup(node);
+            compatInstance.Setup(_settingsProvider);
             _activePatches.Add(compatInstance);
 
             _logger.Info($"Initialized compatibility for {compatInstance.PackageName}");

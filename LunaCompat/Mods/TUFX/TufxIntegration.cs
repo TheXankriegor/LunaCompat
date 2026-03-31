@@ -5,6 +5,8 @@ using HarmonyLib;
 
 using JetBrains.Annotations;
 
+using LunaCompat.Utils;
+
 using LunaCompatCommon.Utils;
 
 namespace LunaCompat.Mods.TUFX;
@@ -39,7 +41,7 @@ internal class TufxIntegration : ClientModIntegration
     /// <summary>
     /// Patch TUFX to save settings not in the sfs but in a separate file that does not reset on join.
     /// </summary>
-    public override void Setup(ConfigNode node)
+    public override void Setup(ModSettingsProvider node)
     {
         var texturesUnlimitedFXLoader = AccessTools.TypeByName("TUFX.TexturesUnlimitedFXLoader");
         var tufxScene = AccessTools.TypeByName("TUFX.TUFXScene");

@@ -1,5 +1,7 @@
 ﻿using JetBrains.Annotations;
 
+using LunaCompat.Utils;
+
 using LunaCompatCommon.Utils;
 
 namespace LunaCompat.Mods.KerbalPlanetaryBaseSystems;
@@ -24,7 +26,7 @@ internal class PlanetaryBaseSystemsIntegration : ClientModIntegration
 
     #region Public Methods
 
-    public override void Setup(ConfigNode node)
+    public override void Setup(ModSettingsProvider node)
     {
         // TODO add Kerbal Planetary Base Systems fixes here
     }

@@ -2,6 +2,8 @@
 
 using JetBrains.Annotations;
 
+using LunaCompat.Utils;
+
 using LunaCompatCommon.Utils;
 
 namespace LunaCompat.Mods.PhysicsRangeExtender;
@@ -30,7 +32,7 @@ internal class PhysicsRangeExtenderIntegration : ClientModIntegration
     /// PRE will never work with LMP. Disable it on load if enabled.
     /// </summary>
     [HarmonyPatch]
-    public override void Setup(ConfigNode node)
+    public override void Setup(ModSettingsProvider node)
     {
         var preSettings = AccessTools.TypeByName("PhysicsRangeExtender.PreSettings");
         var modEnabledSetter = AccessTools.PropertySetter(preSettings, "ModEnabled");

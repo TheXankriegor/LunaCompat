@@ -68,7 +68,7 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
 
     #region Public Methods
 
-    public override void Setup(ConfigNode node)
+    public override void Setup(ModSettingsProvider node)
     {
         groupDictionary = new Dictionary<string, object>();
         queuedCelestialsToRebuild = new List<CelestialBody>();

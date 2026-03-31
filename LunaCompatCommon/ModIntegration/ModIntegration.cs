@@ -30,6 +30,8 @@ namespace LunaCompatCommon.ModIntegration
 
         public abstract string PackageName { get; }
 
+        public string IsIntegrationEnabledKey => $"{PackageName}_Enabled";
+
         #endregion
 
         #region Public Methods

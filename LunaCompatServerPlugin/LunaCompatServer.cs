@@ -3,7 +3,6 @@
 using LmpCommon.Enums;
 using LmpCommon.Message.Client;
 using LmpCommon.Message.Interface;
-using LmpCommon.Xml;
 
 using LunaCompatCommon.Messages;
 using LunaCompatCommon.Utils;
@@ -13,7 +12,6 @@ using LunaCompatServerPlugin.Utils;
 
 using Server.Client;
 using Server.Plugin;
-using Server.System;
 
 namespace LunaCompatServerPlugin;
 
@@ -21,11 +19,10 @@ public class LunaCompatServer : LmpPlugin
 {
     #region Fields
 
-    private readonly string _modSettingsPath;
     private readonly Dictionary<string, ServerModIntegration> _modIntegrations;
+    private readonly ModSettingsProvider _settingsProvider;
     private readonly ServerMessageHandler _messageHandler;
     private readonly ILogger _logger;
-    private ModSettingsStructure _settingsStructure;
 
     #endregion
 
@@ -35,13 +32,12 @@ public class LunaCompatServer : LmpPlugin
     {
         _logger = new Logger();
 
-        _modSettingsPath = Path.Combine(GetLunaCompatBaseDirectory(), "ModSettingsStructure.xml");
+        var modSettingsPath = Path.Combine(GetLunaCompatBaseDirectory(), "ModSettingsStructure.xml");
         _modIntegrations = new Dictionary<string, ServerModIntegration>();
+        _settingsProvider = new ModSettingsProvider(modSettingsPath, _logger);
 
         _messageHandler = new ServerMessageHandler(_logger);
         _messageHandler.RegisterModMessageListener<InitializeMessage>(OnInitializeMessageReceived);
-
-        _settingsStructure = new ModSettingsStructure();
     }
 
     #endregion
@@ -57,14 +53,6 @@ public class LunaCompatServer : LmpPlugin
     {
         _logger.Info("Luna Compat: Loading mod settings storage");
 
-        if (!FileHandler.FileExists(_modSettingsPath))
-        {
-            FileHandler.FolderCreate(GetLunaCompatBaseDirectory());
-            LunaXmlSerializer.WriteToXmlFile(new ModSettingsStructure(), _modSettingsPath);
-        }
-
-        _settingsStructure = LunaXmlSerializer.ReadXmlFromPath<ModSettingsStructure>(_modSettingsPath);
-
         // We could load external fixes here as well - but will that ever be needed?
         var modIntegrations = Assembly.GetExecutingAssembly().GetTypes().Where(x => x.IsAssignableTo(typeof(ServerModIntegration)) && !x.IsAbstract).ToList();
 
@@ -74,11 +62,25 @@ public class LunaCompatServer : LmpPlugin
             return;
         }
 
+        var settingsValid = _settingsProvider.TryLoadSettings();
+
         foreach (var integration in modIntegrations)
         {
             try
             {
                 var instance = (ServerModIntegration)Activator.CreateInstance(integration, _logger, _messageHandler)!;
+
+                if (!settingsValid)
+                    instance.InitializeSettings(_settingsProvider);
+
+                var isEnabled = _settingsProvider.GetValue(instance.PackageName, instance.IsIntegrationEnabledKey, true);
+
+                if (isEnabled is bool and false)
+                {
+                    _logger.Info($"{instance.PackageName} is disabled.");
+                    return;
+                }
+
                 instance.Setup();
                 _modIntegrations.Add(integration.Name, instance);
                 _logger.Info($"Setup mod integration '{integration.Name}' ({instance.PackageName})");

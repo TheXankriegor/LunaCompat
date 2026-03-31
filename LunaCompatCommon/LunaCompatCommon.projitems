@@ -13,6 +13,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Messages\MessageListener.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Messages\ModMessages\KerbalKonstructMessages.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Messages\SegmentedMessageListener.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ModIntegration\IModSettingsProvider.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ModIntegration\ModIntegration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serializer\SerializationReader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serializer\SerializationUtil.cs" />

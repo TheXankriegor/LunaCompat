@@ -1,6 +1,8 @@
 ﻿using LunaCompatCommon.Messages.ModMessages;
 using LunaCompatCommon.Utils;
 
+using LunaCompatServerPlugin.ModSettings;
+
 using LunaConfigNode.CfgNode;
 
 using Server.Client;
@@ -38,6 +40,29 @@ internal class KerbalKonstructsIntegration : ServerModIntegration
     #endregion
 
     #region Public Methods
+
+    public override void InitializeSettings(ModSettingsProvider settingsProvider)
+    {
+        base.InitializeSettings(settingsProvider);
+
+        settingsProvider.SetValue(PackageName, "KKCustomParameters0", @"KKCustomParameters0
+		{
+			blank0 = 
+			enableRT = False
+			enableCommNet = False
+			blank01 = 
+			blank1 = 
+			disableRemoteBaseOpening = False
+			facilityUseRange = 300
+			disableRemoteRecovery = False
+			blank03 = 
+			blank3 = 
+			blank04 = 
+			toggleIconsWithBB = False
+			soundMasterVolume = 1
+			focusLastLaunchSite = True
+		}");
+    }
 
     public override void Setup()
     {

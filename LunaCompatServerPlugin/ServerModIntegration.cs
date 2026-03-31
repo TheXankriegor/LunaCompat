@@ -1,6 +1,8 @@
 ﻿using LunaCompatCommon.ModIntegration;
 using LunaCompatCommon.Utils;
 
+using LunaCompatServerPlugin.ModSettings;
+
 namespace LunaCompatServerPlugin;
 
 internal abstract class ServerModIntegration : ModIntegration
@@ -26,4 +28,9 @@ internal abstract class ServerModIntegration : ModIntegration
     public abstract void Setup();
 
     #endregion
+
+    public virtual void InitializeSettings(ModSettingsProvider settingsProvider)
+    {
+        settingsProvider.SetValue(PackageName, IsIntegrationEnabledKey, true);
+    }
 }

@@ -38,7 +38,7 @@ internal class ClickThroughBlockerIntegration : ClientModIntegration
 
     #region Public Methods
 
-    public override void Setup(ConfigNode node)
+    public override void Setup(ModSettingsProvider node)
     {
         var oneTimePopupType = new ReflectedType("ClickThroughFix.OneTimePopup");
         ctbType = new ReflectedType("ClickThroughFix.CTB");

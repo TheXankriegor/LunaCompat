@@ -6,6 +6,8 @@ using JetBrains.Annotations;
 
 using LmpClient.Events;
 
+using LunaCompat.Utils;
+
 using LunaCompatCommon.Utils;
 
 namespace LunaCompat.Mods.InfernalRobotics;
@@ -36,7 +38,7 @@ internal class InfernalRoboticsIntegration : ClientModIntegration
 
     #region Public Methods
 
-    public override void Setup(ConfigNode node)
+    public override void Setup(ModSettingsProvider node)
     {
         // TODO: I am 99% sure that this does effectively nothing useful. Original LmpIrPlugin has it however?
         _moduleIrServo = AccessTools.TypeByName("InfernalRobotics_v3.Module.ModuleIRServo_v3");

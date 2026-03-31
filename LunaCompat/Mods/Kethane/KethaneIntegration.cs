@@ -30,7 +30,7 @@ internal class KethaneIntegration : ClientModIntegration
 
     #region Public Methods
 
-    public override void Setup(ConfigNode node)
+    public override void Setup(ModSettingsProvider node)
     {
         var legacyResourceGenerator = AccessTools.TypeByName("Kethane.Generators.LegacyResourceGenerator");
 
