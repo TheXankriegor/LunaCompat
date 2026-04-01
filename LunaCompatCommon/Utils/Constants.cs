@@ -5,7 +5,10 @@ namespace LunaCompatCommon.Utils
         #region Constants
 
         public const string Prefix = "LMPC_";
-        public const int MaxMessageSize = 8191;
+        /// <summary>
+        /// Technically anything under 8192 could work, but depending on the message we need a buffer
+        /// </summary>
+        public const int MaxMessageSize = 8180;
 
         #endregion
     }

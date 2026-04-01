@@ -27,8 +27,15 @@ internal class ServerSegmentedMessageListener : SegmentedMessageListener, IServe
 
     public void Execute(ClientStructure client, byte[] data)
     {
-        if (TryHandleSegment(data, out var id, out var combinedBytes))
-            _messageHandler.HandleReceivedMessage(client, id, combinedBytes);
+        try
+        {
+            if (TryHandleSegment(data, out var id, out var combinedBytes))
+                _messageHandler.HandleReceivedMessage(client, id, combinedBytes);
+        }
+        catch (Exception ex)
+        {
+            _logger.Error($"Failed to deserialize message segment ({data.Length} bytes): {ex}");
+        }
     }
 
     #endregion

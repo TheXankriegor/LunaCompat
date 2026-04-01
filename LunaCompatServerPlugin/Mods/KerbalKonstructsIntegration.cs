@@ -18,6 +18,7 @@ internal class KerbalKonstructsIntegration : ServerModIntegration
     private readonly string _baseInstancePath;
     private readonly string _baseGroupsPath;
     private readonly string _baseMapDecalsPath;
+    private readonly string _basePath;
 
     #endregion
 
@@ -26,10 +27,10 @@ internal class KerbalKonstructsIntegration : ServerModIntegration
     public KerbalKonstructsIntegration(ILogger logger, IModSettingsProvider settingsProvider, ServerMessageHandler messageHandler)
         : base(logger, settingsProvider, messageHandler)
     {
-        var baseDir = Path.Combine(LunaCompatServer.GetLunaCompatBaseDirectory(), "KerbalKonstructs");
-        _baseInstancePath = Path.Combine(baseDir, "NewInstances");
-        _baseMapDecalsPath = Path.Combine(baseDir, "MapDecals");
-        _baseGroupsPath = Path.Combine(baseDir, "Groups");
+        _basePath = Path.Combine(LunaCompatServer.GetLunaCompatBaseDirectory(), "KerbalKonstructs");
+        _baseInstancePath = Path.Combine(_basePath, "NewInstances");
+        _baseMapDecalsPath = Path.Combine(_basePath, "MapDecals");
+        _baseGroupsPath = Path.Combine(_basePath, "Groups");
     }
 
     #endregion
@@ -66,6 +67,8 @@ internal class KerbalKonstructsIntegration : ServerModIntegration
         _messageHandler.RegisterModMessageListener<KerbalKonstructsChangeMapDecalMessage>(OnChangeMapDecalMessageReceived);
         _messageHandler.RegisterModMessageListener<KerbalKonstructsDeleteMapDecalMessage>(OnDeleteMapDecalMessageReceived);
 
+        _messageHandler.RegisterModMessageListener<KerbalKonstructsSaveFacilitiesMessage>(OnSaveFacilitiesMessageReceived);
+
         if (!FileHandler.FolderExists(_baseInstancePath))
             FileHandler.FolderCreate(_baseInstancePath);
         if (!FileHandler.FolderExists(_baseGroupsPath))
@@ -74,9 +77,104 @@ internal class KerbalKonstructsIntegration : ServerModIntegration
             FileHandler.FolderCreate(_baseMapDecalsPath);
     }
 
+    public override void Destroy()
+    {
+        _messageHandler.UnregisterModMessageListener<KerbalKonstructsRequestInstancesMessage>();
+
+        _messageHandler.UnregisterModMessageListener<KerbalKonstructsChangeStaticInstanceMessage>();
+        _messageHandler.UnregisterModMessageListener<KerbalKonstructsDeleteStaticInstanceMessage>();
+
+        _messageHandler.UnregisterModMessageListener<KerbalKonstructsChangeGroupCenterMessage>();
+        _messageHandler.UnregisterModMessageListener<KerbalKonstructsDeleteGroupCenterMessage>();
+
+        _messageHandler.UnregisterModMessageListener<KerbalKonstructsChangeMapDecalMessage>();
+        _messageHandler.UnregisterModMessageListener<KerbalKonstructsDeleteMapDecalMessage>();
+
+        _messageHandler.UnregisterModMessageListener<KerbalKonstructsSaveFacilitiesMessage>();
+
+        base.Destroy();
+    }
+
     #endregion
 
     #region Non-Public Methods
+
+    private void SendScenarioData(ClientStructure client)
+    {
+        try
+        {
+            var facPath = Path.Combine(_basePath, "Facilities.cfg");
+            var lsPath = Path.Combine(_basePath, "LaunchSite.cfg");
+            var fac = string.Empty;
+            if (File.Exists(facPath))
+                fac = FileHandler.ReadFileText(facPath);
+            var ls = string.Empty;
+            if (File.Exists(lsPath))
+                ls = FileHandler.ReadFileText(lsPath);
+
+            var baseMessage = new KerbalKonstructsSaveFacilitiesMessage
+            {
+                LaunchSites = ls,
+                Facilities = fac
+            };
+            _messageHandler.SendCompatMessage(client, baseMessage);
+        }
+        catch (Exception ex)
+        {
+            _logger.Error($"Failed to send scenario data: {ex}", PackageName);
+        }
+    }
+
+    private void OnSaveFacilitiesMessageReceived(ClientStructure client, KerbalKonstructsSaveFacilitiesMessage msg)
+    {
+        try
+        {
+            _logger.Debug($"Received facility update from {client.PlayerName}.", PackageName);
+
+            var facPath = Path.Combine(_basePath, "Facilities.cfg");
+            var lsPath = Path.Combine(_basePath, "LaunchSite.cfg");
+
+            UpdateScenarioData(facPath, msg.Facilities);
+            UpdateScenarioData(lsPath, msg.LaunchSites);
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex.ToString(), PackageName);
+        }
+
+        void UpdateScenarioData(string existingPath, string content)
+        {
+            if (File.Exists(existingPath))
+            {
+                var existing = new ConfigNode(FileHandler.ReadFileText(existingPath));
+                var eN = existing.GetAllNodes();
+                var currentKeys = existing.Nodes.GetAllKeys();
+
+                var update = new ConfigNode(content);
+
+                foreach (var newInstance in update.GetAllNodes())
+                {
+                    var match = eN.SingleOrDefault(x => x.GetValue("UUID") == newInstance.GetValue("UUID"));
+
+                    if (match != null)
+                    {
+                        currentKeys.Remove(match.Name);
+                        existing.ReplaceNode(match, newInstance);
+                    }
+                    else
+                        existing.AddNode(newInstance);
+                }
+
+                // remove discarded
+                foreach (var remainingKey in currentKeys)
+                    existing.RemoveNode(remainingKey);
+
+                FileHandler.WriteToFile(existingPath, existing.ToString());
+            }
+            else
+                FileHandler.WriteToFile(existingPath, content);
+        }
+    }
 
     private void OnChangeGroupCenterMessageReceived(ClientStructure client, KerbalKonstructsChangeGroupCenterMessage msg)
     {
@@ -116,13 +214,20 @@ internal class KerbalKonstructsIntegration : ServerModIntegration
 
                 if (existingInstances == null)
                 {
-                    _logger.Warning($"Received empty static instance definition from {client.PlayerName} for {msg.Name}: {msg.Content}", PackageName);
+                    _logger.Warning($"Existing static instance definition for {msg.Name} is empty. Overwriting.", PackageName);
+                    FileHandler.WriteToFile(instancePath, msg.Content);
                     return;
                 }
 
                 var eN = existingInstances.GetNodes("Instances");
                 var update = new ConfigNode(msg.Content);
-                var uN = update.GetNode("root").Value.GetNode("STATIC").Value.GetNodes("Instances");
+                var uN = update.GetNode("root")?.Value?.GetNode("STATIC")?.Value?.GetNodes("Instances");
+
+                if (uN == null)
+                {
+                    _logger.Warning($"Received empty static instance definition from {client.PlayerName} for {msg.Name}: {msg.Content}", PackageName);
+                    return;
+                }
 
                 foreach (var newInstance in uN)
                 {
@@ -253,10 +358,17 @@ internal class KerbalKonstructsIntegration : ServerModIntegration
 
             SendServerSettings(client);
             SendAllGroupCenters(client);
-            SendAllMapDecals(client);
             SendAllStaticInstances(client);
+            SendAllMapDecals(client);
+            SendScenarioData(client);
 
-            _messageHandler.SendCompatMessage(client, new KerbalKonstructsRequestInstancesMessage());
+            Task.Run(async () =>
+            {
+                // Ensure all messages have been sent. At worst, this message arrived before others and allows editing too early (unlikely during join). 
+                await Task.Delay(1000);
+
+                _messageHandler.SendCompatMessage(client, new KerbalKonstructsRequestInstancesMessage());
+            });
         }
         catch (Exception ex)
         {
@@ -298,8 +410,6 @@ internal class KerbalKonstructsIntegration : ServerModIntegration
                 _logger.Error($"Failed to send {file}: {ex}", PackageName);
             }
         }
-
-        ;
     }
 
     private void SendAllStaticInstances(ClientStructure client)

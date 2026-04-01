@@ -26,6 +26,17 @@
         #endregion
     }
 
+    public class KerbalKonstructsSaveFacilitiesMessage : IModMessage
+    {
+        #region Properties
+
+        public string Facilities { get; set; }
+
+        public string LaunchSites { get; set; }
+
+        #endregion
+    }
+
     public class KerbalKonstructsChangeMessage : IModMessage
     {
         #region Properties

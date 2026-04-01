@@ -13,8 +13,9 @@ namespace LunaCompatCommon.Messages
     {
         #region Fields
 
+        protected readonly ILogger _logger;
+
         private readonly Dictionary<int, List<SegmentedMessage>> _messageParts;
-        private readonly ILogger _logger;
 
         #endregion
 
@@ -35,45 +36,44 @@ namespace LunaCompatCommon.Messages
             combinedBytes = Array.Empty<byte>();
             messageType = string.Empty;
 
-            try
+            var message = SerializationUtil.Deserialize<SegmentedMessage>(data);
+
+            if (_messageParts.TryGetValue(message.MessageId, out var parts))
             {
-                var message = SerializationUtil.Deserialize<SegmentedMessage>(data);
+                parts.Add(message);
 
-                if (_messageParts.TryGetValue(message.MessageId, out var parts))
+                if (parts.Count != message.PartCount)
+                    return false;
+
+                _messageParts.Remove(message.MessageId);
+
+                var totalLength = 0;
+
+                // Serverside has no defined LINQ Sum
+                for (var i = 0; i < parts.Count; i++)
                 {
-                    parts.Add(message);
-
-                    if (parts.Count != message.PartCount)
-                        return false;
-
-                    _messageParts.Remove(message.MessageId);
-
-                    var totalLength = parts.Sum(p => p.PartData.Length);
-                    combinedBytes = new byte[totalLength];
-                    var offset = 0;
-
-                    foreach (var part in parts.OrderBy(x => x.PartId))
-                    {
-                        Array.Copy(part.PartData, 0, combinedBytes, offset, part.PartData.Length);
-                        offset += part.PartData.Length;
-                    }
-
-                    messageType = message.OriginalType;
-
-                    return true;
+                    var p = parts[i];
+                    totalLength += p.PartData.Length;
                 }
 
-                _messageParts.Add(message.MessageId, new List<SegmentedMessage>
-                {
-                    message
-                });
+                combinedBytes = new byte[totalLength];
+                var offset = 0;
 
-                return false;
+                foreach (var part in parts.OrderBy(x => x.PartId))
+                {
+                    Array.Copy(part.PartData, 0, combinedBytes, offset, part.PartData.Length);
+                    offset += part.PartData.Length;
+                }
+
+                messageType = message.OriginalType;
+
+                return true;
             }
-            catch (Exception ex)
+
+            _messageParts.Add(message.MessageId, new List<SegmentedMessage>
             {
-                _logger.Error($"Failed to deserialize message segment ({data.Length} bytes): {ex}");
-            }
+                message
+            });
 
             return false;
         }

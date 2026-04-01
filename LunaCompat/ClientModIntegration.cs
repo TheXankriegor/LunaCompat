@@ -26,14 +26,26 @@ internal abstract class ClientModIntegration : ModIntegration
 
     #region Non-Public Methods
 
-    protected void UpdateSetting<T>(string key, T defaultValue, ReflectedType type)
+    protected void SaveSetting(string key, object instance, ReflectedType type)
+    {
+        try
+        {
+            var value = type.GetField(key, instance);
+            _settingsProvider.SetValue(PackageName, key, value);
+        }
+        catch (Exception ex)
+        {
+            _logger.Error($"Failed to load local setting for '{key}': {ex}");
+        }
+    }
+
+    protected void UpdateSetting<T>(string key, T defaultValue, object instance, ReflectedType type)
     {
         try
         {
             var value = _settingsProvider.GetValue(PackageName, key, defaultValue);
-            var paramNode = HighLogic.CurrentGame.Parameters.CustomParams(type.Type);
             var converted = Convert.ChangeType(value, typeof(T));
-            type.SetField(key, paramNode, converted);
+            type.SetField(key, instance, converted);
         }
         catch (Exception ex)
         {
