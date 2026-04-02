@@ -6,18 +6,26 @@ using JetBrains.Annotations;
 
 using LmpClient.Systems.TimeSync;
 
-using LunaCompat.Attributes;
-using LunaCompat.Utils;
+using LunaCompatCommon.ModIntegration;
+using LunaCompatCommon.Utils;
 
 namespace LunaCompat.Mods.ExtraplanetaryLaunchpads;
 
-[LunaFix]
 [UsedImplicitly]
-internal class ExtraplanetaryLaunchpadsCompat : ModCompat
+internal class ExtraplanetaryLaunchpadsIntegration : ClientModIntegration
 {
     #region Fields
 
     private static int serverSeed;
+
+    #endregion
+
+    #region Constructors
+
+    public ExtraplanetaryLaunchpadsIntegration(ILogger logger, IModSettingsProvider settingsProvider)
+        : base(logger, settingsProvider)
+    {
+    }
 
     #endregion
 
@@ -29,7 +37,7 @@ internal class ExtraplanetaryLaunchpadsCompat : ModCompat
 
     #region Public Methods
 
-    public override void Patch(ModMessageHandler modMessageHandler, ConfigNode node)
+    public override void Setup()
     {
         // TODO add Extraplanetary Launchpads fixes here
         // building progress and basic launch + decouple works
@@ -42,10 +50,10 @@ internal class ExtraplanetaryLaunchpadsCompat : ModCompat
 
         LunaCompat.HarmonyInstance.Patch(AccessTools.Method(recyclerFsm, "random", [
             typeof(float), typeof(float)
-        ]), new HarmonyMethod(typeof(ExtraplanetaryLaunchpadsCompat), nameof(PrefixPatchedFloatRandom)));
+        ]), new HarmonyMethod(typeof(ExtraplanetaryLaunchpadsIntegration), nameof(PrefixPatchedFloatRandom)));
         LunaCompat.HarmonyInstance.Patch(AccessTools.Method(recyclerFsm, "random", [
             typeof(int), typeof(int)
-        ]), new HarmonyMethod(typeof(ExtraplanetaryLaunchpadsCompat), nameof(PrefixPatchedIntRandom)));
+        ]), new HarmonyMethod(typeof(ExtraplanetaryLaunchpadsIntegration), nameof(PrefixPatchedIntRandom)));
     }
 
     #endregion

@@ -2,17 +2,23 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 
 using HarmonyLib;
 
-using KSPBuildTools;
-
 using LmpClient;
+using LmpClient.Events;
 
-using LunaCompat.Attributes;
+using LmpCommon.Enums;
+
 using LunaCompat.Utils;
 
+using LunaCompatCommon.Messages;
+
 using UnityEngine;
+
+using ILogger = LunaCompatCommon.Utils.ILogger;
+using Logger = LunaCompat.Utils.Logger;
 
 namespace LunaCompat;
 
@@ -23,57 +29,40 @@ public class LunaCompat : MonoBehaviour
 
     public static Harmony HarmonyInstance = new("LunaCompat");
 
-    private readonly HashSet<ModCompat> _activePatches = [];
-    private ModMessageHandler _modMessageHandler;
+    private readonly HashSet<ClientModIntegration> _activePatches = [];
+    private ILogger _logger;
+    private ClientMessageHandler _messageHandler;
+    private ModSettingsProvider _settingsProvider;
 
     public static LunaCompat Singleton { get; set; }
 
     private void Awake()
     {
         Singleton = this;
+        _logger = new Logger();
+
         DontDestroyOnLoad(this);
 
         if (!MainSystem.Singleton || !MainSystem.Singleton.Enabled)
         {
-            Log.Error("Luna Multiplayer does not appear to be running.");
+            _logger.Error("Luna Multiplayer does not appear to be running.");
             return;
         }
 
-        var node = ConfigNode.Load(KSPUtil.ApplicationRootPath + ConfigFilePath);
+        _messageHandler = new ClientMessageHandler(_logger);
 
-        if (node == null)
-        {
-            Log.Error($"Failed to locate config file '{ConfigFilePath}'.");
-            return;
-        }
+        NetworkEvent.onNetworkStatusChanged.Add(OnLmpNetworkStatusChanged);
 
-        _modMessageHandler = new ModMessageHandler();
+        _settingsProvider = new ModSettingsProvider(KSPUtil.ApplicationRootPath + ConfigFilePath, _logger);
+        _settingsProvider.TryLoadSettings();
 
         // We could load external fixes here as well - but will that ever be needed?
-        var queue = Assembly.GetAssembly(typeof(LunaCompat)).GetTypes().Where(IsLunaFix);
+        var modIntegrations = Assembly.GetExecutingAssembly().GetTypes().Where(x => typeof(ClientModIntegration).IsAssignableFrom(x) && !x.IsAbstract).ToList();
 
-        foreach (var type in queue)
-        {
-            try
-            {
-                var compatInstance = (ModCompat)Activator.CreateInstance(type);
+        foreach (var type in modIntegrations)
+            SetupModCompat(type);
 
-                if (!AssemblyLoader.loadedAssemblies.Contains(compatInstance.PackageName))
-                    continue;
-
-                _activePatches.Add(compatInstance);
-
-                compatInstance.Patch(_modMessageHandler, node);
-
-                Log.Message($"Initialized compatibility for {compatInstance.PackageName}");
-            }
-            catch (Exception e)
-            {
-                Log.Error($"Exception loading {type.Name}: {e}");
-            }
-        }
-
-        Log.Message("Xan's Luna Compat Plugin started.");
+        _logger.Info("Xan's Luna Compat Plugin started.");
     }
 
     private void OnDestroy()
@@ -81,12 +70,85 @@ public class LunaCompat : MonoBehaviour
         foreach (var patch in _activePatches)
             patch.Destroy();
 
-        _modMessageHandler.Destroy();
+        _messageHandler.Dispose();
+
+        NetworkEvent.onNetworkStatusChanged?.Remove(OnLmpNetworkStatusChanged);
     }
 
-    private static bool IsLunaFix(Type type)
+    private void SetupModCompat(Type type)
     {
-        var attributes = type.GetCustomAttributes<LunaFixAttribute>(false);
-        return attributes.Any();
+        try
+        {
+            var compatInstance = (ClientModIntegration)Activator.CreateInstance(type, _logger, _settingsProvider);
+
+            if (bool.TryParse(_settingsProvider.GetValue(compatInstance.PackageName, compatInstance.IsIntegrationEnabledKey, true) as string,
+                              out var integrationEnabled))
+            {
+                if (!integrationEnabled)
+                {
+                    _logger.Info($"{compatInstance.PackageName} is disabled.");
+                    return;
+                }
+            }
+            else
+                _logger.Error($"Failed to read {compatInstance.PackageName} switch - are the settings corrupt?.");
+
+            if (!AssemblyLoader.loadedAssemblies.Contains(compatInstance.PackageName))
+                return;
+
+            compatInstance.Setup();
+            _activePatches.Add(compatInstance);
+
+            _logger.Info($"Initialized compatibility for {compatInstance.PackageName}");
+        }
+        catch (Exception e)
+        {
+            _logger.Error($"Exception loading {type.Name}: {e}");
+        }
+    }
+
+    private void OnLmpNetworkStatusChanged(ClientState data)
+    {
+        // Test for Compat plugin
+        if (data != ClientState.Running)
+            return;
+
+        var serverModConfirmed = false;
+        _logger.Info("Testing for Luna Compat Server Plugin...");
+
+        var version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+
+        _messageHandler.RegisterModMessageListener<InitializeMessage>(message =>
+        {
+            _logger.Info($"Received Luna Compat Server Plugin: {message.Version}");
+
+            if (message.Version != version)
+            {
+                _logger.Warning(
+                    $"The Luna Compat Server Plugin does not match the installed version: Client: {version}, Server: {message.Version} - Contact the server owner for assistance.");
+            }
+
+            serverModConfirmed = true;
+            _messageHandler.SetServerIntegrationDetermined(true);
+        });
+
+        _messageHandler.SendReliableMessage(new InitializeMessage
+        {
+            Version = version
+        }, false);
+
+        // If no reply within 15 seconds - due to this happening on load the communication can be VERY delayed
+        Task.Run(async () =>
+        {
+            await Task.Delay(15000);
+
+            if (!serverModConfirmed)
+            {
+                _logger.Warning("Luna Compat Server Plugin is missing. Contact the server owner for assistance.");
+                _messageHandler.SetServerIntegrationDetermined(false);
+            }
+
+            _messageHandler.UnregisterModMessageListener<InitializeMessage>();
+        });
     }
 }

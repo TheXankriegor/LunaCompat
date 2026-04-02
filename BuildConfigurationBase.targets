@@ -3,14 +3,16 @@
 	<PropertyGroup>
 		<OutputType>Library</OutputType>
 		<Product>LunaCompat</Product>
-		<Copyright>Copyright © 2025</Copyright>
+		<Copyright>Copyright © 2026</Copyright>
 		<GenerateAssemblyInfo>true</GenerateAssemblyInfo>
-		<AssemblyVersion>0.0.6</AssemblyVersion>
+		<AssemblyVersion>0.0.7</AssemblyVersion>
 		<FileVersion>$(AssemblyVersion)</FileVersion>
 
 		<NoWarn>IDE0290</NoWarn>
 		<DebugSymbols>true</DebugSymbols>
 		<DebugType>embedded</DebugType>
-		<LangVersion>latest</LangVersion>
 	</PropertyGroup>
+
+
+	<Import Project="LunaCompatCommon\LunaCompatCommon.projitems" Label="Shared" />
 </Project>

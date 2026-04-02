@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LunaCompat", "LunaCompat\Lu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LunaCompatServerPlugin", "LunaCompatServerPlugin\LunaCompatServerPlugin.csproj", "{82FF4630-BE7A-4620-ABA3-B77AC95DED4E}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "LunaCompatCommon", "LunaCompatCommon\LunaCompatCommon.shproj", "{58682C47-4E90-40E1-8EFF-8CE13CC36E1C}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
 	ProjectSection(SolutionItems) = preProject
 		BuildConfigurationBase.targets = BuildConfigurationBase.targets
@@ -36,5 +38,10 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {88AE7580-4798-4D76-8F72-3E3CFE586588}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		LunaCompatCommon\LunaCompatCommon.projitems*{58682c47-4e90-40e1-8eff-8ce13cc36e1c}*SharedItemsImports = 13
+		LunaCompatCommon\LunaCompatCommon.projitems*{80a81050-dd6d-4aed-a83e-729b2b479103}*SharedItemsImports = 5
+		LunaCompatCommon\LunaCompatCommon.projitems*{82ff4630-be7a-4620-aba3-b77ac95ded4e}*SharedItemsImports = 5
 	EndGlobalSection
 EndGlobal

@@ -2,19 +2,27 @@
 
 using JetBrains.Annotations;
 
-using KSPBuildTools;
-
 using LmpClient.Systems.TimeSync;
 
-using LunaCompat.Attributes;
 using LunaCompat.Utils;
+
+using LunaCompatCommon.ModIntegration;
+using LunaCompatCommon.Utils;
 
 namespace LunaCompat.Mods.Kethane;
 
-[LunaFix]
 [UsedImplicitly]
-internal class KethaneCompat : ModCompat
+internal class KethaneIntegration : ClientModIntegration
 {
+    #region Constructors
+
+    public KethaneIntegration(ILogger logger, IModSettingsProvider settingsProvider)
+        : base(logger, settingsProvider)
+    {
+    }
+
+    #endregion
+
     #region Properties
 
     public override string PackageName => "Kethane";
@@ -23,13 +31,13 @@ internal class KethaneCompat : ModCompat
 
     #region Public Methods
 
-    public override void Patch(ModMessageHandler modMessageHandler, ConfigNode node)
+    public override void Setup()
     {
         var legacyResourceGenerator = AccessTools.TypeByName("Kethane.Generators.LegacyResourceGenerator");
 
         LunaCompat.HarmonyInstance.Patch(AccessTools.Method(legacyResourceGenerator, "Load", [
             typeof(CelestialBody), typeof(ConfigNode)
-        ]), new HarmonyMethod(typeof(KethaneCompat), nameof(PrefixLoad)));
+        ]), new HarmonyMethod(typeof(KethaneIntegration), nameof(PrefixLoad)));
     }
 
     #endregion
@@ -50,7 +58,7 @@ internal class KethaneCompat : ModCompat
         var seed = (int)(TimeSyncSystem.ServerStartTime % int.MaxValue);
         node.SetValue("Seed", seed);
 
-        Log.Message($"[FIX {nameof(PackageName)}]: Use server-wide Kethane seed ({seed}).");
+        Logger.Instance.Info($"[FIX {nameof(PackageName)}]: Use server-wide Kethane seed ({seed}).");
     }
 
     #endregion

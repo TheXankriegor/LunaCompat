@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>58682c47-4e90-40e1-8eff-8ce13cc36e1c</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>LunaCompatCommon</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\MessageHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\MessageListener.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\ModMessages\KerbalKonstructMessages.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\SegmentedMessageListener.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\SettingsValueMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ModIntegration\IModSettingsProvider.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ModIntegration\ModIntegration.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serializer\SerializationReader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serializer\SerializationUtil.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serializer\SerializationWriter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serializer\TypeCache.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serializer\VarInt.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utils\Constants.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\IModMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\InitializeMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\ModMessages\ScanSatMessages.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\SegmentedMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utils\BaseLogger.cs" />
+  </ItemGroup>
+</Project>

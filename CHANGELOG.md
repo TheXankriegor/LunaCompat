@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file
 
+## 0.0.7-pre - 2026-04-02
+
+- add server plugin
+- add KerbalKonstructs compat
+
+
 ## 0.0.6-pre - 2025-08-08
 
 - add TUFX compat
