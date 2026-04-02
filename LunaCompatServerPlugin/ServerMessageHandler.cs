@@ -60,7 +60,7 @@ internal class ServerMessageHandler : MessageHandler<IServerMessageListener>, IS
 
     public void HandleReceivedMessage(ClientStructure client, string id, byte[] data)
     {
-        if (!id.StartsWith(Constants.Prefix) || !TryGetMessageListener(id, out var messageListener))
+        if (id == null || !id.StartsWith(Constants.Prefix) || !TryGetMessageListener(id, out var messageListener))
             return;
 
         Task.Run(() => messageListener.Execute(client, data));

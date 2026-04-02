@@ -85,6 +85,11 @@ Certain mods require the LunaCompat server plugin to function correctly.
 - Download the latest `LunaCompatServerPlugin.zip` from the [Releases](https://github.com/TheXankriegor/LunaCompat/releases)
 - Unpack into your Luna Multiplayer Server `Plugins` folder (create a new folder if it does not exist)
 
+#### A word of caution
+
+Just like most of the other features in LMP, syncing things across the network is done on a best-effort basis and may sometimes mess up. 
+To avoid losing progress, try to interacting with one system at the same time (e.g. editing KerbalKolonies instances).
+
 ### Dependencies
 
 - [Luna Multiplayer Client](https://github.com/LunaMultiplayer/LunaMultiplayer)
