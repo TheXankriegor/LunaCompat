@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file
 
-## 0.0.7-pre - 2026-03-03
+## 0.0.7-pre - 2026-04-02
 
 - add server plugin
 - add KerbalKonstructs compat

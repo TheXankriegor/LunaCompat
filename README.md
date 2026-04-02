@@ -30,7 +30,7 @@ Check the repository to see the full list of supported mods.
 - [TUFX](https://github.com/KSPModStewards/TUFX): Keep settings between disconnects
 - [ClickThroughBlocker](https://github.com/linuxgurugamer/ClickThroughBlocker): Keep settings between disconnects
 - [PhysicsRangeExtender](https://github.com/jrodrigv/PhysicsRangeExtender): Force disable PRE at all times
-- [Kerbal-Konstructs](github.com/KSP-RO/Kerbal-Konstructs): Sync instances across clients (see [Server plugin](#server-plugin))
+- [Kerbal-Konstructs](https://github.com/KSP-RO/Kerbal-Konstructs): Sync instances, groups, map decals and facilities across clients (see [Server plugin](#server-plugin))
 
 ### Part Syncs
 
@@ -70,7 +70,7 @@ Part modules from the following mods are synced:
 
 ### CKAN
 
-The mod is available on CKAN - just search for 'Luna Compat'!
+The mod is available on [CKAN](https://github.com/KSP-CKAN/CKAN/releases) - just search for 'Luna Compat'!
 
 ### Manual installation
 
@@ -80,7 +80,7 @@ The mod is available on CKAN - just search for 'Luna Compat'!
 
 ### Server plugin
 
-Certain mods require the LunaCompat server plugin to function correctly. 
+Certain mods require the LunaCompat server plugin to function correctly. If you are hosting a server, follow the steps below to add the server plugin. After launching the server once, configure the server settings using the '.\Universe\LunaCompat\ModSettingsStructure.xml' file.
 
 - Download the latest `LunaCompatServerPlugin.zip` from the [Releases](https://github.com/TheXankriegor/LunaCompat/releases)
 - Unpack into your Luna Multiplayer Server `Plugins` folder (create a new folder if it does not exist)
