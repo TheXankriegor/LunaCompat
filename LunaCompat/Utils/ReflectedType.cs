@@ -18,13 +18,18 @@ namespace LunaCompat.Utils
 
         #region Constructors
 
-        public ReflectedType(string typeName)
+        public ReflectedType(Type type)
         {
-            Type = AccessTools.TypeByName(typeName);
+            Type = type;
 
             _methods = new Dictionary<string, MethodInfo>();
             _fields = new Dictionary<string, FieldInfo>();
             _properties = new Dictionary<string, PropertyInfo>();
+        }
+
+        public ReflectedType(string typeName)
+            : this(AccessTools.TypeByName(typeName))
+        {
         }
 
         #endregion

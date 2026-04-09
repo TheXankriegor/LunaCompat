@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 
 using HarmonyLib;
 
@@ -411,8 +410,11 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
 
             Logger.Instance.Info($"Group deleted: ({nodePath})", KerbalKonstructsPackageName);
 
-            if (File.Exists(nodePath))
-                File.Delete(nodePath);
+            FileInteractionHandler.ExecuteTask(() =>
+            {
+                if (File.Exists(nodePath))
+                    File.Delete(nodePath);
+            });
 
             if (existing.Key == null)
             {
@@ -484,23 +486,35 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
                 groupDictionary.Add(uuid, __instance);
             }
 
-            var node = ConfigNode.Load(nodePath);
             var writtenFileName = nodePath.Remove(0, basePath.Length + 1);
 
             Logger.Instance.Info($"Group sending: ({nodePath}, {uuid})", KerbalKonstructsPackageName);
 
-            ClientMessageHandler.Instance.SendReliableMessage(new KerbalKonstructsChangeGroupCenterMessage
+            FileInteractionHandler.ExecuteTask(() =>
             {
-                Uuid = uuid,
-                Name = Path.GetFileNameWithoutExtension(writtenFileName),
-                Content = node.ToString()
+                var node = ConfigNode.Load(nodePath);
+
+                ClientMessageHandler.Instance.SendReliableMessage(new KerbalKonstructsChangeGroupCenterMessage
+                {
+                    Uuid = uuid,
+                    Name = Path.GetFileNameWithoutExtension(writtenFileName),
+                    Content = node.ToString()
+                });
             });
 
             // update attached static instances to account for name changes
             var instances = (IEnumerable)groupCenterType.GetField("childInstances", __instance);
+            var processedPaths = new HashSet<string>();
 
             foreach (var instance in instances)
+            {
+                var path = staticInstanceType.GetField("configPath", instance) as string;
+                if (processedPaths.Contains(path))
+                    continue;
+
                 staticInstanceType.Invoke("SaveConfig", instance, []);
+                processedPaths.Add(path);
+            }
         }
         catch (Exception ex)
         {
@@ -559,15 +573,18 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
             var basePath = Path.Combine(KSPUtil.ApplicationRootPath, "GameData");
             var nodePath = Path.Combine(basePath, decalSavePath);
 
-            var node = ConfigNode.Load(nodePath);
-            var name = node.GetNode("KK_MapDecal")?.GetValue("Name");
-
-            Logger.Instance.Info($"Map decal saved: {name} ({nodePath}).", KerbalKonstructsPackageName);
-
-            ClientMessageHandler.Instance.SendReliableMessage(new KerbalKonstructsChangeMapDecalMessage
+            FileInteractionHandler.ExecuteTask(() =>
             {
-                Name = Path.GetFileNameWithoutExtension(nodePath),
-                Content = node.ToString()
+                var node = ConfigNode.Load(nodePath);
+                var name = node.GetNode("KK_MapDecal")?.GetValue("Name");
+
+                Logger.Instance.Info($"Map decal saved: {name} ({nodePath}).", KerbalKonstructsPackageName);
+
+                ClientMessageHandler.Instance.SendReliableMessage(new KerbalKonstructsChangeMapDecalMessage
+                {
+                    Name = Path.GetFileNameWithoutExtension(nodePath),
+                    Content = node.ToString()
+                });
             });
         }
         catch (Exception ex)
@@ -591,27 +608,29 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
                 return;
             }
 
-            var node = ConfigNode.Load(nodePath);
-            var name = node.GetNode("STATIC")?.GetValue("pointername") ?? string.Empty;
-            var newHash = Common.CalculateSha256Hash(Encoding.UTF8.GetBytes(node.ToString()));
-
-            if (instanceStateCache.TryGetValue(name, out var existingHash) && newHash == existingHash)
+            FileInteractionHandler.ExecuteTask(() => ConfigNode.Load(nodePath), node =>
             {
-                // facility might still have changed. 
+                var name = node.GetNode("STATIC")?.GetValue("pointername") ?? string.Empty;
+                var newHash = Common.CalculateSha256Hash(Encoding.UTF8.GetBytes(node.ToString()));
+
+                if (instanceStateCache.TryGetValue(name, out var existingHash) && newHash == existingHash)
+                {
+                    // facility might still have changed. 
+                    SaveScenarioModule();
+                    return;
+                }
+
+                instanceStateCache[name] = newHash;
+
+                Logger.Instance.Info($"Static instance saved: ({nodePath})", KerbalKonstructsPackageName);
+
+                ClientMessageHandler.Instance.SendReliableMessage(new KerbalKonstructsChangeStaticInstanceMessage
+                {
+                    Name = name,
+                    Content = node.ToString()
+                });
                 SaveScenarioModule();
-                return;
-            }
-
-            instanceStateCache[name] = newHash;
-
-            Logger.Instance.Info($"Static instance saved: ({nodePath})", KerbalKonstructsPackageName);
-
-            ClientMessageHandler.Instance.SendReliableMessage(new KerbalKonstructsChangeStaticInstanceMessage
-            {
-                Name = name,
-                Content = node.ToString()
             });
-            SaveScenarioModule();
         }
         catch (Exception ex)
         {
@@ -729,8 +748,12 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
             var refLat = (double)groupCenterType.GetField("RefLatitude", existing);
             var refLng = (double)groupCenterType.GetField("RefLongitude", existing);
             var body = groupCenterType.GetField("CelestialBody", existing) as CelestialBody;
+
             if (body)
-                groupCenterType.SetField("RadialPosition", existing, (Vector3)(body.GetRelSurfaceNVector(refLat, refLng).normalized * body.pqsController.radius));
+            {
+                groupCenterType.SetField("RadialPosition", existing,
+                                         (Vector3)(body.GetRelSurfaceNVector(refLat, refLng).normalized * body.pqsController.radius));
+            }
 
             // update RotationAngle
             var groupCenterGameObject = groupCenterType.GetField("gameObject", existing) as GameObject;
@@ -848,22 +871,33 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
         CloseUiIfOpen();
         apiType.Invoke("RemoveStatic", null, [msg.Identifier]);
 
-        if (!File.Exists(targetPath))
-            return;
-
-        var node = ConfigNode.Load(targetPath);
-        var existingInstances = node.GetNode("root").GetNode("STATIC");
-
-        foreach (var instance in existingInstances.GetNodes("Instances"))
+        FileInteractionHandler.ExecuteTask(() =>
         {
-            if (instance.GetValue("UUID") == msg.Identifier)
-            {
-                existingInstances.RemoveNode(instance);
-                break;
-            }
-        }
+            if (!File.Exists(targetPath))
+                return null;
 
-        File.WriteAllText(targetPath, node.ToString());
+            return ConfigNode.Load(targetPath);
+        }, node =>
+        {
+            if (node == null)
+                return;
+
+            var existingInstances = node.GetNode("root").GetNode("STATIC");
+
+            foreach (var instance in existingInstances.GetNodes("Instances"))
+            {
+                if (instance.GetValue("UUID") == msg.Identifier)
+                {
+                    existingInstances.RemoveNode(instance);
+                    break;
+                }
+            }
+
+            FileInteractionHandler.ExecuteTask(() =>
+            {
+                File.WriteAllText(targetPath, node.ToString());
+            });
+        });
     }
 
     private void OnChangeStaticInstanceMessageReceived(KerbalKonstructsChangeStaticInstanceMessage msg)
@@ -872,7 +906,10 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
 
         var targetPath = Path.Combine(KSPUtil.ApplicationRootPath, "saves/LunaMultiplayer/KerbalKonstructs/NewInstances", $"{msg.Name}.cfg");
 
-        File.WriteAllText(targetPath, msg.Content);
+        FileInteractionHandler.ExecuteTask(() =>
+        {
+            File.WriteAllText(targetPath, msg.Content);
+        });
 
         CloseUiIfOpen();
         var node = ConfigNode.Parse(msg.Content);
@@ -1021,16 +1058,9 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
         var relativePath = Path.Combine("../saves/LunaMultiplayer/KerbalKonstructs/NewInstances", $"{msg.Name}.cfg").Replace('\\', '/');
         var targetPath = Path.Combine(KSPUtil.ApplicationRootPath, "GameData", relativePath);
 
-        Task.Run(() =>
+        FileInteractionHandler.ExecuteTask(() =>
         {
-            try
-            {
-                File.WriteAllText(targetPath, msg.Content);
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, KerbalKonstructsPackageName);
-            }
+            File.WriteAllText(targetPath, msg.Content);
         });
 
         CloseUiIfOpen();
@@ -1144,16 +1174,9 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
         var subPath = Path.Combine("saves/LunaMultiplayer/KerbalKonstructs/NewInstances", $"{msg.Name}.cfg");
         var targetPath = Path.Combine(KSPUtil.ApplicationRootPath, subPath);
 
-        Task.Run(() =>
+        FileInteractionHandler.ExecuteTask(() =>
         {
-            try
-            {
-                File.WriteAllText(targetPath, msg.Content);
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, PackageName);
-            }
+            File.WriteAllText(targetPath, msg.Content);
         });
 
         CloseUiIfOpen();
@@ -1178,12 +1201,16 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
 
         var instancePath = Path.Combine(KSPUtil.ApplicationRootPath, "saves/LunaMultiplayer/KerbalKonstructs/NewInstances");
 
-        if (Directory.Exists(instancePath) && Directory.EnumerateFiles(instancePath).Any())
-            Directory.Delete(instancePath, true);
+        FileInteractionHandler.ExecuteTask(() =>
+        {
+            if (Directory.Exists(instancePath) && Directory.EnumerateFiles(instancePath).Any())
+                Directory.Delete(instancePath, true);
 
-        Directory.CreateDirectory(instancePath);
-
-        ClientMessageHandler.Instance.SendReliableMessage(new KerbalKonstructsRequestInstancesMessage(), false);
+            Directory.CreateDirectory(instancePath);
+        }, () =>
+        {
+            ClientMessageHandler.Instance.SendReliableMessage(new KerbalKonstructsRequestInstancesMessage(), false);
+        });
     }
 
     private void UnloadAllStaticInstances()
