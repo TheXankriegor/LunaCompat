@@ -33,6 +33,7 @@ public class LunaCompat : MonoBehaviour
     private ILogger _logger;
     private ClientMessageHandler _messageHandler;
     private ModSettingsProvider _settingsProvider;
+    private FileInteractionHandler _fileInteractionHandler;
 
     public static LunaCompat Singleton { get; set; }
 
@@ -49,6 +50,7 @@ public class LunaCompat : MonoBehaviour
             return;
         }
 
+        _fileInteractionHandler = new FileInteractionHandler(_logger);
         _messageHandler = new ClientMessageHandler(_logger);
 
         NetworkEvent.onNetworkStatusChanged.Add(OnLmpNetworkStatusChanged);
@@ -73,6 +75,12 @@ public class LunaCompat : MonoBehaviour
         _messageHandler.Dispose();
 
         NetworkEvent.onNetworkStatusChanged?.Remove(OnLmpNetworkStatusChanged);
+    }
+
+    private void FixedUpdate()
+    {
+        // check if anything needs to run in unity context
+        _fileInteractionHandler.Update();
     }
 
     private void SetupModCompat(Type type)
