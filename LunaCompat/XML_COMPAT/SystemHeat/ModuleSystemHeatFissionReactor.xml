@@ -15,18 +15,23 @@
 		</FieldDefinition>
 		<FieldDefinition>
 			<FieldName>CurrentReactorThrottle</FieldName>
+			<MaxIntervalInMs>250</MaxIntervalInMs>
 		</FieldDefinition>
 		<FieldDefinition>
 			<FieldName>CurrentThrottle</FieldName>
+			<MaxIntervalInMs>250</MaxIntervalInMs>
 		</FieldDefinition>
 		<FieldDefinition>
 			<FieldName>CurrentElectricalGeneration</FieldName>
+			<MaxIntervalInMs>250</MaxIntervalInMs>
 		</FieldDefinition>
 		<FieldDefinition>
 			<FieldName>MaxElectricalGeneration</FieldName>
+			<MaxIntervalInMs>250</MaxIntervalInMs>
 		</FieldDefinition>
 		<FieldDefinition>
 			<FieldName>InternalCoreTemperature</FieldName>
+			<MaxIntervalInMs>1000</MaxIntervalInMs>
 		</FieldDefinition>
 		<FieldDefinition>
 			<FieldName>InternalCoreTemperatureResponseScale</FieldName>
@@ -39,9 +44,11 @@
 		</FieldDefinition>
 		<FieldDefinition>
 			<FieldName>LastUpdateTime</FieldName>
+			<MaxIntervalInMs>1000</MaxIntervalInMs>
 		</FieldDefinition>
 		<FieldDefinition>
 			<FieldName>CoreIntegrity</FieldName>
+			<MaxIntervalInMs>1000</MaxIntervalInMs>
 		</FieldDefinition>
 	</Fields>
 	<Methods>
