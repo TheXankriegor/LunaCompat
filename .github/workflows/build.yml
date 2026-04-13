@@ -21,6 +21,14 @@ jobs:
           submodules: true
           fetch-depth: 0 # get full history, not shallow clone
 
+      - name: Set version from tag
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+        run: |
+          V="${{ github.ref_name }}"; BASE_VERSION="${V%%-*}"
+          [[ "$V" == *-* ]] && echo "PRERELEASE=-p" >> $GITHUB_ENV
+          sed -i "s|<AssemblyVersion>.*</AssemblyVersion>|<AssemblyVersion>${BASE_VERSION}</AssemblyVersion>|" BuildConfigurationBase.targets
+          sed -i "s|\"VERSION\": \".*\"|\"VERSION\": \"${BASE_VERSION}\"|" lunacompat.version
+
       - name: Get Changelog Information
         uses: drewcassidy/yaclog@1.5.0
         id: yaclog-show
@@ -70,6 +78,7 @@ jobs:
         run: |
           zip -j LunaCompatServerPlugin.zip $(find Build -name "LunaCompatServerPlugin.dll" | head -n 1)
           gh release create ${{ github.ref_name }} \
+            ${{ env.PRERELEASE }} \
             --notes-file "${{ steps.yaclog-show.outputs.body-file }}" \
             --title "${{ steps.yaclog-show.outputs.name }}" \
             ${{ steps.assemble-release.outputs.artifact-path }}.zip \

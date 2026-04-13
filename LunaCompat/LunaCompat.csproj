@@ -40,7 +40,6 @@
 			<KSPAssemblyName>ModuleManager.4.2.3</KSPAssemblyName>
 			<KSPAssemblyVersion>4.2.3</KSPAssemblyVersion>
 		</Reference>
-		<Compile Remove="..\LunaCompatShared\obj\Debug\**" />
 		<!-- Depends on Harmony -->
 		<Reference Include="0Harmony, Culture=neutral, PublicKeyToken=null">
 			<HintPath>$(KSPRoot)/GameData/000_Harmony/0Harmony.dll</HintPath>
@@ -54,6 +53,12 @@
 			<Private>False</Private>
 			<CKANIdentifier>LunaMultiplayer</CKANIdentifier>
 			<KSPAssemblyName>LmpClient</KSPAssemblyName>
+		</Reference>
+		<Reference Include="LmpCommon, Culture=neutral, PublicKeyToken=null">
+			<HintPath>$(KSPRoot)/GameData/LunaMultiplayer/Plugins/LmpCommon.dll</HintPath>
+			<Private>False</Private>
+			<CKANIdentifier>LunaMultiplayer</CKANIdentifier>
+			<KSPAssemblyName>LmpCommon</KSPAssemblyName>
 		</Reference>
 	</ItemGroup>
 
