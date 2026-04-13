@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file
 
+## 0.0.8-pre - 2026-04-13
+
+- update to server version .NET 10
+
+
 ## 0.0.7-pre - 2026-04-02
 
 - add server plugin

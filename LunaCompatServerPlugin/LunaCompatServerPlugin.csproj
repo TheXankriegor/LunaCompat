@@ -2,7 +2,7 @@
 	<Import Project="..\BuildConfigurationBase.targets" />
 
 	<PropertyGroup>
-		<TargetFramework>net6.0</TargetFramework>
+		<TargetFramework>net10.0</TargetFramework>
 		<LangVersion>10.0</LangVersion>
 		<AssemblyTitle>LunaCompatServerPlugin</AssemblyTitle>
 		<ImplicitUsings>enable</ImplicitUsings>
@@ -13,6 +13,9 @@
 
 	<ItemGroup>
 		<Reference Include="$(LMPServerRoot)/Server.dll">
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="$(LMPServerRoot)/LmpCommon.dll">
 			<Private>False</Private>
 		</Reference>
 		<Reference Include="$(LMPServerRoot)/LunaConfigNode.dll">
