@@ -42,6 +42,21 @@ namespace LunaCompat.Utils
 
         #region Public Methods
 
+        /// <summary>
+        /// As this uses the same cache using multiple methods with the same name will not work. Refactor the cache if that is
+        /// required.
+        /// </summary>
+        public MethodInfo Method(string methodName, Type[] parameters)
+        {
+            if (!_methods.TryGetValue(methodName, out var method))
+            {
+                method = AccessTools.Method(Type, methodName, parameters);
+                _methods.Add(methodName, method);
+            }
+
+            return method;
+        }
+
         public MethodInfo Method(string methodName)
         {
             if (!_methods.TryGetValue(methodName, out var method))

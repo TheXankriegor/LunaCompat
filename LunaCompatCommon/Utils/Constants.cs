@@ -8,7 +8,7 @@ namespace LunaCompatCommon.Utils
         /// <summary>
         /// Technically anything under 8192 could work, but depending on the message we need a buffer
         /// </summary>
-        public const int MaxMessageSize = 8180;
+        public const int MaxMessageSize = 8000;
 
         #endregion
     }

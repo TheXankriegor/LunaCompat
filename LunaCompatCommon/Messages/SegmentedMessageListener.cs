@@ -1,11 +1,12 @@
 ﻿// ReSharper disable RedundantUsingDirective
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
 using LunaCompatCommon.Serializer;
 using LunaCompatCommon.Utils;
+
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace LunaCompatCommon.Messages
 {
@@ -15,7 +16,7 @@ namespace LunaCompatCommon.Messages
 
         protected readonly ILogger _logger;
 
-        private readonly Dictionary<int, List<SegmentedMessage>> _messageParts;
+        private readonly ConcurrentDictionary<int, (List<SegmentedMessage> Segments, DateTime ReceivedTime )> _messageParts;
 
         #endregion
 
@@ -24,7 +25,7 @@ namespace LunaCompatCommon.Messages
         protected SegmentedMessageListener(ILogger logger)
         {
             _logger = logger;
-            _messageParts = new Dictionary<int, List<SegmentedMessage>>();
+            _messageParts = new ConcurrentDictionary<int, (List<SegmentedMessage> Segments, DateTime ReceivedTime)>();
         }
 
         #endregion
@@ -38,14 +39,16 @@ namespace LunaCompatCommon.Messages
 
             var message = SerializationUtil.Deserialize<SegmentedMessage>(data);
 
-            if (_messageParts.TryGetValue(message.MessageId, out var parts))
+            if (_messageParts.TryGetValue(message.MessageId, out var partTpl))
             {
+                var parts = partTpl.Segments;
+
                 parts.Add(message);
 
                 if (parts.Count != message.PartCount)
                     return false;
 
-                _messageParts.Remove(message.MessageId);
+                _messageParts.TryRemove(message.MessageId, out _);
 
                 var totalLength = 0;
 
@@ -65,15 +68,30 @@ namespace LunaCompatCommon.Messages
                     offset += part.PartData.Length;
                 }
 
+                if (_messageParts.Count > 100)
+                {
+                    var toRem = new List<int>();
+                    var cutoff = DateTime.Now.AddMinutes(-1d);
+
+                    foreach (var msg in _messageParts)
+                    {
+                        if (msg.Value.ReceivedTime < cutoff)
+                            toRem.Add(msg.Key);
+                    }
+
+                    foreach (var idx in toRem)
+                        _messageParts.TryRemove(idx, out _);
+                }
+
                 messageType = message.OriginalType;
 
                 return true;
             }
 
-            _messageParts.Add(message.MessageId, new List<SegmentedMessage>
+            _messageParts.TryAdd(message.MessageId, (new List<SegmentedMessage>
             {
                 message
-            });
+            }, DateTime.Now));
 
             return false;
         }

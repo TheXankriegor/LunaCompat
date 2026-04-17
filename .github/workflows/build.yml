@@ -9,7 +9,7 @@ on:
 env:
   KSP_ROOT: /tmp/ksp
   RELEASE_STAGING: /tmp/release
-  LMP_VERSION: 0.29.0-Draft
+  LMP_VERSION: 0.29.1-Draft
 
 jobs:
   build:
