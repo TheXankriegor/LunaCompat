@@ -16,7 +16,6 @@ using LunaCompat.Utils;
 
 using LunaCompatCommon.Messages.ModMessages;
 using LunaCompatCommon.ModIntegration;
-using LunaCompatCommon.Utils;
 
 using UnityEngine;
 
@@ -991,6 +990,7 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
         LoadLocalSettings();
 
         LunaCompat.Singleton.StartCoroutine(UpdateStoredSettings());
+
         // update spheres once after initialization
         foreach (var sphere in queuedCelestialsToRebuild.Distinct())
             sphere.pqsController.RebuildSphere();

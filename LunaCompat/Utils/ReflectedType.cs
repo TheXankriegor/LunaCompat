@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 using HarmonyLib;
@@ -42,16 +43,14 @@ namespace LunaCompat.Utils
 
         #region Public Methods
 
-        /// <summary>
-        /// As this uses the same cache using multiple methods with the same name will not work. Refactor the cache if that is
-        /// required.
-        /// </summary>
         public MethodInfo Method(string methodName, Type[] parameters)
         {
-            if (!_methods.TryGetValue(methodName, out var method))
+            var combinedName = $"{methodName}_{string.Join("_", parameters.Select(x => x.Name))}";
+
+            if (!_methods.TryGetValue(combinedName, out var method))
             {
                 method = AccessTools.Method(Type, methodName, parameters);
-                _methods.Add(methodName, method);
+                _methods.Add(combinedName, method);
             }
 
             return method;
@@ -71,6 +70,11 @@ namespace LunaCompat.Utils
         public object Invoke(string methodName, object instance, object[] args)
         {
             return Method(methodName).Invoke(instance, args);
+        }
+
+        public object Invoke(string methodName, Type[] parameters, object instance, object[] args)
+        {
+            return Method(methodName, parameters).Invoke(instance, args);
         }
 
         public object GetField(string fieldName, object instance)

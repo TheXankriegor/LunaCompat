@@ -2,6 +2,7 @@
 using System.Linq;
 
 using LmpClient.Systems.Status;
+using LmpClient.Systems.Warp;
 
 using LunaCompat.Utils;
 
@@ -30,23 +31,41 @@ internal abstract class ClientModIntegration : ModIntegration
     #region Non-Public Methods
 
     /// <summary>
-    /// Determine if the current player is the player with the alphabetically first name. This should be reliable enough for
-    /// only processing background entities on one client.
-    /// At worst, this misses a couple seconds when one person drops from the game.
+    /// Determine if the current player is the player with the alphabetically first name in the latest subspace. This should be
+    /// reliable enough for only processing background entities on one client.
     /// </summary>
     protected static bool IsPrimaryPlayer()
     {
         try
         {
-            if (StatusSystem.Singleton == null || StatusSystem.Singleton.MyPlayerStatus == null || StatusSystem.Singleton.PlayerStatusList == null)
+            if (HighLogic.CurrentGame == null || HighLogic.CurrentGame.Status == Game.GameStatus.UNSTARTED || StatusSystem.Singleton == null ||
+                WarpSystem.Singleton == null)
                 return false;
 
             var localPlayer = StatusSystem.Singleton.MyPlayerStatus.PlayerName;
 
-            // this could try to get a player in the most advanced subspace...
-            var players = StatusSystem.Singleton.PlayerStatusList.Values.Select(x => x.PlayerName).Concat([localPlayer]).Distinct().OrderBy(x => x).ToArray();
+            // Never process if warping. At worst, this will "revert" processing to the state of the 2nd subspace - but otherwise we would have to compare potentially multiple warping players.
+            if (WarpSystem.Singleton.CurrentlyWarping)
+                return false;
 
-            return players.Length <= 1 || players[0] == localPlayer;
+            // if the first player is warping, they are not in a subspace, and instead the 2nd last player is selected...
+            foreach (var subSpace in WarpSystem.Singleton.Subspaces.OrderByDescending(x => x.Value))
+            {
+                var subSpacePlayers = WarpSystem.Singleton.ClientSubspaceList.Where(x => x.Value == subSpace.Key).Select(x => x.Key).ToArray();
+
+                if (!subSpacePlayers.Any())
+                    continue;
+
+                return localPlayer == subSpacePlayers.OrderBy(x => x).First();
+            }
+
+            // all players fallback
+            Logger.Instance.Warning("No players found in subspaces. Using fallback primary player selection.");
+            return localPlayer == StatusSystem.Singleton.PlayerStatusList.Values.Select(x => x.PlayerName)
+                                              .Concat([localPlayer])
+                                              .Distinct()
+                                              .OrderBy(x => x)
+                                              .FirstOrDefault();
         }
         catch (Exception ex)
         {
