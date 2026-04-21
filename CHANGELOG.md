@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file
 
+## 0.0.9-pre - 2026-04-20
+
+- update SCANsat compat to 21.1
+
+
 ## 0.0.8-pre - 2026-04-13
 
 - update to server version .NET 10

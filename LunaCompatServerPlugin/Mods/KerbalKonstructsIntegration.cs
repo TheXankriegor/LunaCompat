@@ -144,35 +144,36 @@ internal class KerbalKonstructsIntegration : ServerModIntegration
 
         void UpdateScenarioData(string existingPath, string content)
         {
-            if (File.Exists(existingPath))
+            if (!File.Exists(existingPath))
             {
-                var existing = new ConfigNode(FileHandler.ReadFileText(existingPath));
-                var eN = existing.GetAllNodes();
-                var currentKeys = existing.Nodes.GetAllKeys();
-
-                var update = new ConfigNode(content);
-
-                foreach (var newInstance in update.GetAllNodes())
-                {
-                    var match = eN.SingleOrDefault(x => x.GetValue("UUID") == newInstance.GetValue("UUID"));
-
-                    if (match != null)
-                    {
-                        currentKeys.Remove(match.Name);
-                        existing.ReplaceNode(match, newInstance);
-                    }
-                    else
-                        existing.AddNode(newInstance);
-                }
-
-                // remove discarded
-                foreach (var remainingKey in currentKeys)
-                    existing.RemoveNode(remainingKey);
-
-                FileHandler.WriteToFile(existingPath, existing.ToString());
-            }
-            else
                 FileHandler.WriteToFile(existingPath, content);
+                return;
+            }
+
+            var existing = new ConfigNode(FileHandler.ReadFileText(existingPath));
+            var eN = existing.GetAllNodes();
+            var currentKeys = existing.Nodes.GetAllKeys();
+
+            var update = new ConfigNode(content);
+
+            foreach (var newInstance in update.GetAllNodes())
+            {
+                var match = eN.SingleOrDefault(x => x.GetValue("UUID") == newInstance.GetValue("UUID"));
+
+                if (match != null)
+                {
+                    currentKeys.Remove(match.Name);
+                    existing.ReplaceNode(match, newInstance);
+                }
+                else
+                    existing.AddNode(newInstance);
+            }
+
+            // remove discarded
+            foreach (var remainingKey in currentKeys)
+                existing.RemoveNode(remainingKey);
+
+            FileHandler.WriteToFile(existingPath, existing.ToString());
         }
     }
 

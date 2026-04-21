@@ -610,7 +610,14 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
 
             FileInteractionHandler.ExecuteTask(() => ConfigNode.Load(nodePath), node =>
             {
-                var name = node.GetNode("STATIC")?.GetValue("pointername") ?? string.Empty;
+                var name = node.GetNode("STATIC")?.GetValue("pointername");
+
+                if (string.IsNullOrEmpty(name))
+                {
+                    Logger.Instance.Warning($"Static instance at '{nodePath}' seems to be malformed.", KerbalKonstructsPackageName);
+                    return;
+                }
+
                 var newHash = Common.CalculateSha256Hash(Encoding.UTF8.GetBytes(node.ToString()));
 
                 if (instanceStateCache.TryGetValue(name, out var existingHash) && newHash == existingHash)
@@ -981,6 +988,8 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
     private void OnAllInstancesAvailableMessageReceived(KerbalKonstructsRequestInstancesMessage msg)
     {
         LoadLocalSettings();
+
+        LunaCompat.Singleton.StartCoroutine(UpdateStoredSettings());
 
         // update spheres once after initialization
         foreach (var sphere in queuedCelestialsToRebuild.Distinct())

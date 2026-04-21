@@ -30,10 +30,10 @@ public class LunaCompat : MonoBehaviour
     public static Harmony HarmonyInstance = new("LunaCompat");
 
     private readonly HashSet<ClientModIntegration> _activePatches = [];
+    private FileInteractionHandler _fileInteractionHandler;
     private ILogger _logger;
     private ClientMessageHandler _messageHandler;
     private ModSettingsProvider _settingsProvider;
-    private FileInteractionHandler _fileInteractionHandler;
 
     public static LunaCompat Singleton { get; set; }
 
@@ -67,6 +67,12 @@ public class LunaCompat : MonoBehaviour
         _logger.Info("Xan's Luna Compat Plugin started.");
     }
 
+    private void FixedUpdate()
+    {
+        // check if anything needs to run in unity context
+        _fileInteractionHandler.Update();
+    }
+
     private void OnDestroy()
     {
         foreach (var patch in _activePatches)
@@ -75,12 +81,6 @@ public class LunaCompat : MonoBehaviour
         _messageHandler.Dispose();
 
         NetworkEvent.onNetworkStatusChanged?.Remove(OnLmpNetworkStatusChanged);
-    }
-
-    private void FixedUpdate()
-    {
-        // check if anything needs to run in unity context
-        _fileInteractionHandler.Update();
     }
 
     private void SetupModCompat(Type type)
