@@ -11,6 +11,7 @@
 		<NoWarn>IDE0290</NoWarn>
 		<DebugSymbols>true</DebugSymbols>
 		<DebugType>embedded</DebugType>
+		<UseMultiDllLmp Condition="'$(UseMultiDllLmp)' == ''">false</UseMultiDllLmp>
 	</PropertyGroup>
 
 	<Import Project="LunaCompatCommon\LunaCompatCommon.projitems" Label="Shared" />

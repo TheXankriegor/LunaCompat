@@ -1,5 +1,5 @@
 set KSP_PATH=F:/SteamLibrary/steamapps/common/Kerbal Space Program
-set LUNA_SERVER_PATH=F:\SteamLibrary\steamapps\common\Kerbal Space Program\LMPServer
+set LUNA_SERVER_PATH=D:\Code\LunaMultiplayer\LMPServer
 set CURRENT_DIR=%~dp0
 
 cd /d %KSP_PATH%/GameData

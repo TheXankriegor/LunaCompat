@@ -54,7 +54,7 @@
 			<CKANIdentifier>LunaMultiplayer</CKANIdentifier>
 			<KSPAssemblyName>LmpClient</KSPAssemblyName>
 		</Reference>
-		<Reference Include="LmpCommon, Culture=neutral, PublicKeyToken=null">
+		<Reference Include="LmpCommon, Culture=neutral, PublicKeyToken=null" Condition="'$(UseMultiDllLmp)' == 'true'" CoCondition="">
 			<HintPath>$(KSPRoot)/GameData/LunaMultiplayer/Plugins/LmpCommon.dll</HintPath>
 			<Private>False</Private>
 			<CKANIdentifier>LunaMultiplayer</CKANIdentifier>
