@@ -9,7 +9,7 @@ on:
 env:
   KSP_ROOT: /tmp/ksp
   RELEASE_STAGING: /tmp/release
-  LMP_VERSION: 0.29.1-Draft
+  LMP_VERSION: 0.29.1
 
 jobs:
   build:
@@ -59,7 +59,7 @@ jobs:
       - name: Download LMP Server
         id: download-lmp-server
         run: |
-          URL="https://github.com/LunaMultiplayer/LunaMultiplayer/releases/download/${{ env.LMP_VERSION }}/LunaMultiplayer-Server-linux-x64-Release.zip"
+          URL="https://github.com/LunaMultiplayer/LunaMultiplayer/releases/download/${{ env.LMP_VERSION }}/LunaMultiplayer-Server-Release.zip"
           curl -L -o lmp-server.zip "$URL"
           unzip lmp-server.zip -d lmp-server
           echo "path=$(pwd)/lmp-server/LMPServer" >> $GITHUB_OUTPUT
