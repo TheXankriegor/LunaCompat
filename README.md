@@ -88,7 +88,7 @@ Certain mods require the LunaCompat server plugin to function correctly. If you 
 #### A word of caution
 
 Just like most of the other features in LMP, syncing things across the network is done on a best-effort basis and may sometimes mess up. 
-To avoid losing progress, try to interacting with one system at the same time (e.g. editing KerbalKolonies instances).
+To avoid losing progress, try to limit the users interacting with one system at the same time (e.g. editing KerbalKolonies instances).
 
 ### Dependencies
 
