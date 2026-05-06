@@ -58,6 +58,23 @@ internal class FileInteractionHandler
 
     #region Non-Public Methods
 
+    private void ExecuteTaskInternal<T>(Func<Task<T>> asyncAction, Action<T> callback = null)
+    {
+        try
+        {
+            Task.Run(async () =>
+            {
+                var obj = await asyncAction();
+                if (callback != null)
+                    _queue.Enqueue(new ActionEntry<T>(callback, obj));
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.Error($"Failed to enqueue task: {ex}");
+        }
+    }
+
     private void ExecuteTaskInternal<T>(Func<T> asyncAction, Action<T> callback = null)
     {
         try
