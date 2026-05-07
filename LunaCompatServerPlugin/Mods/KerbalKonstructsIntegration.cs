@@ -211,7 +211,7 @@ internal class KerbalKonstructsIntegration : ServerModIntegration
             {
                 var existing = new ConfigNode(FileHandler.ReadFileText(instancePath));
 
-                var existingInstances = existing.GetNode("root")?.Value?.GetNode("STATIC")?.Value;
+                var existingInstances = existing.GetNode("STATIC")?.Value;
 
                 if (existingInstances == null)
                 {
@@ -222,7 +222,7 @@ internal class KerbalKonstructsIntegration : ServerModIntegration
 
                 var eN = existingInstances.GetNodes("Instances");
                 var update = new ConfigNode(msg.Content);
-                var uN = update.GetNode("root")?.Value?.GetNode("STATIC")?.Value?.GetNodes("Instances");
+                var uN = update.GetNode("STATIC")?.Value?.GetNodes("Instances");
 
                 if (uN == null)
                 {
@@ -325,8 +325,7 @@ internal class KerbalKonstructsIntegration : ServerModIntegration
             }
 
             var existing = new ConfigNode(FileHandler.ReadFileText(instancePath));
-            var root = existing.GetNode("root");
-            var statics = root.Value.GetNode("STATIC").Value;
+            var statics = existing.GetNode("STATIC").Value;
             var instances = statics.GetNodes("Instances");
 
             foreach (var instance in instances)
@@ -359,8 +358,8 @@ internal class KerbalKonstructsIntegration : ServerModIntegration
 
             SendServerSettings(client);
             SendAllGroupCenters(client);
-            SendAllStaticInstances(client);
             SendAllMapDecals(client);
+            SendAllStaticInstances(client);
             SendScenarioData(client);
 
             Task.Run(async () =>

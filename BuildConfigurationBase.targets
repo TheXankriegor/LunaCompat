@@ -3,10 +3,12 @@
 	<PropertyGroup>
 		<OutputType>Library</OutputType>
 		<Product>LunaCompat</Product>
+		<Author>TheXankriegor</Author>
 		<Copyright>Copyright © 2026</Copyright>
 		<GenerateAssemblyInfo>true</GenerateAssemblyInfo>
-		<AssemblyVersion>0.0.9</AssemblyVersion>
+		<AssemblyVersion>0.0.10</AssemblyVersion>
 		<FileVersion>$(AssemblyVersion)</FileVersion>
+		<Version>$(AssemblyVersion)</Version>
 
 		<NoWarn>IDE0290</NoWarn>
 		<DebugSymbols>true</DebugSymbols>

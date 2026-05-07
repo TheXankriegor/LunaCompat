@@ -11,6 +11,7 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Messages\MessageHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Messages\MessageListener.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\ModMessages\KerbalColoniesMessages.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Messages\ModMessages\KerbalKonstructMessages.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Messages\SegmentedMessageListener.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Messages\SettingsValueMessage.cs" />

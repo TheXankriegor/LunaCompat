@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file
 
+## 0.0.10-pre - 2026-05-06
+
+- update KerbalKonstructs compat
+- add KerbalColonies compat
+
+
 ## 0.0.9-pre - 2026-04-20
 
 - update SCANsat compat to 21.1

@@ -1,0 +1,12 @@
+﻿<?xml version="1.0"?>
+<ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
+	<Fields>
+		<FieldDefinition>
+			<FieldName>transferMode</FieldName>
+		</FieldDefinition>
+		<FieldDefinition>
+			<FieldName>lastUpdateTime</FieldName>
+			<MaxIntervalInMs>500</MaxIntervalInMs>
+		</FieldDefinition>
+	</Fields>
+</ModuleDefinition>

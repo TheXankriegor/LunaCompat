@@ -31,6 +31,7 @@ Check the repository to see the full list of supported mods.
 - [ClickThroughBlocker](https://github.com/linuxgurugamer/ClickThroughBlocker): Keep settings between disconnects
 - [PhysicsRangeExtender](https://github.com/jrodrigv/PhysicsRangeExtender): Force disable PRE at all times
 - [Kerbal-Konstructs](https://github.com/KSP-RO/Kerbal-Konstructs): Sync instances, groups, map decals and facilities across clients (see [Server plugin](#server-plugin))
+- [KerbalColonies](https://github.com/KerbalColonies/KerbalColoniesCore): Sync colonies & facilities across clients (see [Server plugin](#server-plugin))
 
 ### Part Syncs
 
@@ -49,6 +50,7 @@ Part modules from the following mods are synced:
 - [KerbalActuators](https://github.com/Angel-125/KerbalActuators)
 - [KIS](https://github.com/ihsoft/KIS)
 - [KAS](https://github.com/ihsoft/KAS)
+- [KerbalColonies](https://github.com/KerbalColonies/KerbalColoniesCore)
 - [KerbalPlanetaryBaseSystems](https://github.com/Nils277/KerbalPlanetaryBaseSystems)
 - [Kethane](https://github.com/taniwha/Kethane)
 - [NearFutureElectrical](https://github.com/post-kerbin-mining-corporation/NearFutureElectrical)
@@ -88,7 +90,7 @@ Certain mods require the LunaCompat server plugin to function correctly. If you 
 #### A word of caution
 
 Just like most of the other features in LMP, syncing things across the network is done on a best-effort basis and may sometimes mess up. 
-To avoid losing progress, try to interacting with one system at the same time (e.g. editing KerbalKolonies instances).
+To avoid losing progress, try to limit the users interacting with one system at the same time (e.g. editing KerbalColonies instances).
 
 ### Dependencies
 
