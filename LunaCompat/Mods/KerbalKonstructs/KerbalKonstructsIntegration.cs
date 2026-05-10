@@ -1091,7 +1091,7 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
             }
             catch (Exception ex)
             {
-                _logger.Error($"Failed to save settings: {ex}");
+                _logger.Error($"Failed to save settings: {ex}", PackageName);
             }
         }
     }

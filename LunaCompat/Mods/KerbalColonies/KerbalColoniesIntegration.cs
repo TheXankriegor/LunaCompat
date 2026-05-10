@@ -723,7 +723,7 @@ internal class KerbalColoniesIntegration : ClientModIntegration
             var intervalString = _settingsProvider.GetValue(PackageName, "SyncInterval", 5);
 
             if (!int.TryParse((string)intervalString, out _syncInterval))
-                _syncInterval = 15;
+                _syncInterval = 5;
 
             _keepAlive = true;
             LunaCompat.Singleton.StartCoroutine(CheckForColonyUpdate());

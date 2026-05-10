@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file
 ## 0.0.11-pre - 2026-05-08
 
 - use LZF compression for messages
+- update SCANsat compat to use server plugin
 
 
 ## 0.0.10-pre - 2026-05-06
