@@ -28,5 +28,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Messages\ModMessages\ScanSatMessages.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Messages\SegmentedMessage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utils\BaseLogger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utils\LzfaCompressor.cs" />
   </ItemGroup>
 </Project>

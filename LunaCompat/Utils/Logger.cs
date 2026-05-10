@@ -1,8 +1,10 @@
-﻿using KSPBuildTools;
-using LunaCompatCommon.Utils;
-using System;
+﻿using System;
+
+using KSPBuildTools;
 
 using LmpClient;
+
+using LunaCompatCommon.Utils;
 
 using UnityEngine;
 
@@ -31,6 +33,7 @@ namespace LunaCompat.Utils
         {
             LogScreenMessage("Sync will not function without the server plugin!", Color.red, integration);
         }
+
         public static void LogScreenMessage(string msg, Color color, string integration = null)
         {
             LunaScreenMsg.PostScreenMessage(FormatMessage(msg, integration), 5f, ScreenMessageStyle.UPPER_CENTER, color);

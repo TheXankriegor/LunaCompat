@@ -60,8 +60,13 @@ namespace LunaCompat.Utils
         {
             var mod = _settingsStructure.GetNode(modName) ?? _settingsStructure.AddNode(modName);
 
-            mod.SetValue(key, value.ToString(), true);
-            _settingsRoot.Save(_settingsPath);
+            var valueStr = value.ToString();
+
+            if (mod.GetValue(key) != valueStr)
+            {
+                mod.SetValue(key, value.ToString(), true);
+                _settingsRoot.Save(_settingsPath);
+            }
         }
 
         public object GetValue(string modName, string key, object defaultValue = null)

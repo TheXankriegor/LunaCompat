@@ -28,12 +28,12 @@ namespace LunaCompatCommon.Serializer
         /// <typeparam name="T">Any supported type.</typeparam>
         /// <param name="value">The value to serialize. May be null for reference types.</param>
         /// <returns>A byte array containing the serialized data.</returns>
-        public static byte[] Serialize<T>(T value)
+        public static byte[] Serialize<T>(T value, bool compress = true)
         {
             using var writer = new SerializationWriter();
-
             writer.WriteValue(value, typeof(T));
-            return writer.ToArray();
+
+            return compress ? LzfaCompressor.Compress(writer.ToArray()) : writer.ToArray();
         }
 
         /// <summary>
@@ -42,9 +42,9 @@ namespace LunaCompatCommon.Serializer
         /// <typeparam name="T">Any supported type.</typeparam>
         /// <param name="data">The byte array produced by <see cref="Serialize{T}" />.</param>
         /// <returns>The deserialized value.</returns>
-        public static T Deserialize<T>(byte[] data)
+        public static T Deserialize<T>(byte[] data, bool compress = true)
         {
-            using var reader = new SerializationReader(data);
+            using var reader = new SerializationReader(compress ? LzfaCompressor.Decompress(data) : data);
 
             return (T)reader.ReadValue(typeof(T));
         }
