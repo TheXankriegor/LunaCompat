@@ -43,11 +43,7 @@ internal class ClickThroughBlockerIntegration : ClientModIntegration
         var oneTimePopupType = new ReflectedType("ClickThroughFix.OneTimePopup");
         ctbType = new ReflectedType("ClickThroughFix.CTB");
 
-        var saveGamePath = Path.Combine(KSPUtil.ApplicationRootPath, "saves", HighLogic.SaveFolder);
-        if (!Directory.Exists(saveGamePath))
-            Directory.CreateDirectory(saveGamePath);
-
-        ctbSettingsFilePath = Path.Combine(saveGamePath, "CTBSettings.cfg");
+        ctbSettingsFilePath = Path.Combine(GetSharedModIntegrationFolder(), "CTBSettings.cfg");
 
         LunaCompat.HarmonyInstance.Patch(oneTimePopupType.Method("Awake"),
                                          prefix: new HarmonyMethod(typeof(ClickThroughBlockerIntegration), nameof(PrefixAwake)));

@@ -46,11 +46,7 @@ internal class TufxIntegration : ClientModIntegration
         var tufxScene = AccessTools.TypeByName("TUFX.TUFXScene");
         tufxGameSettings = AccessTools.TypeByName("TUFX.TUFXGameSettings");
 
-        var saveGamePath = Path.Combine(KSPUtil.ApplicationRootPath, "saves", HighLogic.SaveFolder);
-        if (!Directory.Exists(saveGamePath))
-            Directory.CreateDirectory(saveGamePath);
-
-        tufxSettingsFilePath = Path.Combine(saveGamePath, "TUFXSettings.cfg");
+        tufxSettingsFilePath = Path.Combine(GetSharedModIntegrationFolder(), "TUFXSettings.cfg");
 
         LunaCompat.HarmonyInstance.Patch(AccessTools.Method(texturesUnlimitedFXLoader, "GetProfileNameForScene", [
             tufxScene
