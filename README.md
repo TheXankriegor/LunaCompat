@@ -1,5 +1,11 @@
 # Luna Compat
 
+[![][shield:support-ksp]][KSP:developers]&nbsp;
+[![][shield:support-lmp]][mod:lmp]&nbsp;
+[![][shield:ckan]][CKAN:org]&nbsp;
+[![][shield:license-mit]][LunaCompat:license]&nbsp;
+[![][shield:issues]][LunaCompat:issues]&nbsp;
+
 Compatibility patches to make KSP's [Luna Multiplayer Mod](https://github.com/LunaMultiplayer/LunaMultiplayer) support other mods.
 
 - [Luna Compat](#luna-compat)
@@ -8,30 +14,34 @@ Compatibility patches to make KSP's [Luna Multiplayer Mod](https://github.com/Lu
     - [Part Syncs](#part-syncs)
   - [Installation](#installation)
     - [CKAN](#ckan)
+    - [Dependencies](#dependencies)
     - [Manual installation](#manual-installation)
     - [Server plugin](#server-plugin)
-    - [Dependencies](#dependencies)
+      - [A word of caution](#a-word-of-caution)
   - [Creating a release](#creating-a-release)
 
 ## Overview
 
-Complex mods are incompatible with Luna Multiplayer. 
+
+Complex mods are incompatible with Luna Multiplayer.
+
 LunaCompat adds compatibility patches for various mods via LMP part module configurations and Harmony patches. 
-Patches are only applied to mods added to the modlist.
-Check the repository to see the full list of supported mods.
+Patches are only applied to mods added to the modlist. Check the repository to see the full list of supported mods.
 
 ### Harmony patches
 
-- [Extraplanetary-Launchpads](https://github.com/taniwha/Extraplanetary-Launchpads): Use a static random seed for recycling
-- [InfernalRobotics](https://github.com/meirumeiru/InfernalRobotics): Old LMP fixes ([https://github.com/LunaMultiplayer/LmpIrPlugin](https://github.com/LunaMultiplayer/LmpIrPlugin))
-- [KIS](https://github.com/ihsoft/KIS): Old LMP fixes ([https://github.com/LunaMultiplayer/LmpKisPlugin](https://github.com/LunaMultiplayer/LmpKisPlugin))
-- [Kethane](https://github.com/taniwha/Kethane): Use a static random seed for resource distribution
-- [SCANsat](https://github.com/KSPModStewards/SCANsat): Sync active scanners, background scanning and progress
-- [TUFX](https://github.com/KSPModStewards/TUFX): Keep settings between disconnects
-- [ClickThroughBlocker](https://github.com/linuxgurugamer/ClickThroughBlocker): Keep settings between disconnects
-- [PhysicsRangeExtender](https://github.com/jrodrigv/PhysicsRangeExtender): Force disable PRE at all times
-- [Kerbal-Konstructs](https://github.com/KSP-RO/Kerbal-Konstructs): Sync instances, groups, map decals and facilities across clients (see [Server plugin](#server-plugin))
-- [KerbalColonies](https://github.com/KerbalColonies/KerbalColoniesCore): Sync colonies & facilities across clients (see [Server plugin](#server-plugin))
+| Mod | | Patches |
+| --- |-| ------- |
+|[![][shield:epl]][mod:epl]||Use a static random seed for recycling|
+|[![][shield:ir]][mod:ir]||Old LMP fixes ([https://github.com/LunaMultiplayer/LmpIrPlugin](https://github.com/LunaMultiplayer/LmpIrPlugin))|
+|[![][shield:kis]][mod:kis]||Old LMP fixes ([https://github.com/LunaMultiplayer/LmpKisPlugin](https://github.com/LunaMultiplayer/LmpKisPlugin))|
+|[![][shield:kethane]][mod:kethane]||Use a static random seed for resource distribution|
+|[![][shield:tufx]][mod:tufx]||Keep settings between disconnects|
+|[![][shield:ctb]][mod:ctb]||Keep settings between disconnects|
+|[![][shield:pre]][mod:pre]||Force disable PRE at all times|
+|[![][shield:kk]][mod:kk]|[![][shield:serverplugin]][LunaCompat:serverplugin]|Sync instances, groups, map decals and facilities across clients| 
+|[![][shield:kc]][mod:kc]|[![][shield:serverplugin]][LunaCompat:serverplugin]|Sync colonies & facilities across clients|
+|[![][shield:scansat]][mod:scansat]|[![][shield:serverplugin]][LunaCompat:serverplugin]|Sync active scanners, background scanning and progress|
 
 ### Part Syncs
 
@@ -74,6 +84,12 @@ Part modules from the following mods are synced:
 
 The mod is available on [CKAN](https://github.com/KSP-CKAN/CKAN/releases) - just search for 'Luna Compat'!
 
+### Dependencies
+
+- [Luna Multiplayer Client](https://github.com/LunaMultiplayer/LunaMultiplayer)
+- [Harmony 2](https://github.com/KSPModdingLibs/HarmonyKSP)
+- [Module Manager](https://github.com/sarbian/ModuleManager)
+
 ### Manual installation
 
 - Download the latest `LunaCompat.zip` from the [Releases](https://github.com/TheXankriegor/LunaCompat/releases)
@@ -92,12 +108,6 @@ Certain mods require the LunaCompat server plugin to function correctly. If you 
 Just like most of the other features in LMP, syncing things across the network is done on a best-effort basis and may sometimes mess up. 
 To avoid losing progress, try to limit the users interacting with one system at the same time (e.g. editing KerbalColonies instances).
 
-### Dependencies
-
-- [Luna Multiplayer Client](https://github.com/LunaMultiplayer/LunaMultiplayer)
-- [Harmony 2](https://github.com/KSPModdingLibs/HarmonyKSP)
-- [Module Manager](https://github.com/sarbian/ModuleManager)
-
 ## Creating a release
 
 When creating a new release follow these steps
@@ -107,3 +117,42 @@ When creating a new release follow these steps
 3. Create release changenotes (e.g. `yaclog release <release-version>`)
 4. Add changes to main branch
 5. Create version tag to trigger release pipeline
+
+[KSP:developers]: https://kerbalspaceprogram.com/index.php
+[CKAN:org]: http://ksp-ckan.org/
+
+[LunaCompat:license]: https://github.com/TheXankriegor/LunaCompat/blob/main/LICENSE
+[LunaCompat:serverplugin]: https://github.com/TheXankriegor/LunaCompat#server-plugin
+[LunaCompat:issues]:https://github.com/TheXankriegor/LunaCompat/issues?q=is%3Aissue+is%3Aopen
+
+[mod:lmp]: https://github.com/LunaMultiplayer/LunaMultiplayer
+[mod:scansat]: https://github.com/KSPModStewards/SCANsat
+[mod:kc]: https://github.com/KerbalColonies/KerbalColoniesCore
+[mod:kk]: https://github.com/KSP-RO/Kerbal-Konstructs
+[mod:pre]: https://github.com/jrodrigv/PhysicsRangeExtender
+[mod:ctb]: https://github.com/linuxgurugamer/ClickThroughBlocker
+[mod:tufx]: https://github.com/KSPModStewards/TUFX
+[mod:kethane]: https://github.com/taniwha/Kethane
+[mod:kethane]: https://github.com/taniwha/Kethane
+[mod:kis]: https://github.com/ihsoft/KIS
+[mod:ir]: https://github.com/meirumeiru/InfernalRobotics
+[mod:epl]: https://github.com/taniwha/Extraplanetary-Launchpads
+
+[shield:license-mit]: http://img.shields.io/:License-MIT-a31f34.svg
+[shield:support-ksp]: http://img.shields.io/badge/For%20KSP-1.12.5-bad455.svg
+[shield:support-lmp]: http://img.shields.io/badge/For%20LMP-0.29.1-F57D27.svg
+[shield:ckan]: https://img.shields.io/badge/CKAN-Indexed-brightgreen.svg
+[shield:serverplugin]: https://img.shields.io/badge/Server%20Plugin-red.svg
+[shield:issues]: https://img.shields.io/github/issues/TheXankriegor/LunaCompat.svg
+
+[shield:scansat]: https://img.shields.io/badge/SCANsat-21.1-1D24E2.svg
+[shield:kc]: https://img.shields.io/badge/KerbalColonies-1.2.2-1D24E2.svg
+[shield:kk]: https://img.shields.io/badge/Kerbal--Konstructs-1.12.2-1D24E2.svg
+[shield:pre]: https://img.shields.io/badge/PhysicsRangeExtender-1.21-1D24E2.svg
+[shield:ctb]: https://img.shields.io/badge/ClickThroughBlocker-2.1.10-1D24E2.svg
+[shield:tufx]: https://img.shields.io/badge/TUFX-1.1.1-1D24E2.svg
+[shield:kethane]: https://img.shields.io/badge/Kethane-0.11-1D24E2.svg
+[shield:kis]: https://img.shields.io/badge/KIS-1.29-1D24E2.svg
+[shield:ir]: https://img.shields.io/badge/InfernalRobotics-3.1.18-1D24E2.svg
+[shield:epl]: https://img.shields.io/badge/Extraplanetary--Launchpads-6.99.3-1D24E2.svg
+
