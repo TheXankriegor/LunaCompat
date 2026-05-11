@@ -198,10 +198,28 @@ namespace LunaCompatCommon.Serializer
             if (type.IsArray)
             {
                 var elemType = type.GetElementType();
-                var count = VarInt.Read(_ms);
-                var arr = Array.CreateInstance(elemType, count);
-                for (var i = 0; i < count; i++)
-                    arr.SetValue(ReadValue(elemType), i);
+                var rank = VarInt.Read(_ms);
+                var lengths = new int[rank];
+                for (var d = 0; d < rank; d++)
+                    lengths[d] = VarInt.Read(_ms);
+                var arr = Array.CreateInstance(elemType, lengths);
+                var indices = new int[rank];
+                var totalElements = arr.Length;
+
+                for (var n = 0; n < totalElements; n++)
+                {
+                    arr.SetValue(ReadValue(elemType), indices);
+
+                    // Increment the multi-dimensional index (row-major order)
+                    for (var d = rank - 1; d >= 0; d--)
+                    {
+                        if (++indices[d] < lengths[d])
+                            break;
+
+                        indices[d] = 0;
+                    }
+                }
+
                 return arr;
             }
 

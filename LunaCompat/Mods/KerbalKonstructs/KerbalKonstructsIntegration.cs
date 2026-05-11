@@ -1,10 +1,4 @@
-﻿using HarmonyLib;
-using JetBrains.Annotations;
-using LmpCommon;
-using LunaCompat.Utils;
-using LunaCompatCommon.Messages.ModMessages;
-using LunaCompatCommon.ModIntegration;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -12,8 +6,22 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
+
+using HarmonyLib;
+
+using JetBrains.Annotations;
+
+using LmpCommon;
+
+using LunaCompat.Utils;
+
+using LunaCompatCommon.Messages.ModMessages;
+using LunaCompatCommon.ModIntegration;
+
 using UnityEngine;
+
 using static UrlDir;
+
 using File = System.IO.File;
 using FileInfo = System.IO.FileInfo;
 using ILogger = LunaCompatCommon.Utils.ILogger;
@@ -173,8 +181,6 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
     #endregion
 
     #region Non-Public Methods
-
-
 
     private static void ReflectKerbalKonstructsTypes()
     {
@@ -1085,7 +1091,7 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
             }
             catch (Exception ex)
             {
-                _logger.Error($"Failed to save settings: {ex}");
+                _logger.Error($"Failed to save settings: {ex}", PackageName);
             }
         }
     }

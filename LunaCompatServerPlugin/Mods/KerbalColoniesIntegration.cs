@@ -2,6 +2,8 @@
 using LunaCompatCommon.ModIntegration;
 using LunaCompatCommon.Utils;
 
+using LunaCompatServerPlugin.ModSettings;
+
 using Server.Client;
 using Server.System;
 
@@ -48,6 +50,19 @@ internal class KerbalColoniesIntegration : ServerModIntegration
         _messageHandler.UnregisterModMessageListener<KerbalColoniesChangeColonyMessage>();
 
         base.Destroy();
+    }
+
+    public override void InitializeSettings(ModSettingsProvider settingsProvider)
+    {
+        base.InitializeSettings(settingsProvider);
+
+        settingsProvider.SetValue(PackageName, KerbalColoniesConstants.FacilityCostMultiplier, 1f);
+        settingsProvider.SetValue(PackageName, KerbalColoniesConstants.FacilityTimeMultiplier, 1f);
+        settingsProvider.SetValue(PackageName, KerbalColoniesConstants.FacilityRangeMultiplier, 1f);
+        settingsProvider.SetValue(PackageName, KerbalColoniesConstants.EditorRangeMultiplier, 1f);
+        settingsProvider.SetValue(PackageName, KerbalColoniesConstants.VesselCostMultiplier, 1f);
+        settingsProvider.SetValue(PackageName, KerbalColoniesConstants.VesselTimeMultiplier, 1f);
+        settingsProvider.SetValue(PackageName, KerbalColoniesConstants.MaxColoniesPerBody, 10);
     }
 
     #endregion

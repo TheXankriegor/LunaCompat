@@ -296,7 +296,10 @@ namespace LunaCompatCommon.Serializer
             {
                 var arr = (Array)value;
                 var elemType = type.GetElementType();
-                VarInt.Write(_ms, arr.Length);
+                var rank = arr.Rank;
+                VarInt.Write(_ms, rank);
+                for (var d = 0; d < rank; d++)
+                    VarInt.Write(_ms, arr.GetLength(d));
                 foreach (var item in arr)
                     WriteValue(item, elemType);
                 return;
