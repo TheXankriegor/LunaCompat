@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file
 
 - use LZF compression for messages
 - update SCANsat compat to use server plugin
+- update CTB and TUFX storage folder
 
 
 ## 0.0.10-pre - 2026-05-06

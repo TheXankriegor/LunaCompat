@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 
 using LmpClient.Systems.Status;
@@ -72,6 +73,16 @@ internal abstract class ClientModIntegration : ModIntegration
             Logger.Instance.Error($"Failed to determine primary player: {ex}");
             return false;
         }
+    }
+
+    protected string GetSharedModIntegrationFolder()
+    {
+        var saveGamePath = Path.Combine(KSPUtil.ApplicationRootPath, "GameData", "LunaCompat", "ModIntegrations");
+
+        if (!Directory.Exists(saveGamePath))
+            Directory.CreateDirectory(saveGamePath);
+
+        return saveGamePath;
     }
 
     protected void SaveSetting(string key, object instance, ReflectedType type)
