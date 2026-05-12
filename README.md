@@ -38,6 +38,7 @@ Patches are only applied to mods added to the modlist. Check the repository to s
 |[![][shield:kethane]][mod:kethane]||Use a static random seed for resource distribution|
 |[![][shield:tufx]][mod:tufx]||Keep settings between disconnects|
 |[![][shield:ctb]][mod:ctb]||Keep settings between disconnects|
+|[![][shield:sua]][mod:sua]||Keep settings between disconnects|
 |[![][shield:pre]][mod:pre]||Force disable PRE at all times|
 |[![][shield:kk]][mod:kk]|[![][shield:serverplugin]][LunaCompat:serverplugin]|Sync instances, groups, map decals and facilities across clients| 
 |[![][shield:kc]][mod:kc]|[![][shield:serverplugin]][LunaCompat:serverplugin]|Sync colonies & facilities across clients|
@@ -131,6 +132,7 @@ When creating a new release follow these steps
 [mod:kk]: https://github.com/KSP-RO/Kerbal-Konstructs
 [mod:pre]: https://github.com/jrodrigv/PhysicsRangeExtender
 [mod:ctb]: https://github.com/linuxgurugamer/ClickThroughBlocker
+[mod:sua]: https://github.com/yalov/SpeedUnitAnnex
 [mod:tufx]: https://github.com/KSPModStewards/TUFX
 [mod:kethane]: https://github.com/taniwha/Kethane
 [mod:kethane]: https://github.com/taniwha/Kethane
@@ -150,6 +152,7 @@ When creating a new release follow these steps
 [shield:kk]: https://img.shields.io/badge/Kerbal--Konstructs-1.12.2-1D24E2.svg
 [shield:pre]: https://img.shields.io/badge/PhysicsRangeExtender-1.21-1D24E2.svg
 [shield:ctb]: https://img.shields.io/badge/ClickThroughBlocker-2.1.10-1D24E2.svg
+[shield:sua]: https://img.shields.io/badge/SpeedUnitAnnex-1.6.1-1D24E2.svg
 [shield:tufx]: https://img.shields.io/badge/TUFX-1.1.1-1D24E2.svg
 [shield:kethane]: https://img.shields.io/badge/Kethane-0.11-1D24E2.svg
 [shield:kis]: https://img.shields.io/badge/KIS-1.29-1D24E2.svg

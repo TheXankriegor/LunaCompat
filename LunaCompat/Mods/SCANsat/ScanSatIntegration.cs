@@ -595,7 +595,7 @@ internal class ScanSatIntegration : ClientModIntegration
             // Refresh scan controller every time to account for scene changes
             var scanController = ScenarioRunner.GetLoadedModules()?.Find(x => x.ClassName == scanControllerType.Type.Name);
 
-            // body might  not exist yet
+            // body might not exist yet
             var scanData = scanControllerType.Invoke("getData", [typeof(string)], scanController, [message.Body]) ??
                            CreateScanDataForBody(scanController, message.Body);
 
