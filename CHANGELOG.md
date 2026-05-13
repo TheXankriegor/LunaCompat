@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file
 ## 0.0.12-pre - 2026-05-12
 
 - add SpeedUnitAnnex compat
+- update PhysicsRangeExtender compat to only disable terrain extender
 
 
 ## 0.0.11-pre - 2026-05-08
