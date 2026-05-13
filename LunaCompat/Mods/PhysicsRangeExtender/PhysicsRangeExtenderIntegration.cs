@@ -28,22 +28,23 @@ internal class PhysicsRangeExtenderIntegration : ClientModIntegration
     #region Public Methods
 
     /// <summary>
-    /// PRE will never work with LMP. Disable it on load if enabled.
+    /// PRE terrain extender will cause vessel switching when easing positions. Disable it on load if enabled.
     /// </summary>
     [HarmonyPatch]
     public override void Setup()
     {
         var preSettings = AccessTools.TypeByName("PhysicsRangeExtender.PreSettings");
-        var modEnabledSetter = AccessTools.PropertySetter(preSettings, "ModEnabled");
-        modEnabledSetter.Invoke(null, [false]);
-        LunaCompat.HarmonyInstance.Patch(modEnabledSetter, prefix: new HarmonyMethod(typeof(PhysicsRangeExtenderIntegration), nameof(PrefixEnabledSet)));
+        var terrainExtenderEnabledSetter = AccessTools.PropertySetter(preSettings, "TerrainExtenderEnabled");
+        terrainExtenderEnabledSetter.Invoke(null, [false]);
+        LunaCompat.HarmonyInstance.Patch(terrainExtenderEnabledSetter,
+                                         prefix: new HarmonyMethod(typeof(PhysicsRangeExtenderIntegration), nameof(PrefixTerrainExtenderEnabledSet)));
     }
 
     #endregion
 
     #region Non-Public Methods
 
-    private static bool PrefixEnabledSet()
+    private static bool PrefixTerrainExtenderEnabledSet()
     {
         return false;
     }

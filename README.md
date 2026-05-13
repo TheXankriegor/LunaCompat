@@ -39,7 +39,7 @@ Patches are only applied to mods added to the modlist. Check the repository to s
 |[![][shield:tufx]][mod:tufx]||Keep settings between disconnects|
 |[![][shield:ctb]][mod:ctb]||Keep settings between disconnects|
 |[![][shield:sua]][mod:sua]||Keep settings between disconnects|
-|[![][shield:pre]][mod:pre]||Force disable PRE at all times|
+|[![][shield:pre]][mod:pre]||Force disable PRE terrain extender|
 |[![][shield:kk]][mod:kk]|[![][shield:serverplugin]][LunaCompat:serverplugin]|Sync instances, groups, map decals and facilities across clients| 
 |[![][shield:kc]][mod:kc]|[![][shield:serverplugin]][LunaCompat:serverplugin]|Sync colonies & facilities across clients|
 |[![][shield:scansat]][mod:scansat]|[![][shield:serverplugin]][LunaCompat:serverplugin]|Sync active scanners, background scanning and progress|
