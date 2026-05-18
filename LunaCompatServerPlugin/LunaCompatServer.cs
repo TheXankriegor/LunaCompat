@@ -79,7 +79,7 @@ public class LunaCompatServer : LmpPlugin
                 if (isEnabled is bool and false)
                 {
                     _logger.Info($"{instance.PackageName} is disabled.");
-                    return;
+                    continue;
                 }
 
                 instance.Setup();
