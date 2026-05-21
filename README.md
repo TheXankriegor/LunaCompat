@@ -142,7 +142,7 @@ When creating a new release follow these steps
 
 [shield:license-mit]: http://img.shields.io/:License-MIT-a31f34.svg
 [shield:support-ksp]: http://img.shields.io/badge/For%20KSP-1.12.5-bad455.svg
-[shield:support-lmp]: http://img.shields.io/badge/For%20LMP-0.29.1-F57D27.svg
+[shield:support-lmp]: http://img.shields.io/badge/For%20LMP-0.29.2-F57D27.svg
 [shield:ckan]: https://img.shields.io/badge/CKAN-Indexed-brightgreen.svg
 [shield:serverplugin]: https://img.shields.io/badge/Server%20Plugin-red.svg
 [shield:issues]: https://img.shields.io/github/issues/TheXankriegor/LunaCompat.svg

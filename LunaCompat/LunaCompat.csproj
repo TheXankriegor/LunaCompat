@@ -4,67 +4,36 @@
 	<PropertyGroup>
 		<TargetFramework>net4.8</TargetFramework>
 		<AssemblyTitle>LunaCompat</AssemblyTitle>
-		<BinariesOutputRelativePath>Build/GameData/$(SolutionName)</BinariesOutputRelativePath>
-		<XmlSourceDir>$(ProjectDir)XML_COMPAT</XmlSourceDir>
-		<XmlDestinationDir>$(SolutionDir)Build\GameData\LunaMultiplayer\PartSync\LunaCompat</XmlDestinationDir>
+		<OutputPath>$(MSBuildThisFileDirectory)../Build/GameData/$(AssemblyName)</OutputPath>
+		<KSPBT_ModRoot>$(MSBuildThisFileDirectory)../Build/GameData/</KSPBT_ModRoot>
+		<KSPBT_ModPluginFolder>$(SolutionName)</KSPBT_ModPluginFolder>
+		<KSPBT_CopyDLLsToPluginFolder>false</KSPBT_CopyDLLsToPluginFolder>
+		<KSPBT_InstallCKANDependencies>false</KSPBT_InstallCKANDependencies>
 		<LangVersion>latest</LangVersion>
-	</PropertyGroup>
-
-	<PropertyGroup>
-		<GenerateKSPAssemblyAttribute>true</GenerateKSPAssemblyAttribute>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<KSPVersionFile Include=".">
-			<Destination>$(SolutionDir)Build\GameData\$(SolutionName)\lunacompat.version</Destination>
+			<Destination>$(MSBuildThisFileDirectory)../Build/GameData/$(AssemblyName)/lunacompat.version</Destination>
 			<URL>https://github.com/TheXankriegor/LunaCompat/raw/main/lunacompat.version</URL>
 			<Download>https://github.com/TheXankriegor/LunaCompat/releases/latest</Download>
 		</KSPVersionFile>
 	</ItemGroup>
 
-	<Target Name="CopyFiles" AfterTargets="GenerateKSPVersionFile">
+	<Target Name="CopyFiles" AfterTargets="Build">
+		<PropertyGroup>
+			<XmlSourceDir>$(MSBuildThisFileDirectory)/XML_COMPAT</XmlSourceDir>
+			<XmlDestinationDir>$(MSBuildThisFileDirectory)../Build/GameData/LunaMultiplayer/PartSync/LunaCompat</XmlDestinationDir>
+		</PropertyGroup>
+
 		<ItemGroup>
 			<XmlFilesToCopy Include="$([MSBuild]::EnsureTrailingSlash('$(XmlSourceDir)'))**\*.*" />
 		</ItemGroup>
 
+		<Message Importance="high" Text="Copying XML files from $(XmlSourceDir) to $(XmlDestinationDir)" />
 		<MakeDir Directories="$(XmlDestinationDir)" />
 		<Copy SourceFiles="@(XmlFilesToCopy)" DestinationFolder="$([MSBuild]::EnsureTrailingSlash('$(XmlDestinationDir)'))%(RecursiveDir)" />
 	</Target>
-
-	<ItemGroup>
-		<!-- Depends on Modulemanager -->
-		<Reference Include="ModuleManager.4.2.3, Culture=neutral, PublicKeyToken=nul">
-			<HintPath>$(KSPRoot)/GameData/ModuleManager.4.2.3.dll</HintPath>
-			<Private>False</Private>
-			<CKANIdentifier>ModuleManager</CKANIdentifier>
-			<KSPAssemblyName>ModuleManager.4.2.3</KSPAssemblyName>
-			<KSPAssemblyVersion>4.2.3</KSPAssemblyVersion>
-		</Reference>
-		<!-- Depends on Harmony -->
-		<Reference Include="0Harmony, Culture=neutral, PublicKeyToken=null">
-			<HintPath>$(KSPRoot)/GameData/000_Harmony/0Harmony.dll</HintPath>
-			<Private>False</Private>
-			<CKANIdentifier>Harmony2</CKANIdentifier>
-			<KSPAssemblyName>0Harmony</KSPAssemblyName>
-		</Reference>
-		<!-- Depends on Luna Multiplayer -->
-		<Reference Include="LmpClient, Culture=neutral, PublicKeyToken=null">
-			<HintPath>$(KSPRoot)/GameData/LunaMultiplayer/Plugins/LmpClient.dll</HintPath>
-			<Private>False</Private>
-			<CKANIdentifier>LunaMultiplayer</CKANIdentifier>
-			<KSPAssemblyName>LmpClient</KSPAssemblyName>
-		</Reference>
-		<Reference Include="LmpCommon, Culture=neutral, PublicKeyToken=null" Condition="'$(UseMultiDllLmp)' == 'true'" CoCondition="">
-			<HintPath>$(KSPRoot)/GameData/LunaMultiplayer/Plugins/LmpCommon.dll</HintPath>
-			<Private>False</Private>
-			<CKANIdentifier>LunaMultiplayer</CKANIdentifier>
-			<KSPAssemblyName>LmpCommon</KSPAssemblyName>
-		</Reference>
-	</ItemGroup>
-
-	<ItemGroup>
-		<PackageReference Include="KSPBuildTools" Version="0.0.4" />
-	</ItemGroup>
 
 	<ItemGroup>
 		<None Update="LunaCompat.cfg">
@@ -72,4 +41,40 @@
 		</None>
 	</ItemGroup>
 
+	<ItemGroup>
+		<!-- Depends on Modulemanager -->
+		<ModReference Include="ModuleManager">
+			<DLLPath>GameData/ModuleManager.4.2.3.dll</DLLPath>
+			<Private>False</Private>
+			<CKANIdentifier>ModuleManager</CKANIdentifier>
+			<KSPAssemblyName>ModuleManager</KSPAssemblyName>
+			<KSPAssemblyVersion>2.5.0</KSPAssemblyVersion>
+		</ModReference>
+		<!-- Depends on Harmony -->
+		<ModReference Include="0Harmony">
+			<DLLPath>GameData/000_Harmony/0Harmony.dll</DLLPath>
+			<Private>False</Private>
+			<CKANIdentifier>Harmony2</CKANIdentifier>
+			<KSPAssemblyName>0Harmony</KSPAssemblyName>
+		</ModReference>
+		<!-- Depends on Luna Multiplayer -->
+		<ModReference Include="LmpClient">
+			<DLLPath>GameData/LunaMultiplayer/Plugins/LmpClient.dll</DLLPath>
+			<Private>False</Private>
+			<CKANIdentifier>LunaMultiplayer</CKANIdentifier>
+			<KSPAssemblyName>LMP</KSPAssemblyName>
+			<KSPAssemblyVersion>0.29.0</KSPAssemblyVersion>
+		</ModReference>
+		<ModReference Include="LMP" Condition="'$(UseMultiDllLmp)' == 'true'" CoCondition="">
+			<DLLPath>GameData/LunaMultiplayer/Plugins/LmpCommon.dll</DLLPath>
+			<Private>False</Private>
+			<CKANIdentifier>LunaMultiplayer</CKANIdentifier>
+			<KSPAssemblyName>LmpCommon</KSPAssemblyName>
+			<KSPAssemblyVersion>0.29.0</KSPAssemblyVersion>
+		</ModReference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="KSPBuildTools" Version="1.1.1" />
+	</ItemGroup>
 </Project>

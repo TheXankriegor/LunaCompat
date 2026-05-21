@@ -9,10 +9,10 @@
 		<AssemblyVersion>0.0.12</AssemblyVersion>
 		<FileVersion>$(AssemblyVersion)</FileVersion>
 		<Version>$(AssemblyVersion)</Version>
-
 		<NoWarn>IDE0290</NoWarn>
 		<DebugSymbols>true</DebugSymbols>
 		<DebugType>embedded</DebugType>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<UseMultiDllLmp Condition="'$(UseMultiDllLmp)' == ''">false</UseMultiDllLmp>
 	</PropertyGroup>
 

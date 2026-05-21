@@ -1,7 +1,5 @@
 ﻿using System;
 
-using KSPBuildTools;
-
 using LmpClient;
 
 using LunaCompatCommon.Utils;
@@ -41,32 +39,36 @@ namespace LunaCompat.Utils
 
         public override void NetworkDebug(string msg, string integration = null)
         {
-            Log.Debug(FormatMessage(msg, integration));
+#if DEBUG
+            UnityEngine.Debug.Log($"[NETWORK_DEBUG] {FormatMessage(msg, integration)}");
+#endif
         }
 
         public override void Debug(string msg, string integration = null)
         {
-            Log.Debug(FormatMessage(msg, integration));
+#if DEBUG
+            UnityEngine.Debug.Log($"[DEBUG] {FormatMessage(msg, integration)}");
+#endif
         }
 
         public override void Info(string msg, string integration = null)
         {
-            Log.Message(FormatMessage(msg, integration));
+            UnityEngine.Debug.Log(FormatMessage(msg, integration));
         }
 
         public override void Warning(string msg, string integration = null)
         {
-            Log.Warning(FormatMessage(msg, integration));
+            UnityEngine.Debug.LogWarning(FormatMessage(msg, integration));
         }
 
         public override void Error(string msg, string integration = null)
         {
-            Log.Error(FormatMessage(msg, integration));
+            UnityEngine.Debug.LogError(FormatMessage(msg, integration));
         }
 
         public override void Error(Exception ex, string integration = null)
         {
-            Log.Exception(ex);
+            UnityEngine.Debug.LogException(ex);
         }
 
         #endregion
