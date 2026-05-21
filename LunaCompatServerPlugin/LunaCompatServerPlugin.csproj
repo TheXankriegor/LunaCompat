@@ -8,7 +8,6 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<PlatformTarget>x64</PlatformTarget>
 		<OutputPath>$(SolutionDir)\Build\LunaCompat</OutputPath>
-		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 	</PropertyGroup>
 
 	<ItemGroup>

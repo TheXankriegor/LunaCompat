@@ -7,9 +7,9 @@ on:
   workflow_call:
 
 env:
-  KSP_ROOT: /tmp/ksp
+  KSPBT_GameRoot: /tmp/ksp
   RELEASE_STAGING: /tmp/release
-  LMP_VERSION: 0.29.1
+  LMP_VERSION: 0.29.2
 
 jobs:
   build:
@@ -33,15 +33,14 @@ jobs:
         uses: drewcassidy/yaclog@1.5.0
         id: yaclog-show
 
-      - uses: KSPModdingLibs/KSPBuildTools/.github/actions/setup-ckan@0.0.4
+      - uses: KSPModdingLibs/KSPBuildTools/.github/actions/setup-ckan@1.1.1
 
-      - uses: KSPModdingLibs/KSPBuildTools/.github/actions/install-dependencies@0.0.4
+      - uses: KSPModdingLibs/KSPBuildTools/.github/actions/install-dependencies@1.1.1
         with:
            dependency-identifiers: Harmony2 LunaMultiplayer=${{ env.LMP_VERSION }}
 
-      - uses: KSPModdingLibs/KSPBuildTools/.github/actions/compile@0.0.4
+      - uses: KSPModdingLibs/KSPBuildTools/.github/actions/compile@1.1.1
         with:
-          dotnet-version: 6.0.x
           ksp-zip-url: https://github.com/KSPModdingLibs/KSPLibs/raw/main/KSP-1.12.5.zip
 
       - name: Generate KSP Changelog
@@ -50,11 +49,17 @@ jobs:
           mod-name: LunaCompat
           output-path: Build/GameData/LunaCompat/lunacompat-version.cfg
 
-      - uses: KSPModdingLibs/KSPBuildTools/.github/actions/assemble-release@0.0.4
+      - uses: KSPModdingLibs/KSPBuildTools/.github/actions/assemble-release@1.1.1
         id: assemble-release
         with:
           artifacts: Build/GameData
           output-file-name: 'LunaCompat'
+
+      - name: Upload Client Plugin Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: LunaCompat
+          path: ${{ steps.assemble-release.outputs.artifact-dir-path }}
 
       - name: Download LMP Server
         id: download-lmp-server
@@ -81,7 +86,7 @@ jobs:
             ${{ env.PRERELEASE }} \
             --notes-file "${{ steps.yaclog-show.outputs.body-file }}" \
             --title "${{ steps.yaclog-show.outputs.name }}" \
-            ${{ steps.assemble-release.outputs.artifact-path }}.zip \
+            ${{ steps.assemble-release.outputs.artifact-zip-path }} \
             LunaCompatServerPlugin.zip \
             Build/GameData/LunaCompat/lunacompat.version
         # We publish both the mod AND the version file, that way there's always a static latest version file to compare against
