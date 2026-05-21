@@ -81,12 +81,15 @@ jobs:
       - name: Publish to Github
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
         run: |
-          zip -j LunaCompatServerPlugin.zip $(find Build -name "LunaCompatServerPlugin.dll" | head -n 1)
+          mkdir -p /tmp/server_plugin_zip/LunaCompat
+          cp $(find Build -name "LunaCompatServerPlugin.dll" | head -n 1) /tmp/server_plugin_zip/LunaCompat/
+          (cd /tmp/server_plugin_zip && zip -r ${{ github.workspace }}/LunaCompatServerPlugin.zip LunaCompat)
+          (cd ${{ steps.assemble-release.outputs.artifact-dir-path }} && zip -r ${{ github.workspace }}/LunaCompat.zip .)
           gh release create ${{ github.ref_name }} \
             ${{ env.PRERELEASE }} \
             --notes-file "${{ steps.yaclog-show.outputs.body-file }}" \
             --title "${{ steps.yaclog-show.outputs.name }}" \
-            ${{ steps.assemble-release.outputs.artifact-zip-path }} \
+            LunaCompat.zip \
             LunaCompatServerPlugin.zip \
             Build/GameData/LunaCompat/lunacompat.version
         # We publish both the mod AND the version file, that way there's always a static latest version file to compare against
