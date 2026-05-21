@@ -89,6 +89,9 @@ public class LunaCompat : MonoBehaviour
         {
             var compatInstance = (ClientModIntegration)Activator.CreateInstance(type, _logger, _settingsProvider);
 
+            if (!AssemblyLoader.loadedAssemblies.Contains(compatInstance.PackageName))
+                return;
+
             if (bool.TryParse(_settingsProvider.GetValue(compatInstance.PackageName, compatInstance.IsIntegrationEnabledKey, true) as string,
                               out var integrationEnabled))
             {
@@ -100,9 +103,6 @@ public class LunaCompat : MonoBehaviour
             }
             else
                 _logger.Error($"Failed to read {compatInstance.PackageName} switch - are the settings corrupt?.");
-
-            if (!AssemblyLoader.loadedAssemblies.Contains(compatInstance.PackageName))
-                return;
 
             compatInstance.Setup();
             _activePatches.Add(compatInstance);
@@ -132,8 +132,11 @@ public class LunaCompat : MonoBehaviour
 
             if (message.Version != version)
             {
-                _logger.Warning(
-                    $"The Luna Compat Server Plugin does not match the installed version: Client: {version}, Server: {message.Version} - Contact the server owner for assistance.");
+                var warning =
+                    $"The Luna Compat Server Plugin does not match the installed version (Client: {version}, Server: {message.Version})\nUpdate your installation or contact the server owner for assistance.";
+                _logger.Warning(warning);
+
+                Logger.PostPopupDialog($"{nameof(LunaCompat)}_VersionMismatch", warning);
             }
 
             serverModConfirmed = true;
@@ -152,7 +155,10 @@ public class LunaCompat : MonoBehaviour
 
             if (!serverModConfirmed)
             {
-                _logger.Warning("Luna Compat Server Plugin is missing. Contact the server owner for assistance.");
+                const string WARNING = "Luna Compat Server Plugin is missing.\nContact the server owner for assistance.";
+                _logger.Warning(WARNING);
+
+                Logger.PostPopupDialog($"{nameof(LunaCompat)}_VersionMismatch", WARNING);
                 _messageHandler.SetServerIntegrationDetermined(false);
             }
 

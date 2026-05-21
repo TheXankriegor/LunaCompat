@@ -22,7 +22,6 @@ using UnityEngine;
 
 using static UrlDir;
 
-using File = System.IO.File;
 using FileInfo = System.IO.FileInfo;
 using ILogger = LunaCompatCommon.Utils.ILogger;
 using Logger = LunaCompat.Utils.Logger;
@@ -43,6 +42,7 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
     internal static bool Initialized;
 
     private bool _keepAlive;
+    private UrlFile _collectionUrlFile;
 
     private static ReflectedType facilitySelectorType;
     private static ReflectedType decalsDatabaseType;
@@ -158,6 +158,7 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
         base.Destroy();
         _keepAlive = false;
         Initialized = false;
+        _collectionUrlFile = null;
         instanceStateCache.Clear();
         groupStateCache.Clear();
         groupDictionary.Clear();
@@ -482,12 +483,6 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
             var nodePath = Path.Combine(basePath, pathName);
 
             Logger.Instance.Info($"Group deleted: ({nodePath})", KerbalKonstructsPackageName);
-
-            FileInteractionHandler.ExecuteTask(() =>
-            {
-                if (File.Exists(nodePath))
-                    File.Delete(nodePath);
-            });
 
             if (existing.Key == null)
             {
@@ -821,10 +816,6 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
 
     private void LoadGroup(string uuid, string targetPath, ConfigNode node, string nodePath)
     {
-        var urlDir = new UrlDir([new ConfigDirectory("", "../saves/LunaMultiplayer/KerbalKonstructs/NewInstances", DirectoryType.GameData)],
-                                [new ConfigFileType(FileType.Config, ["cfg"])]);
-        var collectionFile = new UrlFile(urlDir, new FileInfo(targetPath));
-
         var groupNode = node?.GetNode("KK_GroupCenter");
 
         if (groupNode == null)
@@ -879,8 +870,7 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
             if (pqs)
                 pqs.Orientate();
 
-            // Apparently not needed:
-            //groupCenterType.Invoke("UpdateRotation2Heading", existing, []);
+            groupCenterType.Invoke("UpdateRotation2Heading", existing, []);
 
             var onSaveAction = apiType.GetField("OnGroupSaved", null);
             groupCenterUpdateInvokeActionMethod.Invoke(onSaveAction, [existing]);
@@ -889,9 +879,8 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
         {
             _logger.Info($"Adding new group {targetPath}.", KerbalKonstructsPackageName);
 
-            var config = new UrlConfig(collectionFile, groupNode);
-            collectionFile.configs.Add(config);
-            GameDatabase.Instance.root.children.First().files.Add(collectionFile);
+            var config = new UrlConfig(_collectionUrlFile, groupNode);
+            _collectionUrlFile.configs.Add(config);
 
             var groupCenter = Activator.CreateInstance(groupCenterType.Type);
 
@@ -907,18 +896,13 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
         _logger.Debug($"Loaded centers: {allCenters.Count}", KerbalKonstructsPackageName);
     }
 
-    private void LoadInstance(string targetPath, ConfigNode node)
+    private void LoadInstance(string name, ConfigNode node)
     {
-        // uri for LunaCompat to ensure valid save location on update
-        // GameDatabase.Instance.root.AllDirectories.Single(x => x.url == nameof(LunaCompat))
-        var urlDir = new UrlDir([new ConfigDirectory("", "../saves/LunaMultiplayer/KerbalKonstructs/NewInstances", DirectoryType.GameData)],
-                                [new ConfigFileType(FileType.Config, ["cfg"])]);
-        var collectionFile = new UrlFile(urlDir, new FileInfo(targetPath));
         var staticNode = node?.GetNode("STATIC");
 
         if (staticNode == null)
         {
-            _logger.Warning($"Static instance {targetPath} has no STATIC component: {node}", KerbalKonstructsPackageName);
+            _logger.Warning($"Static instance {name} has no STATIC component: {node}", KerbalKonstructsPackageName);
             return;
         }
 
@@ -939,9 +923,8 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
 
         isDeleting = false;
 
-        var config = new UrlConfig(collectionFile, staticNode);
-        collectionFile.configs.Add(config);
-        GameDatabase.Instance.root.children.First().files.Add(collectionFile);
+        var config = new UrlConfig(_collectionUrlFile, staticNode);
+        _collectionUrlFile.configs.Add(config);
 
         var modelName = staticNode.GetValue("pointername");
 
@@ -955,7 +938,7 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
         if (model != null)
             kerbalKonstructsType.Invoke("LoadInstances", kkInstance, [config, model]);
 
-        var subPath = $"../saves/LunaMultiplayer/KerbalKonstructs/NewInstances/{Path.GetFileName(targetPath)}";
+        var subPath = $"../saves/LunaMultiplayer/KerbalKonstructs/NewInstances/{name}.cfg";
 
         foreach (var n in staticNode.GetNodes("Instances"))
         {
@@ -970,7 +953,7 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
             var instance = apiType.Invoke("getStaticInstanceByUUID", null, [uuid]);
 
             if (instance == null)
-                _logger.Debug($"No UUID {uuid} for '{targetPath}'", KerbalKonstructsPackageName);
+                _logger.Debug($"No UUID {uuid} for '{name}'", KerbalKonstructsPackageName);
             else
                 staticInstanceType.SetField("configPath", instance, subPath);
         }
@@ -992,54 +975,17 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
     {
         _logger.Info($"Static instance unload received: {msg.ModelName}", PackageName);
 
-        var targetPath = Path.Combine(KSPUtil.ApplicationRootPath, "saves/LunaMultiplayer/KerbalKonstructs/NewInstances", $"{msg.ModelName}.cfg");
-
         CloseUiIfOpen();
         apiType.Invoke("RemoveStatic", null, [msg.Identifier]);
-
-        FileInteractionHandler.ExecuteTask(() =>
-        {
-            if (!File.Exists(targetPath))
-                return null;
-
-            return ConfigNode.Load(targetPath);
-        }, node =>
-        {
-            if (node == null)
-                return;
-
-            var existingInstances = node.GetNode("root").GetNode("STATIC");
-
-            foreach (var instance in existingInstances.GetNodes("Instances"))
-            {
-                if (instance.GetValue("UUID") == msg.Identifier)
-                {
-                    existingInstances.RemoveNode(instance);
-                    break;
-                }
-            }
-
-            FileInteractionHandler.ExecuteTask(() =>
-            {
-                File.WriteAllText(targetPath, node.ToString());
-            });
-        });
     }
 
     private void OnChangeStaticInstanceMessageReceived(KerbalKonstructsChangeStaticInstanceMessage msg)
     {
         _logger.Info($"Static instance received: {msg.Name}", PackageName);
 
-        var targetPath = Path.Combine(KSPUtil.ApplicationRootPath, "saves/LunaMultiplayer/KerbalKonstructs/NewInstances", $"{msg.Name}.cfg");
-
-        FileInteractionHandler.ExecuteTask(() =>
-        {
-            File.WriteAllText(targetPath, msg.Content);
-        });
-
         CloseUiIfOpen();
         var node = ConfigNode.Parse(msg.Content);
-        LoadInstance(targetPath, node);
+        LoadInstance(msg.Name, node);
     }
 
     private void OnSaveFacilitiesMessageReceived(KerbalKonstructsSaveFacilitiesMessage msg)
@@ -1189,23 +1135,14 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
         _logger.Info($"Map decal received: {msg.Name}", KerbalKonstructsPackageName);
 
         var relativePath = Path.Combine("../saves/LunaMultiplayer/KerbalKonstructs/NewInstances", $"{msg.Name}.cfg").Replace('\\', '/');
-        var targetPath = Path.Combine(KSPUtil.ApplicationRootPath, "GameData", relativePath);
-
-        FileInteractionHandler.ExecuteTask(() =>
-        {
-            File.WriteAllText(targetPath, msg.Content);
-        });
 
         CloseUiIfOpen();
         var node = ConfigNode.Parse(msg.Content);
-        LoadMapDecal(targetPath, node, relativePath);
+        LoadMapDecal(node, relativePath);
     }
 
-    private void LoadMapDecal(string targetPath, ConfigNode node, string relativePath)
+    private void LoadMapDecal(ConfigNode node, string relativePath)
     {
-        var urlDir = new UrlDir([new ConfigDirectory("", "../saves/LunaMultiplayer/KerbalKonstructs/NewInstances", DirectoryType.GameData)],
-                                [new ConfigFileType(FileType.Config, ["cfg"])]);
-        var collectionFile = new UrlFile(urlDir, new FileInfo(targetPath));
         var decalNode = node?.GetNode("KK_MapDecal");
 
         object existingDecal = null;
@@ -1225,9 +1162,8 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
         if (existingDecal != null)
             DeleteMapDecal(existingDecal);
 
-        var config = new UrlConfig(collectionFile, decalNode);
-        collectionFile.configs.Add(config);
-        GameDatabase.Instance.root.children.First().files.Add(collectionFile);
+        var config = new UrlConfig(_collectionUrlFile, decalNode);
+        _collectionUrlFile.configs.Add(config);
 
         var newInstance = Activator.CreateInstance(mapDecalInstanceType.Type, true);
         configParserType.Invoke("ParseMapDecalConfig", null, [newInstance, decalNode]);
@@ -1307,11 +1243,6 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
         var subPath = Path.Combine("saves/LunaMultiplayer/KerbalKonstructs/NewInstances", $"{msg.Name}.cfg");
         var targetPath = Path.Combine(KSPUtil.ApplicationRootPath, subPath);
 
-        FileInteractionHandler.ExecuteTask(() =>
-        {
-            File.WriteAllText(targetPath, msg.Content);
-        });
-
         CloseUiIfOpen();
         var node = ConfigNode.Parse(msg.Content);
         LoadGroup(msg.Uuid, targetPath, node, $"../{subPath}");
@@ -1336,7 +1267,12 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
             return;
         }
 
-        var instancePath = Path.Combine(KSPUtil.ApplicationRootPath, "saves/LunaMultiplayer/KerbalKonstructs/NewInstances");
+        const string KK_SAVE_PATH = "saves/LunaMultiplayer/KerbalKonstructs";
+        var instancePath = Path.Combine(KSPUtil.ApplicationRootPath, KK_SAVE_PATH);
+        var targetPath = Path.Combine(instancePath, "instances.cfg");
+        var urlDir = new UrlDir([new ConfigDirectory("", $"../{KK_SAVE_PATH}", DirectoryType.GameData)], [new ConfigFileType(FileType.Config, ["cfg"])]);
+        _collectionUrlFile = new UrlFile(urlDir, new FileInfo(targetPath));
+        GameDatabase.Instance.root.children.First().files.Add(_collectionUrlFile);
 
         FileInteractionHandler.ExecuteTask(() =>
         {
