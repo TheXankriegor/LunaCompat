@@ -1,19 +1,18 @@
-namespace LunaCompatCommon.Messages
+namespace LunaCompatCommon.Messages;
+
+public class SegmentedMessage : IModMessage
 {
-    public class SegmentedMessage : IModMessage
-    {
-        #region Properties
+    #region Properties
 
-        public string OriginalType { get; set; }
+    public string OriginalType { get; set; }
 
-        public int PartCount { get; set; }
+    public int PartCount { get; set; }
 
-        public int MessageId { get; set; }
+    public int MessageId { get; set; }
 
-        public int PartId { get; set; }
+    public int PartId { get; set; }
 
-        public byte[] PartData { get; set; }
+    public byte[] PartData { get; set; }
 
-        #endregion
-    }
+    #endregion
 }

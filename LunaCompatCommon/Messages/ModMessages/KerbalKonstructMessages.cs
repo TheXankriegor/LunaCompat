@@ -1,88 +1,87 @@
-﻿namespace LunaCompatCommon.Messages.ModMessages
+﻿namespace LunaCompatCommon.Messages.ModMessages;
+
+public static class KerbalKonstructsConstants
 {
-    public static class KerbalKonstructsConstants
-    {
-        #region Constants
+    #region Constants
 
-        public const string DisableRemoteRecovery = "disableRemoteRecovery";
-        public const string FacilityUseRange = "facilityUseRange";
-        public const string EnableRT = "enableRT";
-        public const string EnableCommNet = "enableCommNet";
-        public const string DisableRemoteBaseOpening = "disableRemoteBaseOpening";
+    public const string DisableRemoteRecovery = "disableRemoteRecovery";
+    public const string FacilityUseRange = "facilityUseRange";
+    public const string EnableRT = "enableRT";
+    public const string EnableCommNet = "enableCommNet";
+    public const string DisableRemoteBaseOpening = "disableRemoteBaseOpening";
 
-        #endregion
-    }
+    #endregion
+}
 
-    public class KerbalKonstructsRequestInstancesMessage : IModMessage
-    {
-    }
+public class KerbalKonstructsRequestInstancesMessage : IModMessage
+{
+}
 
-    public class KerbalKonstructsDeleteMessage : IModMessage
-    {
-        #region Properties
+public class KerbalKonstructsDeleteMessage : IModMessage
+{
+    #region Properties
 
-        public string Identifier { get; set; }
+    public string Identifier { get; set; }
 
-        #endregion
-    }
+    #endregion
+}
 
-    public class KerbalKonstructsSaveFacilitiesMessage : IModMessage
-    {
-        #region Properties
+public class KerbalKonstructsSaveFacilitiesMessage : IModMessage
+{
+    #region Properties
 
-        public string Facilities { get; set; }
+    public string Facilities { get; set; }
 
-        public string LaunchSites { get; set; }
+    public string LaunchSites { get; set; }
 
-        #endregion
-    }
+    #endregion
+}
 
-    public class KerbalKonstructsChangeMessage : IModMessage
-    {
-        #region Properties
+public class KerbalKonstructsChangeMessage : IModMessage
+{
+    #region Properties
 
-        public string Content { get; set; }
+    public string Content { get; set; }
 
-        public string Name { get; set; }
+    public string Name { get; set; }
 
-        #endregion
-    }
+    #endregion
+}
 
-    public class KerbalKonstructsChangeStaticInstanceMessage : KerbalKonstructsChangeMessage
-    {
-    }
+public class KerbalKonstructsChangeStaticInstanceMessage : KerbalKonstructsChangeMessage
+{
+}
 
-    public class KerbalKonstructsDeleteStaticInstanceMessage : KerbalKonstructsDeleteMessage
-    {
-        #region Properties
+public class KerbalKonstructsDeleteStaticInstanceMessage : KerbalKonstructsDeleteMessage
+{
+    #region Properties
 
-        public string ModelName { get; set; }
+    public string ModelName { get; set; }
 
-        #endregion
-    }
+    #endregion
+}
 
-    public class KerbalKonstructsChangeGroupCenterMessage : KerbalKonstructsChangeMessage
-    {
-        #region Properties
+public class KerbalKonstructsChangeGroupCenterMessage : KerbalKonstructsChangeMessage
+{
+    #region Properties
 
-        public string Uuid { get; set; }
+    public string Uuid { get; set; }
 
-        #endregion
-    }
+    #endregion
+}
 
-    public class KerbalKonstructsChangeMapDecalMessage : KerbalKonstructsChangeMessage
-    {
-    }
+public class KerbalKonstructsChangeMapDecalMessage : KerbalKonstructsChangeMessage
+{
+}
 
-    public class KerbalKonstructsDeleteMapDecalMessage : KerbalKonstructsDeleteMessage
-    {
-    }
+public class KerbalKonstructsDeleteMapDecalMessage : KerbalKonstructsDeleteMessage
+{
+}
 
-    public class KerbalKonstructsDeleteGroupCenterMessage : KerbalKonstructsDeleteMessage
-    {
-    }
+public class KerbalKonstructsDeleteGroupCenterMessage : KerbalKonstructsDeleteMessage
+{
+}
 
-    public class KerbalKonstructsSettingsValueMessage : SettingsValueMessage
-    {
-    }
+public class KerbalKonstructsSettingsValueMessage : SettingsValueMessage
+{
 }

@@ -23,6 +23,12 @@ internal abstract class ClientModIntegration : ModIntegration
 
     #endregion
 
+    #region Properties
+
+    public virtual bool RequiresServerPlugin => false;
+
+    #endregion
+
     #region Public Methods
 
     public abstract void Setup();

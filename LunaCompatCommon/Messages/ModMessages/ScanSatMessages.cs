@@ -2,93 +2,92 @@
 
 using System;
 
-namespace LunaCompatCommon.Messages.ModMessages
+namespace LunaCompatCommon.Messages.ModMessages;
+
+public static class ScanSatConstants
 {
-    public static class ScanSatConstants
+    #region Constants
+
+    public const int CoverageSizeX = 360;
+    public const int CoverageSizeY = 180;
+    public const string AllCelestialBodiesIdentifier = "LunaCompat_Everything";
+
+    #endregion
+}
+
+public static class ScanSatCommon
+{
+    #region Public Methods
+
+    public static short[,] MergeCoverageData(short[,] a, short[,] b)
     {
-        #region Constants
+        if (a.Length != b.Length)
+            throw new InvalidOperationException("Cannot merge coverage data of differing dimensions.");
 
-        public const int CoverageSizeX = 360;
-        public const int CoverageSizeY = 180;
-        public const string AllCelestialBodiesIdentifier = "LunaCompat_Everything";
+        var result = new short[a.GetLength(0), a.GetLength(1)];
 
-        #endregion
-    }
-
-    public static class ScanSatCommon
-    {
-        #region Public Methods
-
-        public static short[,] MergeCoverageData(short[,] a, short[,] b)
+        for (var i = 0; i < a.GetLength(0); i++)
         {
-            if (a.Length != b.Length)
-                throw new InvalidOperationException("Cannot merge coverage data of differing dimensions.");
-
-            var result = new short[a.GetLength(0), a.GetLength(1)];
-
-            for (var i = 0; i < a.GetLength(0); i++)
-            {
-                for (var j = 0; j < a.GetLength(1); j++)
-                    result[i, j] = (short)(a[i, j] | b[i, j]);
-            }
-
-            return result;
+            for (var j = 0; j < a.GetLength(1); j++)
+                result[i, j] = (short)(a[i, j] | b[i, j]);
         }
 
-        #endregion
+        return result;
     }
 
-    public class ScanSatRequestDataMessage : IModMessage
-    {
-    }
+    #endregion
+}
 
-    public class ScanSatDataMessage : IModMessage
-    {
-        #region Properties
+public class ScanSatRequestDataMessage : IModMessage
+{
+}
 
-        public string Body { get; set; }
+public class ScanSatDataMessage : IModMessage
+{
+    #region Properties
 
-        #endregion
-    }
+    public string Body { get; set; }
 
-    public class ScanSatSyncDataMessage : ScanSatDataMessage
-    {
-        #region Properties
+    #endregion
+}
 
-        public short[,] Map { get; set; }
+public class ScanSatSyncDataMessage : ScanSatDataMessage
+{
+    #region Properties
 
-        #endregion
-    }
+    public short[,] Map { get; set; }
 
-    public class ScanSatResetDataMessage : ScanSatDataMessage
-    {
-        #region Properties
+    #endregion
+}
 
-        public short Type { get; set; }
+public class ScanSatResetDataMessage : ScanSatDataMessage
+{
+    #region Properties
 
-        #endregion
-    }
+    public short Type { get; set; }
 
-    public class ScanSatScannerChangeMessage : IModMessage
-    {
-        #region Properties
+    #endregion
+}
 
-        public bool Loaded { get; set; }
+public class ScanSatScannerChangeMessage : IModMessage
+{
+    #region Properties
 
-        public Guid Vessel { get; set; }
+    public bool Loaded { get; set; }
 
-        public int Sensor { get; set; }
+    public Guid Vessel { get; set; }
 
-        public float Fov { get; set; }
+    public int Sensor { get; set; }
 
-        public float MinAlt { get; set; }
+    public float Fov { get; set; }
 
-        public float MaxAlt { get; set; }
+    public float MinAlt { get; set; }
 
-        public float BestAlt { get; set; }
+    public float MaxAlt { get; set; }
 
-        public bool RequireLight { get; set; }
+    public float BestAlt { get; set; }
 
-        #endregion
-    }
+    public bool RequireLight { get; set; }
+
+    #endregion
 }

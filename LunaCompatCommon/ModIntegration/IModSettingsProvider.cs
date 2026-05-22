@@ -1,11 +1,10 @@
-﻿namespace LunaCompatCommon.ModIntegration
+﻿namespace LunaCompatCommon.ModIntegration;
+
+public interface IModSettingsProvider
 {
-    public interface IModSettingsProvider
-    {
-        bool TryLoadSettings();
+    bool TryLoadSettings();
 
-        void SetValue(string modName, string key, object value);
+    void SetValue(string modName, string key, object value);
 
-        object GetValue(string modName, string key, object defaultValue = null);
-    }
+    object GetValue(string modName, string key, object defaultValue = null);
 }

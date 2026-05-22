@@ -1,13 +1,12 @@
-﻿namespace LunaCompatCommon.Messages
+﻿namespace LunaCompatCommon.Messages;
+
+public abstract class SettingsValueMessage : IModMessage
 {
-    public abstract class SettingsValueMessage : IModMessage
-    {
-        #region Properties
+    #region Properties
 
-        public string Key { get; set; }
+    public string Key { get; set; }
 
-        public string Value { get; set; }
+    public string Value { get; set; }
 
-        #endregion
-    }
+    #endregion
 }

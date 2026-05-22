@@ -69,6 +69,8 @@ internal class KerbalColoniesIntegration : ClientModIntegration
 
     #region Properties
 
+    public override bool RequiresServerPlugin => true;
+
     public override string PackageName => KerbalColoniesPackageName;
 
     #endregion
@@ -90,9 +92,9 @@ internal class KerbalColoniesIntegration : ClientModIntegration
 
         // prevent error states from updates during loads
         LunaCompat.HarmonyInstance.Patch(kCProductionFacilityType.Method("UpdateSharedNode"),
-                                         prefix: new HarmonyMethod(typeof(KerbalColoniesIntegration), nameof(PrefixUpdateSharedNode)));
+                                         new HarmonyMethod(typeof(KerbalColoniesIntegration), nameof(PrefixUpdateSharedNode)));
         LunaCompat.HarmonyInstance.Patch(colonyClassType.Method("UpdateColony"),
-                                         prefix: new HarmonyMethod(typeof(KerbalColoniesIntegration), nameof(PrefixUpdateColony)));
+                                         new HarmonyMethod(typeof(KerbalColoniesIntegration), nameof(PrefixUpdateColony)));
 
         ClientMessageHandler.Instance.HasServerIntegrationChanged += OnServerIntegrationDetermined;
         ClientMessageHandler.Instance.RegisterModMessageListener<KerbalColoniesRequestColoniesMessage>(OnAllColoniesReceived);
@@ -773,8 +775,7 @@ internal class KerbalColoniesIntegration : ClientModIntegration
             while (!KerbalKonstructsIntegration.Initialized)
                 await Task.Delay(100);
 
-            _logger.Info("KC requesting all colonies.", PackageName);
-
+            _logger.Info("Requesting all colony data", PackageName);
             ClientMessageHandler.Instance.SendReliableMessage(new KerbalColoniesRequestColoniesMessage(), false);
         });
     }

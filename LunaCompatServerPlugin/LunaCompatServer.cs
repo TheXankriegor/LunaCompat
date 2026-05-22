@@ -24,6 +24,7 @@ public class LunaCompatServer : LmpPlugin
     private readonly ModSettingsProvider _settingsProvider;
     private readonly ServerMessageHandler _messageHandler;
     private readonly ILogger _logger;
+    private readonly string _serverPluginVersion;
 
     #endregion
 
@@ -32,6 +33,8 @@ public class LunaCompatServer : LmpPlugin
     public LunaCompatServer()
     {
         _logger = new Logger();
+
+        _serverPluginVersion = Assembly.GetExecutingAssembly().GetName().Version!.ToString();
 
         var modSettingsPath = Path.Combine(GetLunaCompatBaseDirectory(), "ModSettingsStructure.xml");
         _modIntegrations = new Dictionary<string, ServerModIntegration>();
@@ -52,7 +55,7 @@ public class LunaCompatServer : LmpPlugin
 
     public override void OnServerStart()
     {
-        _logger.Info("Luna Compat: Loading mod settings storage");
+        _logger.Info($"Starting plugin v{_serverPluginVersion}: Loading mod settings storage");
 
         // We could load external fixes here as well - but will that ever be needed?
         var modIntegrations = Assembly.GetExecutingAssembly().GetTypes().Where(x => x.IsAssignableTo(typeof(ServerModIntegration)) && !x.IsAbstract).ToList();
@@ -121,14 +124,12 @@ public class LunaCompatServer : LmpPlugin
     {
         _logger.Info($"Initializing LMP compatibility for player {client.PlayerName}.");
 
-        var serverPluginVersion = Assembly.GetExecutingAssembly().GetName().Version!.ToString();
-
-        if (msg.Version != serverPluginVersion)
-            _logger.Warning($"Client {client.PlayerName} is using a different version of LunaCompat ({msg.Version}, should be {serverPluginVersion}).");
+        if (msg.Version != _serverPluginVersion)
+            _logger.Warning($"Client {client.PlayerName} is using a different version of LunaCompat ({msg.Version}, should be {_serverPluginVersion}).");
 
         _messageHandler.SendCompatMessage(client, new InitializeMessage
         {
-            Version = serverPluginVersion
+            Version = _serverPluginVersion
         });
     }
 

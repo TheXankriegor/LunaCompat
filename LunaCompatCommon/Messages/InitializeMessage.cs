@@ -1,11 +1,10 @@
-﻿namespace LunaCompatCommon.Messages
+﻿namespace LunaCompatCommon.Messages;
+
+public class InitializeMessage : IModMessage
 {
-    public class InitializeMessage : IModMessage
-    {
-        #region Properties
+    #region Properties
 
-        public string Version { get; set; }
+    public string Version { get; set; }
 
-        #endregion
-    }
+    #endregion
 }

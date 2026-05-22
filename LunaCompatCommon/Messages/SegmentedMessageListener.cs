@@ -8,94 +8,93 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace LunaCompatCommon.Messages
+namespace LunaCompatCommon.Messages;
+
+internal abstract class SegmentedMessageListener : IMessageListener
 {
-    internal abstract class SegmentedMessageListener : IMessageListener
+    #region Fields
+
+    protected readonly ILogger _logger;
+
+    private readonly ConcurrentDictionary<int, (List<SegmentedMessage> Segments, DateTime ReceivedTime )> _messageParts;
+
+    #endregion
+
+    #region Constructors
+
+    protected SegmentedMessageListener(ILogger logger)
     {
-        #region Fields
+        _logger = logger;
+        _messageParts = new ConcurrentDictionary<int, (List<SegmentedMessage> Segments, DateTime ReceivedTime)>();
+    }
 
-        protected readonly ILogger _logger;
+    #endregion
 
-        private readonly ConcurrentDictionary<int, (List<SegmentedMessage> Segments, DateTime ReceivedTime )> _messageParts;
+    #region Non-Public Methods
 
-        #endregion
+    protected bool TryHandleSegment(byte[] data, out string messageType, out byte[] combinedBytes)
+    {
+        combinedBytes = Array.Empty<byte>();
+        messageType = string.Empty;
 
-        #region Constructors
+        var message = SerializationUtil.Deserialize<SegmentedMessage>(data);
 
-        protected SegmentedMessageListener(ILogger logger)
+        if (_messageParts.TryGetValue(message.MessageId, out var partTpl))
         {
-            _logger = logger;
-            _messageParts = new ConcurrentDictionary<int, (List<SegmentedMessage> Segments, DateTime ReceivedTime)>();
-        }
+            var parts = partTpl.Segments;
 
-        #endregion
+            parts.Add(message);
 
-        #region Non-Public Methods
+            if (parts.Count != message.PartCount)
+                return false;
 
-        protected bool TryHandleSegment(byte[] data, out string messageType, out byte[] combinedBytes)
-        {
-            combinedBytes = Array.Empty<byte>();
-            messageType = string.Empty;
+            _messageParts.TryRemove(message.MessageId, out _);
 
-            var message = SerializationUtil.Deserialize<SegmentedMessage>(data);
+            var totalLength = 0;
 
-            if (_messageParts.TryGetValue(message.MessageId, out var partTpl))
+            // Serverside has no defined LINQ Sum
+            for (var i = 0; i < parts.Count; i++)
             {
-                var parts = partTpl.Segments;
-
-                parts.Add(message);
-
-                if (parts.Count != message.PartCount)
-                    return false;
-
-                _messageParts.TryRemove(message.MessageId, out _);
-
-                var totalLength = 0;
-
-                // Serverside has no defined LINQ Sum
-                for (var i = 0; i < parts.Count; i++)
-                {
-                    var p = parts[i];
-                    totalLength += p.PartData.Length;
-                }
-
-                combinedBytes = new byte[totalLength];
-                var offset = 0;
-
-                foreach (var part in parts.OrderBy(x => x.PartId))
-                {
-                    Array.Copy(part.PartData, 0, combinedBytes, offset, part.PartData.Length);
-                    offset += part.PartData.Length;
-                }
-
-                if (_messageParts.Count > 100)
-                {
-                    var toRem = new List<int>();
-                    var cutoff = DateTime.Now.AddMinutes(-1d);
-
-                    foreach (var msg in _messageParts)
-                    {
-                        if (msg.Value.ReceivedTime < cutoff)
-                            toRem.Add(msg.Key);
-                    }
-
-                    foreach (var idx in toRem)
-                        _messageParts.TryRemove(idx, out _);
-                }
-
-                messageType = message.OriginalType;
-
-                return true;
+                var p = parts[i];
+                totalLength += p.PartData.Length;
             }
 
-            _messageParts.TryAdd(message.MessageId, (new List<SegmentedMessage>
-            {
-                message
-            }, DateTime.Now));
+            combinedBytes = new byte[totalLength];
+            var offset = 0;
 
-            return false;
+            foreach (var part in parts.OrderBy(x => x.PartId))
+            {
+                Array.Copy(part.PartData, 0, combinedBytes, offset, part.PartData.Length);
+                offset += part.PartData.Length;
+            }
+
+            if (_messageParts.Count > 100)
+            {
+                var toRem = new List<int>();
+                var cutoff = DateTime.Now.AddMinutes(-1d);
+
+                foreach (var msg in _messageParts)
+                {
+                    if (msg.Value.ReceivedTime < cutoff)
+                        toRem.Add(msg.Key);
+                }
+
+                foreach (var idx in toRem)
+                    _messageParts.TryRemove(idx, out _);
+            }
+
+            messageType = message.OriginalType;
+
+            return true;
         }
 
-        #endregion
+        _messageParts.TryAdd(message.MessageId, (new List<SegmentedMessage>
+        {
+            message
+        }, DateTime.Now));
+
+        return false;
     }
+
+    #endregion
 }
