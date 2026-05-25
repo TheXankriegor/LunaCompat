@@ -2,6 +2,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Threading;
 
 namespace LunaCompatCommon.Utils;
 
@@ -106,9 +107,9 @@ public static class LzfaCompressor
     #region Fields
 
     /// <summary>
-    /// Hashtable, that can be allocated only once
+    /// Per-thread hashtable to allow parallel compression
     /// </summary>
-    private static readonly long[] hashTable = new long[Hsize];
+    private static readonly ThreadLocal<long[]> threadHashTable = new ThreadLocal<long[]>(() => new long[(int)Hsize]);
 
     #endregion
 
@@ -176,6 +177,7 @@ public static class LzfaCompressor
     {
         var inputLength = input.Length;
         var outputLength = output.Length;
+        var hashTable = threadHashTable.Value;
         Array.Clear(hashTable, 0, (int)Hsize);
         long hslot;
         uint iidx = 0;

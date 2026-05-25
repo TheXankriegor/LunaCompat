@@ -82,13 +82,21 @@ internal class ServerMessageHandler : MessageHandler<IServerMessageListener>, IS
     public void SendCompatMessageToAll<TMessageType>(TMessageType message)
         where TMessageType : class, IModMessage, new()
     {
-        SendMessageInternal(message, MessageQueuer.SendToAllClients<ModSrvMsg>);
+        SendMessageInternal(message, msg =>
+        {
+            msg.Reliable = true;
+            MessageQueuer.SendToAllClients<ModSrvMsg>(msg);
+        });
     }
 
     public void SendCompatMessage<TMessageType>(ClientStructure client, TMessageType message)
         where TMessageType : class, IModMessage, new()
     {
-        SendMessageInternal(message, msg => MessageQueuer.SendToClient<ModSrvMsg>(client, msg));
+        SendMessageInternal(message, msg =>
+        {
+            msg.Reliable = true;
+            MessageQueuer.SendToClient<ModSrvMsg>(client, msg);
+        });
     }
 
     #endregion
