@@ -58,6 +58,8 @@ internal class ScanSatIntegration : ClientModIntegration
 
     #region Properties
 
+    public override bool RequiresServerPlugin => true;
+
     public override string PackageName => ScanSatPackageName;
 
     private static string ScanSatPackageName => "SCANsat";
@@ -93,7 +95,7 @@ internal class ScanSatIntegration : ClientModIntegration
 
         // add unknown bodies from other players
         LunaCompat.HarmonyInstance.Patch(scanUtilType.Method("getData", [typeof(CelestialBody)]),
-                                         prefix: new HarmonyMethod(typeof(ScanSatIntegration), nameof(PrefixGetData)));
+                                         new HarmonyMethod(typeof(ScanSatIntegration), nameof(PrefixGetData)));
         LunaCompat.HarmonyInstance.Patch(scanControllerType.Method("Update"), postfix: new HarmonyMethod(typeof(ScanSatIntegration), nameof(PostfixUpdate)));
 
         ClientMessageHandler.Instance.HasServerIntegrationChanged += OnServerIntegrationDetermined;

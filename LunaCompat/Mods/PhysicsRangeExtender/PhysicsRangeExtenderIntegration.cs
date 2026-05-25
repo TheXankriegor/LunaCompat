@@ -37,7 +37,7 @@ internal class PhysicsRangeExtenderIntegration : ClientModIntegration
         var terrainExtenderEnabledSetter = AccessTools.PropertySetter(preSettings, "TerrainExtenderEnabled");
         terrainExtenderEnabledSetter.Invoke(null, [false]);
         LunaCompat.HarmonyInstance.Patch(terrainExtenderEnabledSetter,
-                                         prefix: new HarmonyMethod(typeof(PhysicsRangeExtenderIntegration), nameof(PrefixTerrainExtenderEnabledSet)));
+                                         new HarmonyMethod(typeof(PhysicsRangeExtenderIntegration), nameof(PrefixTerrainExtenderEnabledSet)));
     }
 
     #endregion

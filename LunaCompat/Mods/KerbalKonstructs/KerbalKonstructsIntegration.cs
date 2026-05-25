@@ -88,6 +88,8 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
 
     #region Properties
 
+    public override bool RequiresServerPlugin => true;
+
     public override string PackageName => KerbalKonstructsPackageName;
 
     #endregion
@@ -113,19 +115,19 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
 
         // Handle static instance changes
         LunaCompat.HarmonyInstance.Patch(kerbalKonstructsType.Method("DeleteInstance"),
-                                         prefix: new HarmonyMethod(typeof(KerbalKonstructsIntegration), nameof(PrefixStaticInstanceDelete)));
+                                         new HarmonyMethod(typeof(KerbalKonstructsIntegration), nameof(PrefixStaticInstanceDelete)));
         LunaCompat.HarmonyInstance.Patch(configParserType.Method("SaveInstanceByCfg"),
                                          transpiler: new HarmonyMethod(typeof(KerbalKonstructsIntegration), nameof(TranspileSaveInstanceByCfg)));
 
         // Handle facility and launch site changes
         LunaCompat.HarmonyInstance.Patch(facilityManagerType.Method("Open"),
-                                         prefix: new HarmonyMethod(typeof(KerbalKonstructsIntegration), nameof(PrefixFacilityManagerOpen)));
+                                         new HarmonyMethod(typeof(KerbalKonstructsIntegration), nameof(PrefixFacilityManagerOpen)));
         LunaCompat.HarmonyInstance.Patch(facilitySelectorType.Method("OnMouseDown"),
-                                         prefix: new HarmonyMethod(typeof(KerbalKonstructsIntegration), nameof(PrefixFacilitySelectorOnMouseDown)));
+                                         new HarmonyMethod(typeof(KerbalKonstructsIntegration), nameof(PrefixFacilitySelectorOnMouseDown)));
         LunaCompat.HarmonyInstance.Patch(facilityManagerType.Method("drawFacilityManagerWindow"),
-                                         prefix: new HarmonyMethod(typeof(KerbalKonstructsIntegration), nameof(PrefixDrawFacilityManagerWindow)));
+                                         new HarmonyMethod(typeof(KerbalKonstructsIntegration), nameof(PrefixDrawFacilityManagerWindow)));
         LunaCompat.HarmonyInstance.Patch(facilityManagerType.Method("Close"),
-                                         prefix: new HarmonyMethod(typeof(KerbalKonstructsIntegration), nameof(PrefixFacilityManagerClose)));
+                                         new HarmonyMethod(typeof(KerbalKonstructsIntegration), nameof(PrefixFacilityManagerClose)));
         LunaCompat.HarmonyInstance.Patch(kerbalKonstructsSettingsType.Method("OnSave"),
                                          postfix: new HarmonyMethod(typeof(KerbalKonstructsIntegration), nameof(PostfixKerbalKonstructsSettingsOnSave)));
 
@@ -133,7 +135,7 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
         LunaCompat.HarmonyInstance.Patch(groupCenterType.Method("Save"),
                                          transpiler: new HarmonyMethod(typeof(KerbalKonstructsIntegration), nameof(TranspileSaveGroupCenter)));
         LunaCompat.HarmonyInstance.Patch(groupCenterType.Method("DeleteGroupCenter"),
-                                         prefix: new HarmonyMethod(typeof(KerbalKonstructsIntegration), nameof(PrefixDeleteGroupCenter)));
+                                         new HarmonyMethod(typeof(KerbalKonstructsIntegration), nameof(PrefixDeleteGroupCenter)));
 
         // Handle map decal changes
         LunaCompat.HarmonyInstance.Patch(configParserType.Method("SaveMapDecalInstance"),
@@ -493,7 +495,7 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
 
             ClientMessageHandler.Instance.SendReliableMessage(new KerbalKonstructsDeleteGroupCenterMessage
             {
-                Identifier = existing.Key,
+                Identifier = existing.Key
             });
             groupDictionary.Remove(existing.Key);
         }
@@ -621,7 +623,7 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
 
             ClientMessageHandler.Instance.SendReliableMessage(new KerbalKonstructsDeleteMapDecalMessage
             {
-                Identifier = Path.GetFileNameWithoutExtension(decalSavePath),
+                Identifier = Path.GetFileNameWithoutExtension(decalSavePath)
             });
         }
         catch (Exception ex)
@@ -1282,6 +1284,7 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
             Directory.CreateDirectory(instancePath);
         }, () =>
         {
+            _logger.Info("Requesting all structure data", PackageName);
             ClientMessageHandler.Instance.SendReliableMessage(new KerbalKonstructsRequestInstancesMessage(), false);
         });
     }

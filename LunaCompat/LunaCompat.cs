@@ -158,7 +158,8 @@ public class LunaCompat : MonoBehaviour
                 const string WARNING = "Luna Compat Server Plugin is missing.\nContact the server owner for assistance.";
                 _logger.Warning(WARNING);
 
-                Logger.PostPopupDialog($"{nameof(LunaCompat)}_VersionMismatch", WARNING);
+                if (_activePatches.Any(x => x.RequiresServerPlugin))
+                    Logger.PostPopupDialog($"{nameof(LunaCompat)}_VersionMismatch", WARNING);
                 _messageHandler.SetServerIntegrationDetermined(false);
             }
 

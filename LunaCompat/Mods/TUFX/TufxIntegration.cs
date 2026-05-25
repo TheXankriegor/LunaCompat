@@ -50,7 +50,7 @@ internal class TufxIntegration : ClientModIntegration
 
         LunaCompat.HarmonyInstance.Patch(AccessTools.Method(texturesUnlimitedFXLoader, "GetProfileNameForScene", [
             tufxScene
-        ]), prefix: new HarmonyMethod(typeof(TufxIntegration), nameof(PrefixLoad)));
+        ]), new HarmonyMethod(typeof(TufxIntegration), nameof(PrefixLoad)));
         LunaCompat.HarmonyInstance.Patch(AccessTools.Method(texturesUnlimitedFXLoader, "ChangeProfileForScene", [
             typeof(string), tufxScene
         ]), postfix: new HarmonyMethod(typeof(TufxIntegration), nameof(PostfixSave)));

@@ -50,7 +50,7 @@ internal class SpeedUnitAnnexIntegration : ClientModIntegration
         suaSettingsTargetType = new ReflectedType("SpeedUnitAnnex.SUASettingsTarget");
         var speedUnitAnnexType = new ReflectedType("SpeedUnitAnnex.SpeedUnitAnnex");
 
-        LunaCompat.HarmonyInstance.Patch(speedUnitAnnexType.Method("Start"), prefix: new HarmonyMethod(typeof(SpeedUnitAnnexIntegration), nameof(PrefixStart)));
+        LunaCompat.HarmonyInstance.Patch(speedUnitAnnexType.Method("Start"), new HarmonyMethod(typeof(SpeedUnitAnnexIntegration), nameof(PrefixStart)));
 
         GameEvents.OnDifficultySettingsDismiss.Add(OnCloseDifficultySettings);
     }

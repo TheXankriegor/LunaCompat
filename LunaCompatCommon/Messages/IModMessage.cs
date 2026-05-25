@@ -1,6 +1,5 @@
-﻿namespace LunaCompatCommon.Messages
+﻿namespace LunaCompatCommon.Messages;
+
+public interface IModMessage
 {
-    public interface IModMessage
-    {
-    }
 }

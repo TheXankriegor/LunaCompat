@@ -45,10 +45,9 @@ internal class ClickThroughBlockerIntegration : ClientModIntegration
 
         ctbSettingsFilePath = Path.Combine(GetSharedModIntegrationFolder(), "CTBSettings.cfg");
 
-        LunaCompat.HarmonyInstance.Patch(oneTimePopupType.Method("Awake"),
-                                         prefix: new HarmonyMethod(typeof(ClickThroughBlockerIntegration), nameof(PrefixAwake)));
+        LunaCompat.HarmonyInstance.Patch(oneTimePopupType.Method("Awake"), new HarmonyMethod(typeof(ClickThroughBlockerIntegration), nameof(PrefixAwake)));
         LunaCompat.HarmonyInstance.Patch(oneTimePopupType.Method("CreatePopUpFlagFile"),
-                                         prefix: new HarmonyMethod(typeof(ClickThroughBlockerIntegration), nameof(PrefixPopUpFile)));
+                                         new HarmonyMethod(typeof(ClickThroughBlockerIntegration), nameof(PrefixPopUpFile)));
     }
 
     #endregion
