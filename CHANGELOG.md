@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file
 
+## 0.0.13-pre - 2026-05-25
+
+- potential fix for missing sent server data
+
+
 ## 0.0.12-pre - 2026-05-21
 
 - add SpeedUnitAnnex compat
