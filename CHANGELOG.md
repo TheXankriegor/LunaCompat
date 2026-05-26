@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file
 
+## 0.0.14-pre - 2026-05-26
+
+- fix client & server crashes
+
+
 ## 0.0.13-pre - 2026-05-25
 
 - potential fix for missing sent server data

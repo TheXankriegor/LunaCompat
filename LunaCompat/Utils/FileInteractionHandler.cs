@@ -39,6 +39,11 @@ internal class FileInteractionHandler
         instance.ExecuteTaskInternal(asyncAction, callback);
     }
 
+    public static void EnqueueOnUnityThread(Action action)
+    {
+        instance.EnqueueInternal(action);
+    }
+
     public void Update()
     {
         try
@@ -57,6 +62,11 @@ internal class FileInteractionHandler
     #endregion
 
     #region Non-Public Methods
+
+    private void EnqueueInternal(Action action)
+    {
+        _queue.Enqueue(new ActionEntry(action));
+    }
 
     private void ExecuteTaskInternal<T>(Func<Task<T>> asyncAction, Action<T> callback = null)
     {

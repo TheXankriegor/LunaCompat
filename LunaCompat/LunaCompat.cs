@@ -152,18 +152,23 @@ public class LunaCompat : MonoBehaviour
         Task.Run(async () =>
         {
             await Task.Delay(15000);
+            _messageHandler.UnregisterModMessageListener<InitializeMessage>();
 
-            if (!serverModConfirmed)
+            if (serverModConfirmed)
+                return;
+
+            const string WARNING = "Luna Compat Server Plugin is missing.\nContact the server owner for assistance.";
+            _logger.Warning(WARNING);
+
+            if (_activePatches.Any(x => x.RequiresServerPlugin))
             {
-                const string WARNING = "Luna Compat Server Plugin is missing.\nContact the server owner for assistance.";
-                _logger.Warning(WARNING);
-
-                if (_activePatches.Any(x => x.RequiresServerPlugin))
+                FileInteractionHandler.EnqueueOnUnityThread(() =>
+                {
                     Logger.PostPopupDialog($"{nameof(LunaCompat)}_VersionMismatch", WARNING);
-                _messageHandler.SetServerIntegrationDetermined(false);
+                });
             }
 
-            _messageHandler.UnregisterModMessageListener<InitializeMessage>();
+            _messageHandler.SetServerIntegrationDetermined(false);
         });
     }
 }
