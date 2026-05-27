@@ -251,8 +251,7 @@ internal sealed class SerializationReader : IDisposable
         }
 
         // Complex object: check for unsupported collections first
-        // IDictionary type is not always loaded in LMP Server DLL
-        if (typeof(IList).IsAssignableFrom(type))
+        if (typeof(IList).IsAssignableFrom(type) || typeof(IDictionary).IsAssignableFrom(type))
             throw new NotSupportedException("Serialization of collections is not supported. Use arrays instead.");
 
         // Complex object

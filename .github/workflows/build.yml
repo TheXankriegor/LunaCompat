@@ -69,8 +69,16 @@ jobs:
           unzip lmp-server.zip -d lmp-server
           echo "path=$(pwd)/lmp-server/LMPServer" >> $GITHUB_OUTPUT
 
+      - name: Setup .NET 6.0
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '6.0.x'
+
       - name: Build LunaCompatServerPlugin
         run: dotnet build LunaCompatServerPlugin/LunaCompatServerPlugin.csproj -c Release -p:LMPServerRoot=${{ steps.download-lmp-server.outputs.path }} -p:SolutionDir=${{ github.workspace }}
+
+      - name: Run LunaCompatCommon.Tests
+        run: dotnet test LunaCompatCommon.Tests/LunaCompatCommon.Tests.csproj -c Release -p:LMPServerRoot=${{ steps.download-lmp-server.outputs.path }} -p:SolutionDir=${{ github.workspace }}
 
       - name: Upload Server Plugin Artifact
         uses: actions/upload-artifact@v4
