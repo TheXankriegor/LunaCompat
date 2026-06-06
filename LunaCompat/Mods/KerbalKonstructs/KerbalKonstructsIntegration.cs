@@ -44,6 +44,7 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
     private bool _keepAlive;
     private UrlFile _collectionUrlFile;
 
+    private static ReflectedType launchSiteManagerType;
     private static ReflectedType facilitySelectorType;
     private static ReflectedType decalsDatabaseType;
     private static ReflectedType mapDecalInstanceType;
@@ -131,6 +132,11 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
         LunaCompat.HarmonyInstance.Patch(kerbalKonstructsSettingsType.Method("OnSave"),
                                          postfix: new HarmonyMethod(typeof(KerbalKonstructsIntegration), nameof(PostfixKerbalKonstructsSettingsOnSave)));
 
+        LunaCompat.HarmonyInstance.Patch(launchSiteManagerType.Method("OpenLaunchSite"),
+                                         postfix: new HarmonyMethod(typeof(KerbalKonstructsIntegration), nameof(SaveScenarioModule)));
+        LunaCompat.HarmonyInstance.Patch(launchSiteManagerType.Method("CloseLaunchSite"),
+                                         postfix: new HarmonyMethod(typeof(KerbalKonstructsIntegration), nameof(SaveScenarioModule)));
+
         // Handle group center changes
         LunaCompat.HarmonyInstance.Patch(groupCenterType.Method("Save"),
                                          transpiler: new HarmonyMethod(typeof(KerbalKonstructsIntegration), nameof(TranspileSaveGroupCenter)));
@@ -198,6 +204,7 @@ internal class KerbalKonstructsIntegration : ClientModIntegration
         kkCustomParameters0Type = new ReflectedType("KerbalKonstructs.Core.KKCustomParameters0");
         kkCustomParameters1Type = new ReflectedType("KerbalKonstructs.Core.KKCustomParameters1");
         kerbalKonstructsSettingsType = new ReflectedType("KerbalKonstructs.Career.KerbalKonstructsSettings");
+        launchSiteManagerType = new ReflectedType("KerbalKonstructs.Core.LaunchSiteManager");
         staticsEditorGuiType = new ReflectedType("KerbalKonstructs.UI.StaticsEditorGUI");
         groupCenterType = new ReflectedType("KerbalKonstructs.Core.GroupCenter");
         mapDecalInstanceType = new ReflectedType("KerbalKonstructs.Core.MapDecalInstance");
