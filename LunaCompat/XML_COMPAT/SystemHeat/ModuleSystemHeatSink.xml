@@ -4,12 +4,17 @@
 		<FieldDefinition>
 			<FieldName>storageEnabled</FieldName>
 		</FieldDefinition>
+		<!-- Stored heat / temperature drift continuously while absorbing/dumping; throttle to avoid
+		     flooding the log/network while still updating roughly once per second for observers. -->
 		<FieldDefinition>
 			<FieldName>heatStored</FieldName>
+			<MaxIntervalInMs>1000</MaxIntervalInMs>
 		</FieldDefinition>
 		<FieldDefinition>
 			<FieldName>storageTemperature</FieldName>
+			<MaxIntervalInMs>1000</MaxIntervalInMs>
 		</FieldDefinition>
+		<!-- Player-set dump rate; discrete -->
 		<FieldDefinition>
 			<FieldName>heatStorageDumpRate</FieldName>
 		</FieldDefinition>

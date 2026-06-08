@@ -1,23 +1,31 @@
 ﻿<?xml version="1.0"?>
 <ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
 	<Fields>
+		<!-- Loop temperature/flux readouts drift continuously during transients; throttle so they
+		     don't flood the log/network, while still updating roughly once per second for observers. -->
 		<FieldDefinition>
 			<FieldName>totalSystemTemperature</FieldName>
+			<MaxIntervalInMs>1000</MaxIntervalInMs>
 		</FieldDefinition>
 		<FieldDefinition>
 			<FieldName>totalSystemFlux</FieldName>
+			<MaxIntervalInMs>1000</MaxIntervalInMs>
 		</FieldDefinition>
+		<!-- Loop assignment; discrete, changes only on player action -->
 		<FieldDefinition>
 			<FieldName>currentLoopID</FieldName>
 		</FieldDefinition>
 		<FieldDefinition>
 			<FieldName>currentLoopTemperature</FieldName>
+			<MaxIntervalInMs>1000</MaxIntervalInMs>
 		</FieldDefinition>
 		<FieldDefinition>
 			<FieldName>nominalLoopTemperature</FieldName>
+			<MaxIntervalInMs>1000</MaxIntervalInMs>
 		</FieldDefinition>
 		<FieldDefinition>
 			<FieldName>currentLoopFlux</FieldName>
+			<MaxIntervalInMs>1000</MaxIntervalInMs>
 		</FieldDefinition>
 	</Fields>
 </ModuleDefinition>

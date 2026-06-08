@@ -42,10 +42,11 @@
 		<FieldDefinition>
 			<FieldName>FirstLoad</FieldName>
 		</FieldDefinition>
-		<FieldDefinition>
-			<FieldName>LastUpdateTime</FieldName>
-			<MaxIntervalInMs>1000</MaxIntervalInMs>
-		</FieldDefinition>
+		<!-- LastUpdateTime is a per-physics-tick simulation clock: it changes every FixedUpdate,
+		     so it can never be quieted by a throttle (it always fires at the interval ceiling) and
+		     just floods the log/network. It is re-seeded on FirstLoad and still carried by LMP's
+		     periodic full-protovessel sync for load-time catch-up, so it is intentionally not synced
+		     as an incremental field. -->
 		<FieldDefinition>
 			<FieldName>CoreIntegrity</FieldName>
 			<MaxIntervalInMs>1000</MaxIntervalInMs>
