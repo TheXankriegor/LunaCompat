@@ -2,9 +2,10 @@
 <ModuleDefinition xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation="luna:schema ../../PartSyncSchema.xsd">
 	<Fields>
 		<!-- LastUpdateTime is a per-physics-tick simulation clock: it changes every FixedUpdate,
-		     so it can never be quieted by a throttle and just floods the log/network. It is still
-		     carried by LMP's periodic full-protovessel sync for load-time catch-up, so it is
-		     intentionally not synced as an incremental field. -->
+		     so it can never be quieted by a throttle (it always fires at the interval ceiling) and
+		     just floods the log/network. It is re-seeded on FirstLoad and still carried by LMP's
+		     periodic full-protovessel sync for load-time catch-up, so it is intentionally not synced
+		     as an incremental field. -->
 		<FieldDefinition>
 			<FieldName>CoolingAllowed</FieldName>
 		</FieldDefinition>
