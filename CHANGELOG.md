@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file
 
+## 0.1.0 - 2026-06-12
+
+- bump version to 0.1.0
+- fix SystemHeat sync noise (DrewBanyai)
+
+
 ## 0.0.14-pre - 2026-05-26
 
 - fix client & server crashes
@@ -10,7 +16,7 @@ All notable changes to this project will be documented in this file
 ## 0.0.13-pre - 2026-05-25
 
 - potential fix for missing sent server data
-
+- fix server integration toggle (Sean-Kenneth-Doherty)
 
 ## 0.0.12-pre - 2026-05-21
 
