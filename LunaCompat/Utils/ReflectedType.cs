@@ -97,11 +97,7 @@ internal class ReflectedType
         Property(propertyName).SetValue(instance, value);
     }
 
-    #endregion
-
-    #region Non-Public Methods
-
-    private FieldInfo Field(string fieldName)
+    public FieldInfo Field(string fieldName)
     {
         if (!_fields.TryGetValue(fieldName, out var field))
         {
@@ -112,7 +108,7 @@ internal class ReflectedType
         return field;
     }
 
-    private PropertyInfo Property(string propertyName)
+    public PropertyInfo Property(string propertyName)
     {
         if (!_properties.TryGetValue(propertyName, out var property))
         {
