@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file
 
+## 0.1.1-pre - 2026-06-25
+
+- add WaypointManager compat
+
+
 ## 0.1.0 - 2026-06-12
 
 - bump version to 0.1.0
@@ -17,6 +22,7 @@ All notable changes to this project will be documented in this file
 
 - potential fix for missing sent server data
 - fix server integration toggle (Sean-Kenneth-Doherty)
+
 
 ## 0.0.12-pre - 2026-05-21
 

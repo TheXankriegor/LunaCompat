@@ -41,11 +41,11 @@ internal class WaypointManagerIntegration : ClientModIntegration
     private static MethodInfo removeWaypointMethod;
     private static MethodInfo syncWaypointMethod;
 
-    private static List<Guid> waypointLoadList;
-    private static List<Guid> waypointRemoveList;
     private static Dictionary<Guid, Waypoint> waypointsCache;
     private static bool isDeleting;
 
+    private List<Guid> _waypointLoadList;
+    private List<Guid> _waypointRemoveList;
     private bool _keepAlive;
 
     #endregion
@@ -73,8 +73,8 @@ internal class WaypointManagerIntegration : ClientModIntegration
     {
         _keepAlive = true;
         waypointsCache = new Dictionary<Guid, Waypoint>();
-        waypointLoadList = [];
-        waypointRemoveList = [];
+        _waypointLoadList = [];
+        _waypointRemoveList = [];
 
         ReflectWaypointManagerTypes();
 
@@ -99,8 +99,8 @@ internal class WaypointManagerIntegration : ClientModIntegration
         base.Destroy();
         _keepAlive = false;
         waypointsCache.Clear();
-        waypointLoadList.Clear();
-        waypointRemoveList.Clear();
+        _waypointLoadList.Clear();
+        _waypointRemoveList.Clear();
 
         LunaCompat.Singleton.StopCoroutine(AddReceivedWaypointsCoroutine());
 
@@ -149,6 +149,8 @@ internal class WaypointManagerIntegration : ClientModIntegration
 
             Logger.Instance.Info($"Synchronizing waypoint {waypoint.navigationId}", WaypointManagerPackageName);
 
+            waypointsCache[waypoint.navigationId] = waypoint;
+
             var message = new WaypointManagerChangeMessage
             {
                 ConfigNodeString = WriteWaypointToNode(waypoint),
@@ -170,7 +172,7 @@ internal class WaypointManagerIntegration : ClientModIntegration
             if (isDeleting)
                 return true;
 
-            if (waypointsCache.ContainsKey(waypoint.navigationId))
+            if (!waypointsCache.ContainsKey(waypoint.navigationId))
             {
                 Logger.Instance.Warning($"Attempting to remove waypoint which does not exist: {waypoint.navigationId}", WaypointManagerPackageName);
                 return true;
@@ -197,14 +199,12 @@ internal class WaypointManagerIntegration : ClientModIntegration
         {
             var node = new ConfigNode("WAYPOINT");
 
-                node.AddValue("name", waypoint.name);
-                node.AddValue("celestialName", waypoint.celestialName);
+            node.AddValue("name", waypoint.name);
+            node.AddValue("celestialName", waypoint.celestialName);
             node.AddValue("latitude", waypoint.latitude);
             node.AddValue("longitude", waypoint.longitude);
             node.AddValue("navigationId", waypoint.navigationId);
-
-                node.AddValue("icon", waypoint.id);
-
+            node.AddValue("icon", waypoint.id);
             node.AddValue("altitude", waypoint.altitude);
             node.AddValue("index", waypoint.index);
             node.AddValue("seed", waypoint.seed);
@@ -224,59 +224,67 @@ internal class WaypointManagerIntegration : ClientModIntegration
         {
             yield return new WaitForSeconds(1);
 
-            if ((waypointLoadList.Count == 0 && waypointRemoveList.Count == 0) || !FinePrint.WaypointManager.Instance())
+            if ((_waypointLoadList.Count == 0 && _waypointRemoveList.Count == 0) || !FinePrint.WaypointManager.Instance())
                 continue;
 
-            foreach (var waypointId in waypointLoadList)
-            {
-                try
-                {
-                    if (!waypointsCache.TryGetValue(waypointId, out var waypoint))
-                    {
-                        _logger.Warning($"Attempting to load non-existent waypoint: {waypointId}", PackageName);
-                        continue;
-                    }
-
-                    customWaypointsType.Invoke("AddWaypoint", null, [waypoint]);
-                    _logger.Info($"Added new waypoint: {waypointId}", PackageName);
-                }
-                catch (Exception ex)
-                {
-                    _logger.Error(ex, PackageName);
-                }
-            }
-
-            waypointLoadList.Clear();
-
-            foreach (var waypointId in waypointRemoveList)
-            {
-                try
-                {
-                    var match = FinePrint.WaypointManager.Instance().Waypoints.Find(x => x.navigationId == waypointId);
-
-                    if (match == null)
-                    {
-                        _logger.Warning($"Attempting to remove non-existent waypoint: {waypointId}", PackageName);
-                        continue;
-                    }
-
-                    isDeleting = true;
-                    waypointsCache.Remove(waypointId);
-                    customWaypointsType.Invoke("RemoveWaypoint", null, [match]);
-                    isDeleting = false;
-                    _logger.Info($"Removed waypoint: {waypointId}", PackageName);
-                }
-                catch (Exception ex)
-                {
-                    _logger.Error(ex, PackageName);
-                }
-                
-            }
-
-            waypointRemoveList.Clear();
+            LoadQueuedWaypoints();
+            DeleteQueuedWaypoints();
 
             waypointDataType.Invoke("CacheWaypointData", null, []);
         }
+    }
+
+    private void LoadQueuedWaypoints()
+    {
+        foreach (var waypointId in _waypointLoadList)
+        {
+            try
+            {
+                if (!waypointsCache.TryGetValue(waypointId, out var waypoint))
+                {
+                    _logger.Warning($"Attempting to load non-existent waypoint: {waypointId}", PackageName);
+                    continue;
+                }
+
+                customWaypointsType.Invoke("AddWaypoint", null, [waypoint]);
+                _logger.Info($"Added new waypoint: {waypointId}", PackageName);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, PackageName);
+            }
+        }
+
+        _waypointLoadList.Clear();
+    }
+
+    private void DeleteQueuedWaypoints()
+    {
+        foreach (var waypointId in _waypointRemoveList)
+        {
+            try
+            {
+                var match = FinePrint.WaypointManager.Instance().Waypoints.Find(x => x.navigationId == waypointId);
+
+                if (match == null)
+                {
+                    _logger.Warning($"Attempting to remove non-existent waypoint: {waypointId}", PackageName);
+                    continue;
+                }
+
+                isDeleting = true;
+                waypointsCache.Remove(waypointId);
+                customWaypointsType.Invoke("RemoveWaypoint", null, [match]);
+                isDeleting = false;
+                _logger.Info($"Removed waypoint: {waypointId}", PackageName);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, PackageName);
+            }
+        }
+
+        _waypointRemoveList.Clear();
     }
 
     private void ApplyConfigNodeToWaypoint(ConfigNode node, Waypoint waypoint)
@@ -342,6 +350,7 @@ internal class WaypointManagerIntegration : ClientModIntegration
                 // update
                 _logger.Info($"Updating existing waypoint ({msg.NavigationId}).", PackageName);
                 ApplyConfigNodeToWaypoint(node, existing);
+                waypointDataType.Invoke("CacheWaypointData", null, []);
             }
             else
             {
@@ -349,11 +358,9 @@ internal class WaypointManagerIntegration : ClientModIntegration
                 _logger.Info($"Adding new waypoint ({msg.NavigationId}).", PackageName);
                 var waypoint = new Waypoint();
                 ApplyConfigNodeToWaypoint(node, waypoint);
-                waypointLoadList.Add(waypoint.navigationId);
+                _waypointLoadList.Add(waypoint.navigationId);
                 waypointsCache.Add(waypoint.navigationId, waypoint);
             }
-
-            waypointDataType.Invoke("CacheWaypointData", null, []);
         }
         catch (Exception ex)
         {
@@ -375,8 +382,8 @@ internal class WaypointManagerIntegration : ClientModIntegration
 
             if (waypointsCache.ContainsKey(msg.NavigationId))
             {
-                waypointRemoveList.Add(msg.NavigationId);
-                waypointLoadList.Remove(msg.NavigationId);
+                _waypointRemoveList.Add(msg.NavigationId);
+                _waypointLoadList.Remove(msg.NavigationId);
             }
             else
                 _logger.Warning($"Attempting to remove non-existent waypoint: {msg.NavigationId}", PackageName);

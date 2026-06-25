@@ -1,3 +1,5 @@
+// ReSharper disable once RedundantUsingDirective
+
 using System;
 
 namespace LunaCompatCommon.Messages.ModMessages;

@@ -82,7 +82,6 @@ internal class WaypointManagerIntegration : ServerModIntegration
         {
             _logger.Info($"Sending {_waypoints.Count} waypoints to {client.PlayerName}", PackageName);
 
-            // Send each waypoint as its own message
             foreach (var waypointEntry in _waypoints)
             {
                 _messageHandler.SendCompatMessage(client, new WaypointManagerChangeMessage

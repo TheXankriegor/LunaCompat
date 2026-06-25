@@ -43,6 +43,7 @@ Patches are only applied to mods added to the modlist. Check the repository to s
 |[![][shield:kk]][mod:kk]|[![][shield:serverplugin]][LunaCompat:serverplugin]|Sync instances, groups, map decals and facilities across clients| 
 |[![][shield:kc]][mod:kc]|[![][shield:serverplugin]][LunaCompat:serverplugin]|Sync colonies & facilities across clients|
 |[![][shield:scansat]][mod:scansat]|[![][shield:serverplugin]][LunaCompat:serverplugin]|Sync active scanners, background scanning and progress|
+|[![][shield:wm]][mod:wm]|[![][shield:serverplugin]][LunaCompat:serverplugin]|Sync waypoints across clients|
 
 ### Part Syncs
 
@@ -139,6 +140,7 @@ When creating a new release follow these steps
 [mod:kis]: https://github.com/ihsoft/KIS
 [mod:ir]: https://github.com/meirumeiru/InfernalRobotics
 [mod:epl]: https://github.com/taniwha/Extraplanetary-Launchpads
+[mod:wm]: https://github.com/linuxgurugamer/WaypointManager
 
 [shield:license-mit]: http://img.shields.io/:License-MIT-a31f34.svg
 [shield:support-ksp]: http://img.shields.io/badge/For%20KSP-1.12.5-bad455.svg
@@ -158,4 +160,5 @@ When creating a new release follow these steps
 [shield:kis]: https://img.shields.io/badge/KIS-1.29-1D24E2.svg
 [shield:ir]: https://img.shields.io/badge/InfernalRobotics-3.1.18-1D24E2.svg
 [shield:epl]: https://img.shields.io/badge/Extraplanetary--Launchpads-6.99.3-1D24E2.svg
+[shield:wm]: https://img.shields.io/badge/WaypointManager-2.8.4.7-1D24E2.svg
 
