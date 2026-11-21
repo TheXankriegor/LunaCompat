@@ -150,7 +150,7 @@ When creating a new release follow these steps
 [shield:issues]: https://img.shields.io/github/issues/TheXankriegor/LunaCompat.svg
 
 [shield:scansat]: https://img.shields.io/badge/SCANsat-21.1-1D24E2.svg
-[shield:kc]: https://img.shields.io/badge/KerbalColonies-1.2.2-1D24E2.svg
+[shield:kc]: https://img.shields.io/badge/KerbalColonies-1.5.1-1D24E2.svg
 [shield:kk]: https://img.shields.io/badge/Kerbal--Konstructs-1.12.2-1D24E2.svg
 [shield:pre]: https://img.shields.io/badge/PhysicsRangeExtender-1.21-1D24E2.svg
 [shield:ctb]: https://img.shields.io/badge/ClickThroughBlocker-2.1.10-1D24E2.svg
