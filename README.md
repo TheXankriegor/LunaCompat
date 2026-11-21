@@ -160,5 +160,5 @@ When creating a new release follow these steps
 [shield:kis]: https://img.shields.io/badge/KIS-1.29-1D24E2.svg
 [shield:ir]: https://img.shields.io/badge/InfernalRobotics-3.1.18-1D24E2.svg
 [shield:epl]: https://img.shields.io/badge/Extraplanetary--Launchpads-6.99.3-1D24E2.svg
-[shield:wm]: https://img.shields.io/badge/WaypointManager-2.8.4.7-1D24E2.svg
+[shield:wm]: https://img.shields.io/badge/WaypointManager-2.8.5.2-1D24E2.svg
 
