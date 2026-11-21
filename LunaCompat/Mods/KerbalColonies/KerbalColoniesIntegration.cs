@@ -44,7 +44,7 @@ internal class KerbalColoniesIntegration : ClientModIntegration
     private static ReflectedType kCFacilityWindowBaseType;
     private static ReflectedType kCWindowManagerType;
     private static ReflectedType colonyBuildingType;
-    private static ReflectedType configurationType;
+    private static ReflectedType kCSaveGameType;
 
     private static IReadOnlyDictionary<string, HashSet<int>> lastOpenColonies;
     private static Dictionary<string, string[]> colonyLineCache;
@@ -83,7 +83,7 @@ internal class KerbalColoniesIntegration : ClientModIntegration
 
         ReflectKerbalColoniesTypes();
 
-        LunaCompat.HarmonyInstance.Patch(configurationType.Method("OnSave"),
+        LunaCompat.HarmonyInstance.Patch(kCSaveGameType.Method("OnSave"),
                                          postfix: new HarmonyMethod(typeof(KerbalColoniesIntegration), nameof(PostfixSaveConfiguration)));
         LunaCompat.HarmonyInstance.Patch(kCWindowManagerType.Method("CloseWindow"),
                                          postfix: new HarmonyMethod(typeof(KerbalColoniesIntegration), nameof(PostfixCloseWindow)));
@@ -122,7 +122,7 @@ internal class KerbalColoniesIntegration : ClientModIntegration
 
     private static void ReflectKerbalColoniesTypes()
     {
-        configurationType = new ReflectedType("KerbalColonies.Settings.Configuration");
+        kCSaveGameType = new ReflectedType("KerbalColonies.Settings.KCSaveGame");
         colonyBuildingType = new ReflectedType("KerbalColonies.ColonyBuilding");
         kCWindowManagerType = new ReflectedType("KerbalColonies.UI.KCWindowManager");
         kCFacilityWindowBaseType = new ReflectedType("KerbalColonies.UI.KCFacilityWindowBase");
@@ -151,14 +151,14 @@ internal class KerbalColoniesIntegration : ClientModIntegration
             var colonyObj = colony;
             var allowSave = true;
 
-            if (kCProductionFacilityType.GetProperty("ConstructingFacilities", null) is IDictionary constructingFacilities)
-                CheckDictionary(constructingFacilities, "ConstructingFacilities");
             if (kCProductionFacilityType.GetProperty("ConstructedFacilities", null) is IDictionary constructedFacilities)
                 CheckDictionary(constructedFacilities, "ConstructedFacilities");
-            if (kCProductionFacilityType.GetProperty("UpgradingFacilities", null) is IDictionary upgradingFacilities)
-                CheckDictionary(upgradingFacilities, "UpgradingFacilities");
             if (kCProductionFacilityType.GetProperty("UpgradedFacilities", null) is IDictionary upgradedFacilities)
                 CheckDictionary(upgradedFacilities, "UpgradedFacilities");
+            if (kCProductionFacilityType.GetProperty("ConstructedBuildables", null) is IDictionary constructedBuildables)
+                CheckDictionary(constructedBuildables, "ConstructedBuildables");
+            if (kCProductionFacilityType.GetProperty("UpgradedBuildables", null) is IDictionary upgradedBuildables)
+                CheckDictionary(upgradedBuildables, "UpgradedBuildables");
 
             return allowSave;
 
@@ -360,7 +360,7 @@ internal class KerbalColoniesIntegration : ClientModIntegration
             return;
         }
 
-        var colonyScenario = ScenarioRunner.GetLoadedModules()?.Find(x => x.ClassName == configurationType.Type.Name);
+        var colonyScenario = ScenarioRunner.GetLoadedModules()?.Find(x => x.ClassName == kCSaveGameType.Type.Name);
 
         if (!colonyScenario)
         {
@@ -394,7 +394,7 @@ internal class KerbalColoniesIntegration : ClientModIntegration
 
         facilityId = (int)kCFacilityBaseType.GetField("id", facility);
         var name = colonyClassType.GetProperty("Name", colonyObj) as string;
-        var body = colonyClassType.GetProperty("BodyName", colonyObj) as string;
+        var body = colonyClassType.GetField("BodyName", colonyObj) as string;
         colony = $"{body}_{name}";
 
         return true;
@@ -516,7 +516,7 @@ internal class KerbalColoniesIntegration : ClientModIntegration
         var colonyId = $"{body}_{colonyName}";
         colonyLineCache[colonyId] = colonyStr.Split(["\r\n", "\n"], StringSplitOptions.RemoveEmptyEntries);
 
-        if (configurationType.GetField("colonyDictionary", null) is not IDictionary colonyDict)
+        if (kCSaveGameType.GetField("colonyDictionary", null) is not IDictionary colonyDict)
         {
             Logger.Instance.Warning($"Colony {colonyName} ({body}) cannot be loaded because KC is not initialized.", KerbalColoniesPackageName);
             LunaCompat.Singleton.StartCoroutine(RetryLoadColony());
@@ -529,9 +529,9 @@ internal class KerbalColoniesIntegration : ClientModIntegration
             colonyDict.Add(body, Activator.CreateInstance(listType));
         }
 
-        var newColony = Activator.CreateInstance(colonyClassType.Type, node.GetNode("colonyClass"));
+        var newColony = Activator.CreateInstance(colonyClassType.Type, node.GetNode("colonyClass"), body);
 
-        if (configurationType.GetField("GroupFacilities", null) is IDictionary groupFacilities)
+        if (kCSaveGameType.GetField("GroupFacilities", null) is IDictionary groupFacilities)
         {
             var cab = colonyClassType.GetProperty("CAB", newColony);
             UpdateKkGroups(groupFacilities, cab);
@@ -574,17 +574,21 @@ internal class KerbalColoniesIntegration : ClientModIntegration
     {
         var toRemove = new List<object>();
 
-        if (kCProductionFacilityType.GetProperty("ConstructingFacilities", null) is IDictionary constructingFacilities)
-            RemoveFacilities(constructingFacilities);
+        if (kCProductionFacilityType.GetProperty("ProductionQueues", null) is IDictionary productionQueues)
+            RemoveItems(productionQueues);
+
         if (kCProductionFacilityType.GetProperty("ConstructedFacilities", null) is IDictionary constructedFacilities)
-            RemoveFacilities(constructedFacilities);
-        if (kCProductionFacilityType.GetProperty("UpgradingFacilities", null) is IDictionary upgradingFacilities)
-            RemoveFacilities(upgradingFacilities);
+            RemoveItems(constructedFacilities);
         if (kCProductionFacilityType.GetProperty("UpgradedFacilities", null) is IDictionary upgradedFacilities)
-            RemoveFacilities(upgradedFacilities);
+            RemoveItems(upgradedFacilities);
+
+        if (kCProductionFacilityType.GetProperty("ConstructedBuildables", null) is IDictionary constructedBuildables)
+            RemoveItems(constructedBuildables);
+        if (kCProductionFacilityType.GetProperty("UpgradedBuildables", null) is IDictionary upgradedBuildables)
+            RemoveItems(upgradedBuildables);
 
         // KCgroups should not matter for v4 KC systems
-        if (configurationType.GetField("colonyDictionary", null) is IDictionary colonyDictionary && colonyDictionary.Contains(body) &&
+        if (kCSaveGameType.GetField("colonyDictionary", null) is IDictionary colonyDictionary && colonyDictionary.Contains(body) &&
             colonyDictionary[body] is IList colonies)
         {
             foreach (var colonyObj in colonies)
@@ -599,7 +603,7 @@ internal class KerbalColoniesIntegration : ClientModIntegration
             toRemove.Clear();
         }
 
-        if (configurationType.GetField("GroupFacilities", null) is IDictionary groupFacilities)
+        if (kCSaveGameType.GetField("GroupFacilities", null) is IDictionary groupFacilities)
         {
             foreach (var key in groupFacilities.Keys)
             {
@@ -617,7 +621,7 @@ internal class KerbalColoniesIntegration : ClientModIntegration
 
         return;
 
-        void RemoveFacilities(IDictionary dictionary)
+        void RemoveItems(IDictionary dictionary)
         {
             foreach (var colony in dictionary.Keys)
             {
@@ -638,7 +642,7 @@ internal class KerbalColoniesIntegration : ClientModIntegration
             if (name != colonyName)
                 return false;
 
-            var colonyBody = colonyClassType.GetProperty("BodyName", colonyObj) as string;
+            var colonyBody = colonyClassType.GetField("BodyName", colonyObj) as string;
             if (body != colonyBody)
                 return false;
 
@@ -650,20 +654,20 @@ internal class KerbalColoniesIntegration : ClientModIntegration
     {
         Logger.Instance.Info("Unloading all colonies.", KerbalColoniesPackageName);
 
-        if (kCProductionFacilityType.GetProperty("ConstructingFacilities", null) is IDictionary constructingFacilities)
-            constructingFacilities.Clear();
+        if (kCProductionFacilityType.GetProperty("ProductionQueues", null) is IDictionary productionQueues)
+            productionQueues.Clear();
         if (kCProductionFacilityType.GetProperty("ConstructedFacilities", null) is IDictionary constructedFacilities)
             constructedFacilities.Clear();
-        if (kCProductionFacilityType.GetProperty("UpgradingFacilities", null) is IDictionary upgradingFacilities)
-            upgradingFacilities.Clear();
         if (kCProductionFacilityType.GetProperty("UpgradedFacilities", null) is IDictionary upgradedFacilities)
             upgradedFacilities.Clear();
+        if (kCProductionFacilityType.GetProperty("ConstructedBuildables", null) is IDictionary constructedBuildables)
+            constructedBuildables.Clear();
+        if (kCProductionFacilityType.GetProperty("UpgradedBuildables", null) is IDictionary upgradedBuildables)
+            upgradedBuildables.Clear();
 
-        if (configurationType.GetField("KCgroups", null) is IDictionary kCgroups)
-            kCgroups.Clear();
-        if (configurationType.GetField("colonyDictionary", null) is IDictionary colonyDictionary)
+        if (kCSaveGameType.GetField("colonyDictionary", null) is IDictionary colonyDictionary)
             colonyDictionary.Clear();
-        if (configurationType.GetField("GroupFacilities", null) is IDictionary groupFacilities)
+        if (kCSaveGameType.GetField("GroupFacilities", null) is IDictionary groupFacilities)
             groupFacilities.Clear();
 
         colonyBuildQueueType.Invoke("Clear", colonyBuildingType.GetField("buildQueue", null), []);
