@@ -61,8 +61,8 @@ internal class KerbalColoniesIntegration : ClientModIntegration
     public KerbalColoniesIntegration(ILogger logger, IModSettingsProvider settingsProvider)
         : base(logger, settingsProvider)
     {
-        IgnoredScenarios.IgnoreReceive.Add("Configuration");
-        IgnoredScenarios.IgnoreSend.Add("Configuration");
+        IgnoredScenarios.IgnoreReceive.Add("KCSaveGame");
+        IgnoredScenarios.IgnoreSend.Add("KCSaveGame");
     }
 
     #endregion
