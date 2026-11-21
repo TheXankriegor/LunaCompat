@@ -124,12 +124,16 @@ internal class WaypointManagerIntegration : ClientModIntegration
 
     private static IEnumerable<CodeInstruction> TranspileWindowGui(IEnumerable<CodeInstruction> instructions)
     {
+        // Updated for WaypointManager 2.8.5.2
+        const int SAVE_LOCAL_INDEX = 11;
+        const int APPLY_LOCAL_INDEX = 12;
+
         foreach (var instr in instructions)
         {
             if (instr.opcode == OpCodes.Ret)
             {
-                yield return new CodeInstruction(OpCodes.Ldloc_3); // save
-                yield return new CodeInstruction(OpCodes.Ldloc_S, (byte)4); // apply
+                yield return new CodeInstruction(OpCodes.Ldloc_S, (byte)SAVE_LOCAL_INDEX);
+                yield return new CodeInstruction(OpCodes.Ldloc_S, (byte)APPLY_LOCAL_INDEX);
                 yield return new CodeInstruction(OpCodes.Call, syncWaypointMethod);
             }
 

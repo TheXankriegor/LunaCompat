@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file
 ## 0.1.2-pre - 2026-11-25
 
 - update KerbalColonies compat for 1.5.1
+- update WaypointManager compat for 2.8.5.2
 
 
 ## 0.1.1-pre - 2026-06-25
